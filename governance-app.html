@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #030407;
@@ -19,13 +22,17 @@
             --dim: #94a3b8;
             --accent: #00ff9d;
             --accent-glow: rgba(0, 255, 157, 0.15);
-            
+
             /* Maturity Colors */
-            --lvl-a: #00ff9d; /* Resilient */
-            --lvl-b: #00d4ff; /* Optimized */
-            --lvl-c: #fbbf24; /* Managed */
-            --lvl-d: #f43f5e; /* High Risk */
-            
+            --lvl-a: #00ff9d;
+            /* Resilient */
+            --lvl-b: #00d4ff;
+            /* Optimized */
+            --lvl-c: #fbbf24;
+            /* Managed */
+            --lvl-d: #f43f5e;
+            /* High Risk */
+
             --glass: rgba(13, 15, 20, 0.7);
         }
 
@@ -37,7 +44,7 @@
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--bg);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(0, 255, 157, 0.03) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 40%);
             color: var(--text);
@@ -52,7 +59,9 @@
             padding: 2.5rem 1.5rem;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             font-weight: 800;
             letter-spacing: -0.02em;
         }
@@ -83,7 +92,7 @@
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
         }
 
         .card-panel:hover {
@@ -102,8 +111,16 @@
         }
 
         /* Inputs & Buttons */
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--dim); font-size: 0.85rem; }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dim);
+            font-size: 0.85rem;
+        }
 
         input {
             background: rgba(255, 255, 255, 0.03);
@@ -192,10 +209,28 @@
         }
 
         /* Utility */
-        .hidden { display: none !important; }
-        .msg { padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        .msg.err { background: rgba(244, 63, 94, 0.1); color: var(--lvl-d); border: 1px solid rgba(244, 63, 94, 0.2); }
-        .msg.ok { background: rgba(0, 255, 157, 0.1); color: var(--lvl-a); border: 1px solid rgba(0, 255, 157, 0.2); }
+        .hidden {
+            display: none !important;
+        }
+
+        .msg {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .msg.err {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--lvl-d);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .msg.ok {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--lvl-a);
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
 
         /* Login Screen */
         #loginScreen {
@@ -213,7 +248,7 @@
             padding: 3rem;
             border-radius: 24px;
             border: 1px solid var(--border);
-            box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
         }
 
         /* Dashboard UI */
@@ -321,10 +356,29 @@
             text-transform: uppercase;
         }
 
-        .score-a { color: var(--lvl-a); background: rgba(0, 255, 157, 0.1); border: 1px solid rgba(0, 255, 157, 0.2); }
-        .score-b { color: var(--lvl-b); background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2); }
-        .score-c { color: var(--lvl-c); background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); }
-        .score-d { color: var(--lvl-d); background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); }
+        .score-a {
+            color: var(--lvl-a);
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
+
+        .score-b {
+            color: var(--lvl-b);
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .score-c {
+            color: var(--lvl-c);
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .score-d {
+            color: var(--lvl-d);
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
 
         .toast {
             position: fixed;
@@ -335,7 +389,7 @@
             color: var(--accent);
             padding: 1.25rem 2rem;
             border-radius: 16px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
             transform: translateY(120px);
             opacity: 0;
             transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -343,10 +397,18 @@
             font-weight: 600;
         }
 
-        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
 
         /* Icons */
-        .icon { width: 1.4em; height: 1.4em; vertical-align: middle; fill: currentColor; }
+        .icon {
+            width: 1.4em;
+            height: 1.4em;
+            vertical-align: middle;
+            fill: currentColor;
+        }
 
         /* Environments Management */
         .env-block {
@@ -357,22 +419,125 @@
             border: 1px solid var(--border);
         }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); }
-        td { padding: 1.5rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-        tr:last-child td { border-bottom: none; }
-        a { color: var(--accent); text-decoration: none; font-weight: 600; }
-        a:hover { text-decoration: underline; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            color: var(--dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Compliance Specific Styles */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card.compliance {
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .badge-pass {
+            color: var(--lvl-a);
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
+
+        .badge-fail {
+            color: var(--lvl-d);
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .badge-partial {
+            color: var(--lvl-c);
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: var(--accent);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        textarea.compliance-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
+
 <body>
     <div class="container" id="loginScreen">
         <div style="text-align: center; margin-bottom: 3rem;">
             <h1>
-                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 10.91v7.09c-2.68-1.11-4.73-4.39-4.97-8H12z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 10.91v7.09c-2.68-1.11-4.73-4.39-4.97-8H12z" />
+                </svg>
                 Nine-Security
             </h1>
-            <p style="color: var(--dim); margin-top: 1rem; font-weight: 400;">Advanced Governance Operations Platform</p>
+            <p style="color: var(--dim); margin-top: 1rem; font-weight: 400;">Advanced Governance Operations Platform
+            </p>
         </div>
 
         <div class="auth-card">
@@ -420,20 +585,26 @@
     <div class="container hidden" id="dashboard">
         <div class="user-bar">
             <h1>
-                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 10.91v7.09c-2.68-1.11-4.73-4.39-4.97-8H12z"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 10.91v7.09c-2.68-1.11-4.73-4.39-4.97-8H12z" />
+                </svg>
                 Nine-Security <span style="font-weight: 300; opacity: 0.6; margin-left: 8px;">Governance</span>
             </h1>
             <div style="display: flex; align-items: center; gap: 24px;">
                 <div style="text-align: right;">
                     <div id="userInfo" style="font-weight: 600; font-size: 0.95rem;"></div>
-                    <div style="color: var(--dim); font-size: 0.75rem; text-transform: uppercase;">Authenticated Session</div>
+                    <div style="color: var(--dim); font-size: 0.75rem; text-transform: uppercase;">Authenticated Session
+                    </div>
                 </div>
-                <button type="button" id="btnLogout" class="btn-secondary" style="padding: 10px 16px; font-size: 0.85rem">Exit</button>
+                <button type="button" id="btnLogout" class="btn-secondary"
+                    style="padding: 10px 16px; font-size: 0.85rem">Exit</button>
             </div>
         </div>
 
         <div class="dashboard-tabs">
             <button type="button" id="dashTabOverview" class="active">Maturity Dashboard</button>
+            <button type="button" id="dashTabCompliance">Compliance Center</button>
             <button type="button" id="dashTabEnvs">Resource Management</button>
         </div>
 
@@ -445,16 +616,97 @@
             </div>
         </div>
 
+        <div id="panelCompliance" class="dashboard-panel hidden">
+            <div class="grid-3">
+                <div class="stat-card compliance">
+                    <div class="stat-value" id="val-readiness" style="color: var(--accent)">0%</div>
+                    <div class="stat-label">Overall Readiness</div>
+                </div>
+                <div class="stat-card compliance">
+                    <div class="stat-value" id="val-controls" style="color: var(--lvl-b)">0 / 0</div>
+                    <div class="stat-label">Controls Passed</div>
+                </div>
+                <div class="stat-card compliance">
+                    <div class="stat-value" id="val-comp-etmi" style="color: #fff">--</div>
+                    <div class="stat-label">Linked Risk Index</div>
+                </div>
+            </div>
+
+            <div class="card-panel" style="margin-top: 2rem;">
+                <h2>
+                    <svg class="icon">
+                        <path
+                            d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 10.91v7.09c-2.68-1.11-4.73-4.39-4.97-8H12z" />
+                    </svg>
+                    Framework Control Gap Analysis
+                </h2>
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 12px;">
+                    <button class="btn-secondary" id="btnShowFwManager"
+                        style="padding: 8px 16px; font-size: 0.8rem;">Manage Frameworks</button>
+                    <button class="btn-secondary" id="btnShowFactExplorer"
+                        style="padding: 8px 16px; font-size: 0.8rem;">Fact Explorer</button>
+                </div>
+                <div id="complianceResultsArea">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Control ID</th>
+                                <th>Title</th>
+                                <th>Criticality</th>
+                                <th>Status</th>
+                                <th>Technical Coverage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-controls-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Framework Manager Modal Component (Hidden by default) -->
+            <div id="compModalFw" class="card-panel hidden"
+                style="background: var(--card-hover); border-color: var(--accent);">
+                <h2>Load New Framework (YAML)</h2>
+                <textarea id="framework-yaml" class="compliance-input" rows="8"
+                    placeholder="Paste framework definition YAML here..."></textarea>
+                <div style="margin-top: 1rem; display: flex; gap: 12px;">
+                    <button id="btn-load-fw" class="btn-primary" style="padding: 10px 20px; font-size: 0.85rem;">Ingest
+                        Framework</button>
+                    <button class="btn-secondary btnCloseModal"
+                        style="padding: 10px 20px; font-size: 0.85rem;">Close</button>
+                </div>
+            </div>
+
+            <!-- Fact Explorer Component (Hidden by default) -->
+            <div id="compModalFacts" class="card-panel hidden"
+                style="background: var(--card-hover); border-color: var(--accent);">
+                <h2>Technical Facts Registry</h2>
+                <table id="table-facts">
+                    <thead>
+                        <tr>
+                            <th>Fact Key</th>
+                            <th>Value</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-facts-body"></tbody>
+                </table>
+                <button class="btn-secondary btnCloseModal"
+                    style="margin-top: 1rem; padding: 10px 20px; font-size: 0.85rem;">Close Fact Explorer</button>
+            </div>
+        </div>
+
         <div id="panelEnvs" class="dashboard-panel hidden">
             <div class="card-panel" style="margin-bottom: 0px; border-bottom: none; border-radius: 20px 20px 0 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="margin:0">Environment Inventory</h2>
-                    <button type="button" id="btnNewTask" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                    <button type="button" id="btnNewTask" class="btn-primary"
+                        style="padding: 10px 20px; font-size: 0.9rem;">
                         Register New Env
                     </button>
                 </div>
             </div>
-            <div id="envsArea" style="padding: 2rem; background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 20px 20px;">
+            <div id="envsArea"
+                style="padding: 2rem; background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 20px 20px;">
                 Searching registered systems...
             </div>
         </div>
@@ -492,7 +744,7 @@
                 try {
                     const j = await api("/api/governance/me");
                     if (!j || !j.ok) forceLogout("Session expired.");
-                } catch (e) {}
+                } catch (e) { }
             }
         }
 
@@ -553,11 +805,79 @@
             if (name === "Overview") {
                 document.getElementById("dashTabOverview").classList.add("active");
                 document.getElementById("panelOverview").classList.remove("hidden");
+            } else if (name === "Compliance") {
+                document.getElementById("dashTabCompliance").classList.add("active");
+                document.getElementById("panelCompliance").classList.remove("hidden");
+                loadComplianceDashboard();
             } else if (name === "Environments") {
                 document.getElementById("dashTabEnvs").classList.add("active");
                 document.getElementById("panelEnvs").classList.remove("hidden");
                 loadEnvs();
             }
+        }
+
+        async function loadComplianceDashboard() {
+            const assessmentId = localStorage.getItem('currentAssessmentId') || 'demo-asmt';
+            const frameworkId = localStorage.getItem('currentFrameworkId') || 'TW_CYBERSEC_ACT_V1';
+
+            try {
+                // In production, this would use a real assessmentId from navigation context
+                const res = await fetch(`${API_BASE}/api/compliance/evaluate/${assessmentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': govCsrfToken
+                    },
+                    body: JSON.stringify({ frameworkId })
+                }).then(r => r.json());
+
+                if (res.ok) {
+                    const results = res.results;
+                    document.getElementById('val-readiness').textContent = Math.round(results.overall_readiness * 100) + '%';
+
+                    const passed = results.control_results.filter((c) => c.status === 'pass').length;
+                    document.getElementById('val-controls').textContent = `${passed} / ${results.control_results.length}`;
+
+                    const tbody = document.getElementById('table-controls-body');
+                    if (tbody) {
+                        tbody.innerHTML = results.control_results.map((c) => `
+                            <tr>
+                                <td class="mono">${c.control_id}</td>
+                                <td>${escapeHtml(c.title || 'Control')}</td>
+                                <td><span style="font-size:0.75rem; color:var(--dim)">${c.criticality.toUpperCase()}</span></td>
+                                <td><span class="badge badge-${c.status}">${c.status.toUpperCase()}</span></td>
+                                <td>
+                                    ${Math.round(c.technical_coverage * 100)}%
+                                    <div class="progress-bar"><div class="progress-fill" style="width: ${c.technical_coverage * 100}%"></div></div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                } else {
+                    showToast("Compliance engine awaiting initial framework data.");
+                }
+            } catch (err) {
+                console.error("Compliance evaluation failed", err);
+            }
+        }
+
+        async function loadComplianceFacts() {
+            const assessmentId = localStorage.getItem('currentAssessmentId') || 'demo-asmt';
+            try {
+                const res = await api(`/api/compliance/facts/${assessmentId}`);
+                if (res.ok) {
+                    const tbody = document.getElementById('table-facts-body');
+                    if (tbody) {
+                        tbody.innerHTML = res.facts.map((f) => `
+                            <tr>
+                                <td class="mono" style="color:var(--accent)">${escapeHtml(f.key)}</td>
+                                <td><code class="mono">${escapeHtml(JSON.stringify(f.value))}</code></td>
+                                <td>${f.confidence.toFixed(2)}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) { }
         }
 
         async function loadMe() {
@@ -578,7 +898,7 @@
             const d = j.data;
             const envs = d.environments || [];
             const summary = d.summary || {};
-            
+
             if (envs.length === 0) {
                 el.innerHTML = `<div class="stat-card" style="text-align:center; padding: 4rem;"><p style="color:var(--dim); font-size:1.1rem; margin-bottom:1rem;">Ready for First Assessment</p><p style="color:var(--dim); font-size:0.9rem;">Register an environment to generate your first ETMI maturity index.</p></div>`;
                 return;
@@ -586,7 +906,7 @@
 
             const avgScore = summary.overall_score_avg != null ? Math.round(summary.overall_score_avg) : 0;
             const latestAt = summary.latest_at ? new Date(summary.latest_at).toLocaleDateString() + ' ' + new Date(summary.latest_at).toLocaleTimeString() : "—";
-            
+
             let html = `
                 <div class="summary-header">
                     <div class="stat-card">
@@ -604,10 +924,10 @@
                 </div>
             `;
 
-            envs.forEach(function(ev) {
+            envs.forEach(function (ev) {
                 const r = ev.report;
                 const name = escapeHtml(ev.env_name || ev.environment_id || "—");
-                
+
                 html += `
                     <div class="env-group" style="margin-top: 4rem;">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem;">
@@ -616,7 +936,7 @@
                                 ${name}
                                 ${r ? `<span class="score-badge score-${(r.risk_level || 'D').toLowerCase()}">${r.risk_level}</span>` : ''}
                             </h3>
-                            ${r ? `<span style="font-family: 'JetBrains Mono'; color:var(--dim); font-size:0.8rem; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px;">REF_ID: ${r.id.slice(0,8).toUpperCase()}</span>` : ''}
+                            ${r ? `<span style="font-family: 'JetBrains Mono'; color:var(--dim); font-size:0.8rem; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:6px;">REF_ID: ${r.id.slice(0, 8).toUpperCase()}</span>` : ''}
                         </div>
                 `;
 
@@ -625,7 +945,7 @@
                 } else {
                     html += `<div class="domain-grid">`;
                     if (ev.domains && ev.domains.length) {
-                        ev.domains.forEach(function(x) {
+                        ev.domains.forEach(function (x) {
                             const dScore = x.score != null ? Math.round(x.score) : 0;
                             const dCls = dScore >= 90 ? 'lvl-a' : dScore >= 75 ? 'lvl-b' : dScore >= 60 ? 'lvl-c' : 'lvl-d';
                             html += `
@@ -775,8 +1095,37 @@
         document.body.addEventListener("click", async (e) => {
             const el = e.target;
             if (el.id === "dashTabOverview") switchDashboardTab("Overview");
+            if (el.id === "dashTabCompliance") switchDashboardTab("Compliance");
             if (el.id === "dashTabEnvs") switchDashboardTab("Environments");
             if (el.id === "btnNewTask") runNewTask();
+
+            // Compliance Modals
+            if (el.id === "btnShowFwManager") document.getElementById("compModalFw").classList.toggle("hidden");
+            if (el.id === "btnShowFactExplorer") {
+                document.getElementById("compModalFacts").classList.toggle("hidden");
+                loadComplianceFacts();
+            }
+            if (el.classList.contains("btnCloseModal")) {
+                el.closest(".card-panel").classList.add("hidden");
+            }
+
+            if (el.id === "btn-load-fw") {
+                const yaml = document.getElementById('framework-yaml').value;
+                const res = await api("/api/compliance/frameworks/load", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ yaml })
+                });
+                if (res.ok) {
+                    showToast("Framework Ingested: " + res.framework_id);
+                    localStorage.setItem('currentFrameworkId', res.framework_id);
+                    document.getElementById("compModalFw").classList.add("hidden");
+                    loadComplianceDashboard();
+                } else {
+                    showToast("Error: " + res.error);
+                }
+            }
+
             if (el.hasAttribute("data-clear-env")) {
                 const id = el.getAttribute("data-clear-env");
                 if (confirm("Permanently purge all telemetry for this asset?")) {
@@ -792,8 +1141,9 @@
             try {
                 const j = await api("/api/governance/me");
                 if (j && j.ok && j.user) showDashboard();
-            } catch (e) {}
+            } catch (e) { }
         })();
     </script>
 </body>
+
 </html>
