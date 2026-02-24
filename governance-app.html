@@ -1135,12 +1135,14 @@
                             // For now, we'll try to find any facts that look like system identifiers
                             const hosts = new Set();
                             factsRes.facts.forEach(f => {
+                                // 1. Trust indexed hostId first
                                 if (f.hostId && f.hostId !== 'unknown-host' && f.hostId !== 'default') {
                                     hosts.add(f.hostId);
                                 }
-                                // Fallback: still look for specific keys if hostId was generic
-                                if (f.key === 'system.hostname' || f.key === 'identity.computer_name' || f.key === 'host.hostname') {
-                                    hosts.add(f.value);
+                                // 2. Fallback to specific identity facts
+                                if (f.key === 'system.hostname' || f.key === 'identity.computer_name' || f.key === 'host.hostname' || f.key === 'identity.host_id') {
+                                    const val = typeof f.value === 'string' ? f.value : JSON.stringify(f.value);
+                                    if (val && val !== 'undefined') hosts.add(val);
                                 }
                             });
                             if (byEnv[eid]) byEnv[eid].hosts = Array.from(hosts);
@@ -1151,8 +1153,8 @@
                 el.innerHTML = envIds.map(envId => {
                     const block = byEnv[envId] || { name: envId, tasks: [], hosts: [] };
                     const hostTags = block.hosts.length
-                        ? block.hosts.map(h => `<span class="badge" style="background:var(--accent-glow); color:var(--accent); border:1px solid var(--accent); margin-right:6px; font-size:0.75rem;">${escapeHtml(h)}</span>`).join("")
-                        : '<span style="color:var(--dim); font-size:0.8rem;">No active endpoints detected yet.</span>';
+                        ? block.hosts.map(h => `<span class="badge" style="background:var(--accent-glow); color:var(--accent); border:1px solid var(--accent); margin-right:8px; margin-bottom:8px; padding:4px 10px; border-radius:6px; display:inline-block; font-size:0.8rem; font-family:'JetBrains Mono';">${escapeHtml(h)}</span>`).join("")
+                        : '<span style="color:var(--dim); font-size:0.85rem; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; display:inline-block; border:1px dashed var(--border);">No active endpoints detected yet. Pulse sync required.</span>';
 
                     const taskRows = (block.tasks || []).slice(0, 3).map(t => {
                         const created = t.created_at ? new Date(t.created_at).toLocaleString() : "—";
