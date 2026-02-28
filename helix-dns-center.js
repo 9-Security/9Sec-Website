@@ -344,10 +344,12 @@ async function refreshUsers() {
                 <td>${u.email}</td>
                 <td><span class="badge ${u.role === 'admin' ? 'badge-warning' : 'badge-success'}">${u.role}</span></td>
                 <td><i class="fa-solid ${u.two_factor_enabled ? 'fa-circle-check text-accent' : 'fa-circle-xmark'}" style="color: ${u.two_factor_enabled ? 'var(--accent)' : 'var(--text-dim)'};"></i> ${u.two_factor_enabled ? 'Protected' : 'No 2FA'}</td>
-                <td style="font-size: 12px; color: var(--text-dim);">${new Date(u.created_at).toLocaleDateString()}</td>
-                <td style="text-align: center; display: flex; gap: 8px; justify-content: center;">
-                    ${u.two_factor_enabled ? `<button class="btn" style="padding: 4px 8px; font-size: 10px; background: rgba(255,150,0,0.1); color: #ff9f43;" title="Reset 2FA" onclick="resetUser2FA('${u.id}', '${u.email}')"><i class="fa-solid fa-shield-slash"></i></button>` : ''}
-                    ${u.email !== selfEmail ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteUser('${u.id}', '${u.email}')"><i class="fa-solid fa-user-minus"></i></button>` : `<span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">You</span>`}
+                <td style="font-size: 12px; color: var(--text-dim); text-align: center;">${new Date(u.created_at).toLocaleDateString()}</td>
+                <td>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        ${u.two_factor_enabled ? `<button class="btn" style="padding: 4px 8px; font-size: 10px; background: rgba(255,150,0,0.1); color: #ff9f43;" title="Reset 2FA" onclick="resetUser2FA('${u.id}', '${u.email}')"><i class="fa-solid fa-shield-slash"></i></button>` : ''}
+                        ${u.email !== selfEmail ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteUser('${u.id}', '${u.email}')"><i class="fa-solid fa-user-minus"></i></button>` : `<span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">You</span>`}
+                    </div>
                 </td>
             </tr>
         `).join('');
