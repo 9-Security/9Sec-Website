@@ -87,6 +87,19 @@ async function loadSectionData(id) {
     }
 }
 
+// Custom Alert System
+function showAlert(message, title = 'Notification', icon = 'fa-circle-check', color = 'var(--accent)') {
+    const modal = document.getElementById('alert-modal');
+    document.getElementById('alert-title').textContent = title;
+    document.getElementById('alert-message').textContent = message;
+    document.getElementById('alert-icon').innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i>`;
+    modal.style.display = 'flex';
+}
+
+function closeAlert() {
+    document.getElementById('alert-modal').style.display = 'none';
+}
+
 // Auth Logic
 function checkAuth() {
     const saved = localStorage.getItem('9sec_user');
@@ -280,9 +293,12 @@ async function submitAllowlist() {
 }
 
 async function deleteAllowlist(id) {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Are you sure you want to remove this trusted domain?")) return;
     const data = await apiFetch(`/api/user/allowlist/${id}`, 'DELETE');
-    if (data.ok) refreshAllowlist();
+    if (data.ok) {
+        refreshAllowlist();
+        showAlert("Domain removed from trusted list.", "Success");
+    }
 }
 
 // Users
@@ -350,9 +366,9 @@ document.getElementById('save-settings-btn').onclick = async () => {
 
     const data = await apiFetch('/api/user/dns-settings', 'PATCH', { allowed_cidrs: egressCidrs.join(', ') });
     if (data.ok) {
-        alert("Domain Egress Settings updated successfully!");
+        showAlert("Domain Egress Settings updated successfully!", "Infrastructure Sync");
     } else {
-        alert("Update failed: " + data.error);
+        showAlert("Update failed: " + data.error, "Error", "fa-triangle-exclamation", "var(--danger)");
     }
     btn.disabled = false;
     btn.textContent = 'Update Infrastructure Config';
@@ -372,9 +388,9 @@ document.getElementById('save-advanced-btn').onclick = async () => {
 
     const data = await apiFetch('/api/user/dns-settings', 'PATCH', payload);
     if (data.ok) {
-        alert("Advanced DNA Security settings saved!");
+        showAlert("Advanced DNA Security settings saved!", "Settings Saved");
     } else {
-        alert("Save failed: " + data.error);
+        showAlert("Save failed: " + data.error, "Error", "fa-triangle-exclamation", "var(--danger)");
     }
     btn.disabled = false;
     btn.textContent = 'Save Advanced Settings';
@@ -382,31 +398,33 @@ document.getElementById('save-advanced-btn').onclick = async () => {
 
 async function testOpenAIKey() {
     const key = document.getElementById('openai-key').value;
-    if (!key) return alert("Please enter an API Key first.");
+    if (!key) return showAlert("Please enter an API Key first.", "Verification", "fa-key", "var(--warning)");
 
     document.body.style.cursor = 'wait';
     const data = await apiFetch('/api/user/test-openai-key', 'POST', { key });
     document.body.style.cursor = 'default';
 
-    if (data.ok) alert("✅ OpenAI Connection Successful!");
-    else alert("❌ Connection Failed: " + data.error);
+    if (data.ok) showAlert("✅ OpenAI Connection Successful!", "Connection Verified");
+    else showAlert("❌ Connection Failed: " + data.error, "Connection Error", "fa-triangle-exclamation", "var(--danger)");
 }
 
 async function testGSVKey() {
     const key = document.getElementById('gsv-key').value;
-    if (!key) return alert("Please enter an API Key first.");
+    if (!key) return showAlert("Please enter an API Key first.", "Verification", "fa-key", "var(--warning)");
 
     document.body.style.cursor = 'wait';
     const data = await apiFetch('/api/user/test-safebrowsing-key', 'POST', { key });
     document.body.style.cursor = 'default';
 
-    if (data.ok) alert("✅ Google Safe Browsing Connection Successful!");
-    else alert("❌ Connection Failed: " + data.error);
+    if (data.ok) showAlert("✅ Google Safe Browsing Connection Successful!", "Connection Verified");
+    else showAlert("❌ Connection Failed: " + data.error, "Connection Error", "fa-triangle-exclamation", "var(--danger)");
 }
 
 // Modals
 function showAddAllowlist() { document.getElementById('allowlist-modal').style.display = 'flex'; }
 function hideAddAllowlist() { document.getElementById('allowlist-modal').style.display = 'none'; }
+function showAddBlocklist() { document.getElementById('blocklist-modal').style.display = 'flex'; }
+function hideAddBlocklist() { document.getElementById('blocklist-modal').style.display = 'none'; }
 
 // Colors
 function getRiskColor(score) {
@@ -600,18 +618,24 @@ async function refreshBlocklist() {
 async function deleteBlacklist(id) {
     if (!confirm("Are you sure you want to remove this block rule?")) return;
     const data = await apiFetch(`/api/user/dns-blacklist/${id}`, { method: 'DELETE' });
-    if (data.ok) refreshBlocklist();
+    if (data.ok) {
+        refreshBlocklist();
+        showAlert("Domain removed from blacklist.", "Policy Updated");
+    }
 }
 
-function showAddBlocklist() {
-    const pattern = prompt("Enter domain pattern to block (e.g. malwaredomain.com):");
-    if (pattern) {
-        apiFetch('/api/user/dns-blacklist', {
-            method: 'POST',
-            body: { pattern, category: 'manual_block' }
-        }).then(data => {
-            if (data.ok) refreshBlocklist();
-        });
+async function submitBlocklist() {
+    const pattern = document.getElementById('block-pattern').value;
+    const category = document.getElementById('block-category').value;
+    if (!pattern) return;
+
+    const data = await apiFetch('/api/user/dns-blacklist', 'POST', { pattern, category });
+    if (data.ok) {
+        hideAddBlocklist();
+        refreshBlocklist();
+        showAlert(`Domain ${pattern} blocked successfully.`, "Policy Enforced");
+    } else {
+        showAlert("Failed to block domain: " + data.error, "Enforcement Error", "fa-triangle-exclamation", "var(--danger)");
     }
 }
 

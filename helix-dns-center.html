@@ -363,10 +363,22 @@
 
     </main>
 
-    <!-- Modal for adding allowlist (Simple implementation) -->
-    <div id="allowlist-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
-        <div class="glass-card" style="width: 400px;">
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="modal-overlay" style="display:none; z-index: 3000;">
+        <div class="glass-card modal-content" style="width: 380px; text-align: center;">
+            <div id="alert-icon" style="font-size: 3rem; margin-bottom: 20px;">
+                <i class="fa-solid fa-circle-check" style="color: var(--accent);"></i>
+            </div>
+            <h3 id="alert-title" style="margin-bottom: 12px; font-family: 'Outfit';">Success</h3>
+            <p id="alert-message" style="color: var(--text-dim); margin-bottom: 30px; line-height: 1.6;"></p>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                onclick="closeAlert()">Done</button>
+        </div>
+    </div>
+
+    <!-- Modal for adding allowlist -->
+    <div id="allowlist-modal" class="modal-overlay" style="display:none; z-index:1000;">
+        <div class="glass-card modal-content" style="width: 400px;">
             <h3 style="margin-bottom: 16px;">Add to Allowlist</h3>
             <input type="text" id="new-pattern" placeholder="*.example.com"
                 style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
@@ -375,7 +387,29 @@
             <div style="display:flex; gap:12px;">
                 <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
                     onclick="hideAddAllowlist()">Cancel</button>
-                <button class="btn btn-primary" style="flex:1" onclick="submitAllowlist()">Add</button>
+                <button class="btn btn-primary" style="flex:1" onclick="submitAllowlist()">Add to Trusted</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding blocklist -->
+    <div id="blocklist-modal" class="modal-overlay" style="display:none; z-index:1000;">
+        <div class="glass-card modal-content" style="width: 400px;">
+            <h3 style="margin-bottom: 16px; color: var(--danger);">Block Domain</h3>
+            <input type="text" id="block-pattern" placeholder="malicious.com"
+                style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
+            <select id="block-category"
+                style="width:100%; margin-bottom:20px; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-dark); color:#fff;">
+                <option value="Phishing">Phishing</option>
+                <option value="Malware">Malware / C2</option>
+                <option value="Ads/Trackers">Ads & Trackers</option>
+                <option value="Custom">Custom Block</option>
+            </select>
+            <div style="display:flex; gap:12px;">
+                <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
+                    onclick="hideAddBlocklist()">Cancel</button>
+                <button class="btn" style="flex:1; background: var(--danger); color: #fff;"
+                    onclick="submitBlocklist()">Block Domain</button>
             </div>
         </div>
     </div>
@@ -399,7 +433,7 @@
         </div>
     </div>
 
-    <script src="helix-dns-center.js?v=2.3.5"></script>
+    <script src="helix-dns-center.js?v=2.3.6"></script>
 </body>
 
 </html>
