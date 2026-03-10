@@ -276,7 +276,12 @@ async function refreshAnalytics() {
 
             body.innerHTML = filteredLogs.map(log => {
                 const ai = (window.aiVerdicts || {})[log.query_domain];
-                const aiHtml = ai ? `<span class="badge" title="${ai.reasoning}" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); font-size: 10px; cursor: help; padding: 2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${ai.verdict}</span>` : '-';
+                const aiHtml = ai ? `
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        <span class="badge" title="${ai.reasoning}" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); font-size: 10px; cursor: help; padding: 2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${ai.verdict}</span>
+                        <button class="btn" onclick="deepDive('${log.query_domain}')" style="padding: 2px 6px; font-size: 10px; background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2);"><i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive</button>
+                    </div>
+                ` : '-';
 
                 return `
                     <tr>
@@ -297,6 +302,27 @@ async function refreshAnalytics() {
         console.log(`[Dashboard] Sync complete: ${data.logs.length} logs found.`);
     } else {
         console.error("[Dashboard] Failed to fetch analytics:", data.error);
+    }
+}
+
+async function deepDive(domain) {
+    const modal = document.getElementById('report-modal');
+    const content = document.getElementById('report-content');
+    const title = document.getElementById('report-title');
+
+    title.textContent = "AI Analysis: " + domain;
+    content.textContent = "Synthesizing deep traffic insights and campaign context. This may take 10-15 seconds...";
+    modal.style.display = 'flex';
+
+    try {
+        const data = await apiFetch('/api/user/dns-deep-dive', 'POST', { domain });
+        if (data.ok) {
+            content.textContent = data.explanation;
+        } else {
+            content.innerHTML = `<div style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Analysis failed: ${data.error}</div>`;
+        }
+    } catch (e) {
+        content.textContent = "Connection error while reaching the AI dispatcher.";
     }
 }
 

@@ -531,6 +531,18 @@
         </div>
     </div>
 
+    <!-- AI Deep Dive Report Modal -->
+    <div id="report-modal" class="modal-overlay" style="display:none; z-index: 3200;">
+        <div class="glass-card modal-content" style="width: 650px; text-align: left;">
+            <h3 id="report-title" style="margin-bottom: 20px; font-family: 'Outfit';">AI Analysis Report</h3>
+            <div id="report-content"
+                style="max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;">
+                Generating report...</div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 24px;"
+                onclick="document.getElementById('report-modal').style.display='none'">Close Report</button>
+        </div>
+    </div>
+
     <!-- Modal for adding allowlist -->
     <div id="allowlist-modal" class="modal-overlay" style="display:none; z-index:1000;">
         <div class="glass-card modal-content" style="width: 400px;">
