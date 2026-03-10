@@ -91,16 +91,35 @@ async function loadSectionData(id) {
 }
 
 // Custom Alert System
+let alertResolver = null;
 function showAlert(message, title = 'Notification', icon = 'fa-circle-check', color = 'var(--accent)') {
     const modal = document.getElementById('alert-modal');
     document.getElementById('alert-title').textContent = title;
     document.getElementById('alert-message').textContent = message;
     document.getElementById('alert-icon').innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i>`;
     modal.style.display = 'flex';
+    return new Promise(resolve => { alertResolver = resolve; });
 }
 
 function closeAlert() {
     document.getElementById('alert-modal').style.display = 'none';
+    if (alertResolver) alertResolver(true);
+}
+
+let confirmResolver = null;
+function showConfirm(message, title = 'Confirm action', icon = 'fa-circle-question', color = 'var(--warning)') {
+    const modal = document.getElementById('confirm-modal');
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-icon').innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i>`;
+    document.getElementById('confirm-action-btn').style.background = color === 'var(--danger)' ? 'var(--danger)' : 'var(--primary)';
+    modal.style.display = 'flex';
+    return new Promise(resolve => { confirmResolver = resolve; });
+}
+
+function resolveConfirm(result) {
+    document.getElementById('confirm-modal').style.display = 'none';
+    if (confirmResolver) confirmResolver(result);
 }
 
 // Auth Logic
@@ -376,21 +395,8 @@ async function refreshUsers() {
     }
 }
 
-async function resetUser2FA(id, email) {
-    showAlert(`Reset 2FA for user ${email}? Use this only if they lost access to their device.`, "Confirm Reset", "fa-shield-slash", "var(--warning)")
-        .then(async confirmed => {
-            if (confirmed) {
-                const data = await apiFetch(`/api/user/users/${id}/reset-2fa`, 'POST');
-                if (data.ok) {
-                    refreshUsers();
-                    showAlert(`2FA for ${email} has been reset.`, "Reset Successful");
-                }
-            }
-        });
-}
-
 async function deleteUser(id, email) {
-    showAlert(`Are you sure you want to delete user ${email}?`, "Confirm Delete", "fa-user-minus", "var(--danger)")
+    showConfirm(`Are you sure you want to delete user ${email}?`, "Confirm Delete", "fa-user-minus", "var(--danger)")
         .then(async confirmed => {
             if (confirmed) {
                 const data = await apiFetch(`/api/user/users/${id}`, 'DELETE');
@@ -399,6 +405,19 @@ async function deleteUser(id, email) {
                     showAlert(`User ${email} has been removed.`, "Success");
                 } else {
                     showAlert(data.error, "Error", "fa-triangle-exclamation", "var(--danger)");
+                }
+            }
+        });
+}
+
+async function resetUser2FA(id, email) {
+    showConfirm(`Reset 2FA for user ${email}? Use this only if they lost access to their device.`, "Confirm Reset", "fa-shield-slash", "var(--warning)")
+        .then(async confirmed => {
+            if (confirmed) {
+                const data = await apiFetch(`/api/user/users/${id}/reset-2fa`, 'POST');
+                if (data.ok) {
+                    refreshUsers();
+                    showAlert(`2FA for ${email} has been reset.`, "Reset Successful");
                 }
             }
         });
@@ -564,7 +583,7 @@ async function verifyEnable2FA() {
 }
 
 async function disable2FA() {
-    showAlert("Are you sure you want to disable 2FA? This will make your account less secure.", "Disable Security", "fa-triangle-exclamation", "var(--warning)")
+    showConfirm("Are you sure you want to disable 2FA? This will make your account less secure.", "Disable Security", "fa-triangle-exclamation", "var(--warning)")
         .then(async confirmed => {
             if (confirmed) {
                 const data = await apiFetch('/api/user/2fa/disable', 'POST');
