@@ -67,6 +67,7 @@ async function loadSectionData(id) {
         case 'overview':
             refreshAnalytics();
             refreshTrends();
+            refreshBehaviorAlerts();
             break;
         case 'event':
             refreshAnalytics();
@@ -81,11 +82,9 @@ async function loadSectionData(id) {
             break;
         case 'users':
             refreshUsers();
-            refresh2FAStatus();
             break;
         case 'setting':
             refreshSettings();
-            refresh2FAStatus();
             break;
     }
 }
@@ -589,28 +588,34 @@ function handle2FAToggle(el) {
 }
 
 async function refresh2FAStatus() {
+    // Optimization: This is now largely handled by refreshUsers()
+    // but kept as a fall-back or for global state if needed in future.
     const data = await apiFetch('/api/user/me');
     if (data.ok && data.user) {
         const isEnabled = data.user.two_factor_enabled;
-        const statusText = document.getElementById('2fa-status-text');
-        const toggleInput = document.getElementById('2fa-toggle-input');
-        const iconDiv = document.getElementById('2fa-icon-shield');
+        updateUser2FAUI(isEnabled);
+    }
+}
 
-        if (isEnabled) {
-            if (statusText) {
-                statusText.textContent = "Protected";
-                statusText.style.color = "var(--accent)";
-            }
-            if (toggleInput) toggleInput.checked = true;
-            if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield-check" style="color: var(--accent);"></i>';
-        } else {
-            if (statusText) {
-                statusText.textContent = "No 2FA";
-                statusText.style.color = "var(--text-dim)";
-            }
-            if (toggleInput) toggleInput.checked = false;
-            if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield" style="color: var(--text-dim);"></i>';
+function updateUser2FAUI(isEnabled) {
+    const statusText = document.getElementById('2fa-status-text');
+    const toggleInput = document.getElementById('2fa-toggle-input');
+    const iconDiv = document.getElementById('2fa-icon-shield');
+
+    if (isEnabled) {
+        if (statusText) {
+            statusText.textContent = "Protected";
+            statusText.style.color = "var(--accent)";
         }
+        if (toggleInput) toggleInput.checked = true;
+        if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield-check" style="color: var(--accent);"></i>';
+    } else {
+        if (statusText) {
+            statusText.textContent = "No 2FA";
+            statusText.style.color = "var(--text-dim)";
+        }
+        if (toggleInput) toggleInput.checked = false;
+        if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield" style="color: var(--text-dim);"></i>';
     }
 }
 
@@ -648,6 +653,31 @@ async function refreshTrends() {
         trendsChart.data.datasets[0].data = totals;
         trendsChart.data.datasets[1].data = threats;
         trendsChart.update();
+    }
+}
+
+async function refreshBehaviorAlerts() {
+    const data = await apiFetch('/api/user/dns-behavior-alerts');
+    if (data.ok) {
+        const body = document.getElementById('behavior-table-body');
+        if (data.data.length === 0) {
+            body.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-dim); padding: 40px;">No behavioral anomalies detected in the last hour.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = data.data.map(a => {
+            const risk = a.query_count > 100 ? 'High' : (a.query_count > 50 ? 'Medium' : 'Low');
+            const badgeClass = risk === 'High' ? 'badge-danger' : (risk === 'Medium' ? 'badge-warning' : 'badge-success');
+
+            return `
+                <tr>
+                    <td><code style="color: var(--primary);">${a.client_ip}</code></td>
+                    <td style="font-weight: 600;">${a.base_domain}</td>
+                    <td style="text-align: center;">${a.query_count}</td>
+                    <td style="text-align: center;"><span class="badge ${badgeClass}">${risk}</span></td>
+                </tr>
+            `;
+        }).join('');
     }
 }
 
@@ -821,10 +851,18 @@ function updateModeUI(mode) {
 }
 
 async function setHelixMode(mode) {
-    updateModeUI(mode); // Optimistic UI update
+    const activeCard = document.getElementById('mode-active');
+    const passiveCard = document.getElementById('mode-passive');
+
+    // UI Feedback
+    updateModeUI(mode);
+    [activeCard, passiveCard].forEach(c => c.style.opacity = '0.7');
+
     const data = await apiFetch('/api/user/dns-settings', 'PATCH', { helix_dns_mode: mode });
+    [activeCard, passiveCard].forEach(c => c.style.opacity = '1');
+
     if (data.ok) {
-        showAlert(`HelixDNS mode switched to ${mode}.`, "Policy Synchronized");
+        showAlert(`HelixDNS mode switched to ${mode}. The edge resolvers will sync within 10 seconds.`, "Policy Synchronized");
     } else {
         showAlert("Failed to update mode: " + data.error, "Error", "fa-triangle-exclamation", "var(--danger)");
         refreshHelixMode(); // Revert on failure

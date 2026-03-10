@@ -157,6 +157,33 @@
                     <div id="quad-policy" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</div>
                 </div>
             </div>
+            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr; gap: 30px;">
+                <div class="glass-card">
+                    <h3
+                        style="margin-bottom: 20px; font-family: 'Outfit'; display: flex; align-items:center; gap: 10px;">
+                        <i class="fa-solid fa-tower-observation" style="color: #f59e0b;"></i> Behavioral Anomaly
+                        Monitoring (Tunneling & Rate)
+                    </h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Client IP</th>
+                                    <th>Suspect Base Domain</th>
+                                    <th style="text-align: center;">Queries (Last Hr)</th>
+                                    <th style="text-align: center;">Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="behavior-table-body">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-dim); padding: 40px;">
+                                        Monitoring background traffic patterns...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Event Logs Section -->
