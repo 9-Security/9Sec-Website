@@ -79,6 +79,7 @@ async function loadSectionData(id) {
             refreshAllowlist();
             refreshBlocklist();
             refreshHelixMode();
+            refreshGlobalIntelStats();
             break;
         case 'users':
             refreshUsers();
@@ -678,6 +679,13 @@ async function refreshBehaviorAlerts() {
                 </tr>
             `;
         }).join('');
+    }
+}
+
+async function refreshGlobalIntelStats() {
+    const data = await apiFetch('/api/user/dns-blacklist-stats');
+    if (data.ok) {
+        document.getElementById('global-intel-count').textContent = data.total.toLocaleString();
     }
 }
 
