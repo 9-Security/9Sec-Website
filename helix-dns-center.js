@@ -731,6 +731,16 @@ async function refreshGlobalIntelStats() {
     const data = await apiFetch('/api/user/dns-blacklist-stats');
     if (data.ok) {
         document.getElementById('global-intel-count').textContent = data.total.toLocaleString();
+
+        // Show per-source breakdown if element exists
+        const breakdown = document.getElementById('global-intel-breakdown');
+        if (breakdown && data.sources && data.sources.length > 0) {
+            const sourceIcons = { openphish: '🎣', urlhaus: '🦠', phishtank: '🐟', manual: '✏️' };
+            breakdown.innerHTML = data.sources.map(s => {
+                const icon = sourceIcons[s.source] || '📋';
+                return `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); border-radius:20px; padding:2px 10px; font-size:0.72rem; color:#fca5a5; margin:2px;">${icon} ${s.source} <strong>${s.count.toLocaleString()}</strong></span>`;
+            }).join('');
+        }
     }
 }
 
@@ -869,11 +879,18 @@ async function generateReport() {
     doc.save(`9Sec_HelixDNS_${currentUser.organization_id}_${Date.now()}.pdf`);
 }
 
-// Blacklist Management
+// Blacklist Management — UI shows manual rules only; auto threat-intel is in DB for detection
 async function refreshBlocklist() {
     const data = await apiFetch('/api/user/dns-blacklist');
     if (data.ok) {
         const body = document.getElementById('blacklist-table-body');
+        if (data.data.length === 0) {
+            body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-dim); padding:28px 0;">
+                <i class="fa-solid fa-shield-halved" style="font-size:1.5rem; margin-bottom:8px; display:block; opacity:0.4;"></i>
+                No manual block rules. Auto threat-intel is active in the background.
+            </td></tr>`;
+            return;
+        }
         body.innerHTML = data.data.map(row => `
             <tr>
                 <td style="font-weight:700; color: var(--danger);">${row.pattern}</td>
