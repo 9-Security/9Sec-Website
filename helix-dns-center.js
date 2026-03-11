@@ -220,41 +220,58 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
     return await resp.json();
 }
 
-// Overview & Events
+// ── Event Log state ──────────────────────────────────────────────
 window.logCurrentPage = 1;
+window.logTotalPages = 1;
 window.logFilterType = 'all';
+window.logAllRows = [];
 
+// Overview tab — just refresh stats & quadrant cards
 async function refreshAnalytics() {
-    // Called from Overview tab — updates stats & quadrant cards only
-    const [data, aiData] = await Promise.all([
-        apiFetch('/api/user/dns-analytics?limit=25&page=1'),
-        apiFetch('/api/user/dns-ai-verdicts')
-    ]);
+    // Reuse fetchEventLogs which always updates stats/quadrant regardless of tab
+    await fetchEventLogs(1);
+}
 
-    if (data.ok) {
-        if (aiData && aiData.ok) {
-            window.aiVerdicts = window.aiVerdicts || {};
-            aiData.verdicts.forEach(v => { window.aiVerdicts[v.domain] = v; });
-        }
+// Fix 5: Date validation helpers
+function onDateFromChange() {
+    const from = document.getElementById('log-from').value;
+    const toEl = document.getElementById('log-to');
+    if (from) toEl.min = from;
+    // If current 'to' is before new 'from', clear it
+    if (toEl.value && toEl.value < from) toEl.value = from;
+}
+function onDateToChange() {
+    const to = document.getElementById('log-to').value;
+    const fromEl = document.getElementById('log-from');
+    const today = new Date().toISOString().slice(0, 10);
+    if (to > today) { document.getElementById('log-to').value = today; return; }
+    if (to) fromEl.max = to;
+    if (fromEl.value && fromEl.value > to) fromEl.value = to;
+}
 
-        document.getElementById('stat-total').textContent = data.stats.total_queries || 0;
-        document.getElementById('stat-clients').textContent = data.stats.unique_clients || 0;
-        const q = data.quadrants;
-        document.getElementById('quad-dga').textContent = q.dga;
-        document.getElementById('quad-c2').textContent = q.c2;
-        document.getElementById('quad-tunnel').textContent = q.tunneling;
-        document.getElementById('quad-policy').textContent = q.policy;
-        document.getElementById('stat-threats').textContent = q.dga + q.c2 + q.tunneling;
+// Fix 3/6: single entry point used by Apply, page-size change, date change
+function applyEventLogs() {
+    // Validate date range (Fix 5 double-check)
+    const from = document.getElementById('log-from').value;
+    const to = document.getElementById('log-to').value;
+    if (from && to && from > to) {
+        showAlert('結束日期不得早於開始日期', '日期錯誤', 'fa-triangle-exclamation', 'var(--danger)');
+        return;
     }
+    fetchEventLogs(1);
 }
 
 async function fetchEventLogs(page = 1) {
-    const limit = parseInt(document.getElementById('log-page-size')?.value || '25');
-    const from = document.getElementById('log-from')?.value || '';
-    const to = document.getElementById('log-to')?.value || '';
+    const limitEl = document.getElementById('log-page-size');
+    const limit = limitEl ? parseInt(limitEl.value) || 25 : 25;
+    const from = (document.getElementById('log-from')?.value || '').trim();
+    const to = (document.getElementById('log-to')?.value || '').trim();
     const filter = window.logFilterType || 'all';
 
-    const params = new URLSearchParams({ limit, page, filter_type: filter });
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    params.set('page', String(page));
+    params.set('filter_type', filter);
     if (from) params.set('from', from);
     if (to) params.set('to', to);
 
@@ -270,11 +287,13 @@ async function fetchEventLogs(page = 1) {
         aiData.verdicts.forEach(v => { window.aiVerdicts[v.domain] = v; });
     }
 
-    // Update overview stats too (in case user is on event tab)
-    document.getElementById('stat-total').textContent = data.stats.total_queries || 0;
-    document.getElementById('stat-clients').textContent = data.stats.unique_clients || 0;
-    const q = data.quadrants;
-    if (q) {
+    // Update stats cards
+    if (data.stats) {
+        document.getElementById('stat-total').textContent = data.stats.total_queries || 0;
+        document.getElementById('stat-clients').textContent = data.stats.unique_clients || 0;
+    }
+    if (data.quadrants) {
+        const q = data.quadrants;
         document.getElementById('quad-dga').textContent = q.dga;
         document.getElementById('quad-c2').textContent = q.c2;
         document.getElementById('quad-tunnel').textContent = q.tunneling;
@@ -282,29 +301,37 @@ async function fetchEventLogs(page = 1) {
         document.getElementById('stat-threats').textContent = q.dga + q.c2 + q.tunneling;
     }
 
-    // Track state
-    window.logCurrentPage = data.pagination?.page || page;
-    window.logAllRows = data.logs; // for client-side keyword filter
+    // Fix 3/4: track state with actual returned values
+    const pg = data.pagination || { page: 1, limit, total: 0, totalPages: 1 };
+    window.logCurrentPage = pg.page;
+    window.logTotalPages = pg.totalPages;
+    window.logAllRows = data.logs;
 
-    renderLogTable(data.logs);
-
-    // Pagination footer
-    const pg = data.pagination || {};
-    const start = pg.total === 0 ? 0 : (pg.page - 1) * pg.limit + 1;
-    const end = Math.min(pg.page * pg.limit, pg.total);
-    document.getElementById('log-page-info').textContent =
-        pg.total ? `Showing ${start}–${end} of ${pg.total} records` : 'No records';
-    document.getElementById('log-prev').disabled = pg.page <= 1;
-    document.getElementById('log-next').disabled = pg.page >= pg.totalPages;
+    renderLogTable(data.logs, filter);
+    updatePaginationFooter(pg);
 }
 
-function renderLogTable(logs) {
+// Fix 2: empty message includes current filter name
+const filterLabels = {
+    all: '全部', dga: 'DGA Detection', c2: 'C2 Communication',
+    tunnel: 'Exfiltration/Tunnel', policy: 'Policy Violations'
+};
+
+function renderLogTable(logs, filter) {
     const body = document.getElementById('log-table-body');
-    const keyword = (document.getElementById('log-filter')?.value || '').toLowerCase();
-    const filtered = keyword ? logs.filter(l => l.query_domain.toLowerCase().includes(keyword)) : logs;
+    const keyword = (document.getElementById('log-filter')?.value || '').toLowerCase().trim();
+    const filtered = keyword
+        ? logs.filter(l => l.query_domain.toLowerCase().includes(keyword) ||
+            (l.client_hostname || '').toLowerCase().includes(keyword) ||
+            (l.client_ip || '').includes(keyword))
+        : logs;
 
     if (filtered.length === 0) {
-        body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-dim);">No records match your filters.</td></tr>';
+        const label = filterLabels[filter || window.logFilterType] || filter;
+        body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-dim);">
+            <i class="fa-solid fa-filter-circle-xmark" style="font-size:1.4rem; display:block; margin-bottom:10px; opacity:0.4;"></i>
+            <strong>${label}</strong>：查無符合條件的 Log 記錄（共 0 筆）
+        </td></tr>`;
         return;
     }
 
@@ -332,19 +359,78 @@ function renderLogTable(logs) {
     }).join('');
 }
 
-function logClientFilter() {
-    // Real-time keyword filter on already-fetched page rows (no new API call)
-    if (window.logAllRows) renderLogTable(window.logAllRows);
+// Fix 4: update all pagination UI elements
+function updatePaginationFooter(pg) {
+    const start = pg.total === 0 ? 0 : (pg.page - 1) * pg.limit + 1;
+    const end = Math.min(pg.page * pg.limit, pg.total);
+    const infoEl = document.getElementById('log-page-info');
+    const pageNumEl = document.getElementById('log-page-num');
+    const prevBtn = document.getElementById('log-prev');
+    const nextBtn = document.getElementById('log-next');
+
+    if (infoEl) infoEl.textContent = pg.total ? `共 ${pg.total.toLocaleString()} 筆，顯示 ${start}–${end}` : '查無資料';
+    if (pageNumEl) pageNumEl.textContent = pg.totalPages >= 1 ? `第 ${pg.page} / ${pg.totalPages} 頁` : '';
+
+    if (prevBtn) {
+        prevBtn.disabled = pg.page <= 1;
+        prevBtn.style.opacity = pg.page <= 1 ? '0.35' : '1';
+        prevBtn.style.cursor = pg.page <= 1 ? 'not-allowed' : 'pointer';
+    }
+    if (nextBtn) {
+        nextBtn.disabled = pg.page >= pg.totalPages;
+        nextBtn.style.opacity = pg.page >= pg.totalPages ? '0.35' : '1';
+        nextBtn.style.cursor = pg.page >= pg.totalPages ? 'not-allowed' : 'pointer';
+    }
 }
 
+// Fix 4: safe named navigation functions (no inline window.logCurrentPage arithmetic)
+function prevPage() {
+    if (window.logCurrentPage > 1) fetchEventLogs(window.logCurrentPage - 1);
+}
+function nextPage() {
+    if (window.logCurrentPage < window.logTotalPages) fetchEventLogs(window.logCurrentPage + 1);
+}
+
+// Fix 6: keyword filter — triggers fresh fetch if no rows loaded yet
+function logClientFilter() {
+    if (window.logAllRows && window.logAllRows.length >= 0) {
+        renderLogTable(window.logAllRows, window.logFilterType);
+    } else {
+        applyEventLogs();
+    }
+}
+
+// Fix 1: Quick Filter active state with clear visual distinction
 function setEventFilter(type) {
     window.logFilterType = type;
-    document.querySelectorAll('.qf-btn').forEach(b => {
-        b.style.opacity = '0.55';
-        b.style.fontWeight = 'normal';
+
+    // Active colours map
+    const activeStyles = {
+        all: { border: '2px solid var(--primary)', background: 'var(--primary)', color: '#fff' },
+        dga: { border: '2px solid #ef4444', background: 'rgba(239,68,68,0.25)', color: '#fca5a5' },
+        c2: { border: '2px solid #a855f7', background: 'rgba(168,85,247,0.25)', color: '#d8b4fe' },
+        tunnel: { border: '2px solid #f59e0b', background: 'rgba(251,191,36,0.25)', color: '#fde68a' },
+        policy: { border: '2px solid #3b82f6', background: 'rgba(59,130,246,0.25)', color: '#93c5fd' }
+    };
+    const idleStyles = {
+        all: { border: '1px solid var(--border)', background: 'transparent', color: '#9ca3af' },
+        dga: { border: '1px solid rgba(239,68,68,0.35)', background: 'rgba(239,68,68,0.08)', color: '#fca5a5' },
+        c2: { border: '1px solid rgba(168,85,247,0.35)', background: 'rgba(168,85,247,0.08)', color: '#d8b4fe' },
+        tunnel: { border: '1px solid rgba(251,191,36,0.35)', background: 'rgba(251,191,36,0.08)', color: '#fde68a' },
+        policy: { border: '1px solid rgba(59,130,246,0.35)', background: 'rgba(59,130,246,0.08)', color: '#93c5fd' }
+    };
+
+    ['all', 'dga', 'c2', 'tunnel', 'policy'].forEach(t => {
+        const btn = document.getElementById('qf-' + t);
+        if (!btn) return;
+        const s = t === type ? activeStyles[t] : idleStyles[t];
+        btn.style.border = s.border;
+        btn.style.background = s.background;
+        btn.style.color = s.color;
+        btn.style.fontWeight = t === type ? '700' : '400';
+        btn.style.boxShadow = t === type ? '0 0 8px rgba(255,255,255,0.15)' : 'none';
     });
-    const active = document.getElementById('qf-' + type);
-    if (active) { active.style.opacity = '1'; active.style.fontWeight = '700'; }
+
     fetchEventLogs(1);
 }
 
@@ -352,12 +438,12 @@ function resetEventFilters() {
     document.getElementById('log-from').value = '';
     document.getElementById('log-to').value = '';
     document.getElementById('log-filter').value = '';
-    document.getElementById('log-page-size').value = '25';
-    window.logFilterType = 'all';
-    document.querySelectorAll('.qf-btn').forEach(b => { b.style.opacity = '0.55'; b.style.fontWeight = 'normal'; });
-    const allBtn = document.getElementById('qf-all');
-    if (allBtn) { allBtn.style.opacity = '1'; allBtn.style.fontWeight = '700'; }
-    fetchEventLogs(1);
+    const pageSizeEl = document.getElementById('log-page-size');
+    if (pageSizeEl) pageSizeEl.value = '25';
+    // Remove min/max constraints
+    document.getElementById('log-from').removeAttribute('max');
+    document.getElementById('log-to').removeAttribute('min');
+    setEventFilter('all'); // resets active state & triggers fetch
 }
 
 async function deepDive(domain) {

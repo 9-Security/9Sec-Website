@@ -199,17 +199,17 @@
                 <!-- Toolbar row 1: date range + search -->
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; align-items:center;">
                     <label style="font-size:12px; color:var(--text-dim);">From</label>
-                    <input type="date" id="log-from"
-                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px;">
+                    <input type="date" id="log-from" onchange="onDateFromChange()"
+                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; color-scheme:dark;">
                     <label style="font-size:12px; color:var(--text-dim);">To</label>
-                    <input type="date" id="log-to"
-                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px;">
+                    <input type="date" id="log-to" onchange="onDateToChange()"
+                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; color-scheme:dark;">
                     <input type="text" id="log-filter" placeholder="Search domain..." oninput="logClientFilter()"
                         style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; flex:1; min-width:140px;">
-                    <button class="btn btn-primary" onclick="fetchEventLogs(1)"
-                        style="font-size:12px; padding:6px 14px;">Apply</button>
+                    <button class="btn btn-primary" onclick="applyEventLogs()"
+                        style="font-size:12px; padding:6px 16px;">Apply</button>
                     <button class="btn" onclick="resetEventFilters()"
-                        style="font-size:12px; padding:6px 12px; background:rgba(255,255,255,0.06);">Reset</button>
+                        style="font-size:12px; padding:6px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15);">Reset</button>
                 </div>
 
                 <!-- Toolbar row 2: quick-filter type chips + page size -->
@@ -217,24 +217,24 @@
                     <span
                         style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Quick
                         Filter:</span>
-                    <button id="qf-all" class="qf-btn qf-active" onclick="setEventFilter('all')"
-                        style="font-size:11px; padding:3px 10px; border-radius:20px; border:1px solid var(--border); background:var(--primary); color:#fff; cursor:pointer;">All</button>
+                    <button id="qf-all" class="qf-btn" onclick="setEventFilter('all')"
+                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:2px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; transition:all .15s;">All</button>
                     <button id="qf-dga" class="qf-btn" onclick="setEventFilter('dga')"
-                        style="font-size:11px; padding:3px 10px; border-radius:20px; border:1px solid rgba(239,68,68,0.4); background:rgba(239,68,68,0.1); color:#fca5a5; cursor:pointer;">🔴
+                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#fca5a5; cursor:pointer; transition:all .15s;">🔴
                         DGA Detection</button>
                     <button id="qf-c2" class="qf-btn" onclick="setEventFilter('c2')"
-                        style="font-size:11px; padding:3px 10px; border-radius:20px; border:1px solid rgba(168,85,247,0.4); background:rgba(168,85,247,0.1); color:#d8b4fe; cursor:pointer;">☠️
+                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(168,85,247,0.35); background:rgba(168,85,247,0.08); color:#d8b4fe; cursor:pointer; transition:all .15s;">☠️
                         C2 Communication</button>
                     <button id="qf-tunnel" class="qf-btn" onclick="setEventFilter('tunnel')"
-                        style="font-size:11px; padding:3px 10px; border-radius:20px; border:1px solid rgba(251,191,36,0.4); background:rgba(251,191,36,0.1); color:#fde68a; cursor:pointer;">🌀
+                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(251,191,36,0.35); background:rgba(251,191,36,0.08); color:#fde68a; cursor:pointer; transition:all .15s;">🌀
                         Exfiltration/Tunnel</button>
                     <button id="qf-policy" class="qf-btn" onclick="setEventFilter('policy')"
-                        style="font-size:11px; padding:3px 10px; border-radius:20px; border:1px solid rgba(59,130,246,0.4); background:rgba(59,130,246,0.1); color:#93c5fd; cursor:pointer;">🛡️
+                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(59,130,246,0.35); background:rgba(59,130,246,0.08); color:#93c5fd; cursor:pointer; transition:all .15s;">🛡️
                         Policy Violations</button>
                     <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
                         <label style="font-size:12px; color:var(--text-dim);">每頁</label>
-                        <select id="log-page-size" onchange="fetchEventLogs(1)"
-                            style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px;">
+                        <select id="log-page-size" onchange="applyEventLogs()"
+                            style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; font-size:12px;">
                             <option value="25" selected>25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
@@ -268,12 +268,14 @@
                 <div id="log-pagination"
                     style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; flex-wrap:wrap; gap:8px;">
                     <span id="log-page-info" style="font-size:12px; color:var(--text-dim);"></span>
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn" id="log-prev" onclick="fetchEventLogs(window.logCurrentPage - 1)"
-                            style="font-size:12px; padding:4px 12px; background:rgba(255,255,255,0.06);">&#8592;
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button id="log-prev" onclick="prevPage()"
+                            style="font-size:12px; padding:5px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer;">&#8592;
                             Prev</button>
-                        <button class="btn" id="log-next" onclick="fetchEventLogs(window.logCurrentPage + 1)"
-                            style="font-size:12px; padding:4px 12px; background:rgba(255,255,255,0.06);">Next
+                        <span id="log-page-num"
+                            style="font-size:12px; color:var(--text-dim); min-width:80px; text-align:center;"></span>
+                        <button id="log-next" onclick="nextPage()"
+                            style="font-size:12px; padding:5px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer;">Next
                             &#8594;</button>
                     </div>
                 </div>
