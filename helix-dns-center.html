@@ -495,9 +495,12 @@
             <h3>Two-Factor Authentication</h3>
             <p style="color: var(--text-dim); margin-bottom: 24px;">Please enter the 6-digit code from your
                 authenticator app to continue.</p>
-            <input type="text" id="2fa-login-code" placeholder="000000" maxlength="6"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; text-align: center; font-size: 24px; letter-spacing: 4px; margin-bottom: 24px;">
-            <button class="btn btn-primary" style="width:100%" onclick="submit2FALogin()">Verify & Login</button>
+            <form onsubmit="submit2FALogin(); return false;">
+                <input type="text" id="2fa-login-code" placeholder="000000" maxlength="6" inputmode="numeric"
+                    autocomplete="one-time-code"
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; text-align: center; font-size: 24px; letter-spacing: 4px; margin-bottom: 24px;">
+                <button type="submit" class="btn btn-primary" style="width:100%">Verify &amp; Login</button>
+            </form>
         </div>
     </div>
 
