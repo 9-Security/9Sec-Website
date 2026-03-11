@@ -70,7 +70,7 @@ async function loadSectionData(id) {
             refreshBehaviorAlerts();
             break;
         case 'event':
-            refreshAnalytics();
+            fetchEventLogs(1);
             break;
         case 'audit':
             refreshAuditLogs();
@@ -221,88 +221,143 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
 }
 
 // Overview & Events
+window.logCurrentPage = 1;
+window.logFilterType = 'all';
+
 async function refreshAnalytics() {
+    // Called from Overview tab — updates stats & quadrant cards only
     const [data, aiData] = await Promise.all([
-        apiFetch('/api/user/dns-analytics'),
+        apiFetch('/api/user/dns-analytics?limit=25&page=1'),
         apiFetch('/api/user/dns-ai-verdicts')
     ]);
 
     if (data.ok) {
-        // AI Verdict Mapping
         if (aiData && aiData.ok) {
             window.aiVerdicts = window.aiVerdicts || {};
-            aiData.verdicts.forEach(v => {
-                window.aiVerdicts[v.domain] = v;
-            });
+            aiData.verdicts.forEach(v => { window.aiVerdicts[v.domain] = v; });
         }
 
-        // Stats
         document.getElementById('stat-total').textContent = data.stats.total_queries || 0;
         document.getElementById('stat-clients').textContent = data.stats.unique_clients || 0;
-
-        // Quadrants
         const q = data.quadrants;
         document.getElementById('quad-dga').textContent = q.dga;
         document.getElementById('quad-c2').textContent = q.c2;
         document.getElementById('quad-tunnel').textContent = q.tunneling;
         document.getElementById('quad-policy').textContent = q.policy;
         document.getElementById('stat-threats').textContent = q.dga + q.c2 + q.tunneling;
-
-        // Table - Flicker reduction
-        const body = document.getElementById('log-table-body');
-        const latestLogId = data.logs.length > 0 ? data.logs[0].id : null;
-        if (window.lastProcessedLogId === latestLogId && data.logs.length > 0) return;
-        window.lastProcessedLogId = latestLogId;
-
-        if (data.logs.length === 0) {
-            body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-dim);">No traffic detected yet. Ensure your devices are using the Resolver IP.</td></tr>';
-        } else {
-            let filteredLogs = data.logs;
-            if (logFilterMode === 'malicious') {
-                filteredLogs = data.logs.filter(l => l.risk_score > 0);
-            } else if (logFilterMode === 'dga') {
-                filteredLogs = data.logs.filter(l => l.risk_score > 70 && l.risk_score <= 85);
-            } else if (logFilterMode === 'c2') {
-                filteredLogs = data.logs.filter(l => l.risk_score > 85);
-            } else if (logFilterMode === 'tunnel') {
-                filteredLogs = data.logs.filter(l => l.query_domain.length > 50 || l.query_type === 'TXT_TUNNEL');
-            } else if (logFilterMode === 'policy') {
-                filteredLogs = data.logs.filter(l =>
-                    (l.response_code === 'NXDOMAIN' && l.risk_score > 40) ||
-                    l.query_type === 'DOH_BYPASS' ||
-                    l.query_type === 'DOT_ENCRYPTED'
-                );
-            }
-
-            body.innerHTML = filteredLogs.map(log => {
-                const ai = (window.aiVerdicts || {})[log.query_domain];
-                const aiHtml = ai ? `
-                    <div style="display:flex; align-items:center; gap: 8px;">
-                        <span class="badge" title="${ai.reasoning}" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); font-size: 10px; cursor: help; padding: 2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${ai.verdict}</span>
-                        <button class="btn" onclick="deepDive('${log.query_domain}')" style="padding: 2px 6px; font-size: 10px; background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2);"><i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive</button>
-                    </div>
-                ` : '-';
-
-                return `
-                    <tr>
-                        <td style="font-size: 11px; color: var(--text-dim);">${new Date(log.timestamp).toLocaleString()}</td>
-                        <td>
-                            <div style="font-weight:600; color: var(--accent); font-size: 13px;">${log.client_hostname || 'External Gateway'}</div>
-                            <div style="font-size: 10px; opacity: 0.7;">${log.internal_ip || log.client_ip}</div>
-                        </td>
-                        <td style="font-weight:600; font-size: 13px;">${log.query_domain}</td>
-                        <td><span class="badge" style="background: rgba(255,255,255,0.05); font-size: 10px;">${log.query_type}</span></td>
-                        <td><span style="color: ${getRiskColor(log.risk_score)}; font-weight: 700;">${Math.round(log.risk_score)}%</span></td>
-                        <td><span class="badge ${log.response_code === 'NXDOMAIN' ? 'badge-danger' : 'badge-success'}" style="font-size: 10px;">${log.response_code || 'NOERROR'}</span></td>
-                        <td>${aiHtml}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        console.log(`[Dashboard] Sync complete: ${data.logs.length} logs found.`);
-    } else {
-        console.error("[Dashboard] Failed to fetch analytics:", data.error);
     }
+}
+
+async function fetchEventLogs(page = 1) {
+    const limit = parseInt(document.getElementById('log-page-size')?.value || '25');
+    const from = document.getElementById('log-from')?.value || '';
+    const to = document.getElementById('log-to')?.value || '';
+    const filter = window.logFilterType || 'all';
+
+    const params = new URLSearchParams({ limit, page, filter_type: filter });
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+
+    const [data, aiData] = await Promise.all([
+        apiFetch('/api/user/dns-analytics?' + params.toString()),
+        apiFetch('/api/user/dns-ai-verdicts')
+    ]);
+
+    if (!data.ok) return;
+
+    if (aiData?.ok) {
+        window.aiVerdicts = window.aiVerdicts || {};
+        aiData.verdicts.forEach(v => { window.aiVerdicts[v.domain] = v; });
+    }
+
+    // Update overview stats too (in case user is on event tab)
+    document.getElementById('stat-total').textContent = data.stats.total_queries || 0;
+    document.getElementById('stat-clients').textContent = data.stats.unique_clients || 0;
+    const q = data.quadrants;
+    if (q) {
+        document.getElementById('quad-dga').textContent = q.dga;
+        document.getElementById('quad-c2').textContent = q.c2;
+        document.getElementById('quad-tunnel').textContent = q.tunneling;
+        document.getElementById('quad-policy').textContent = q.policy;
+        document.getElementById('stat-threats').textContent = q.dga + q.c2 + q.tunneling;
+    }
+
+    // Track state
+    window.logCurrentPage = data.pagination?.page || page;
+    window.logAllRows = data.logs; // for client-side keyword filter
+
+    renderLogTable(data.logs);
+
+    // Pagination footer
+    const pg = data.pagination || {};
+    const start = pg.total === 0 ? 0 : (pg.page - 1) * pg.limit + 1;
+    const end = Math.min(pg.page * pg.limit, pg.total);
+    document.getElementById('log-page-info').textContent =
+        pg.total ? `Showing ${start}–${end} of ${pg.total} records` : 'No records';
+    document.getElementById('log-prev').disabled = pg.page <= 1;
+    document.getElementById('log-next').disabled = pg.page >= pg.totalPages;
+}
+
+function renderLogTable(logs) {
+    const body = document.getElementById('log-table-body');
+    const keyword = (document.getElementById('log-filter')?.value || '').toLowerCase();
+    const filtered = keyword ? logs.filter(l => l.query_domain.toLowerCase().includes(keyword)) : logs;
+
+    if (filtered.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-dim);">No records match your filters.</td></tr>';
+        return;
+    }
+
+    body.innerHTML = filtered.map(log => {
+        const ai = (window.aiVerdicts || {})[log.query_domain];
+        const aiHtml = ai ? `
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="badge" title="${ai.reasoning}" style="background:rgba(168,85,247,0.1); color:#a855f7; border:1px solid rgba(168,85,247,0.2); font-size:10px; cursor:help; padding:2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${ai.verdict}</span>
+                <button class="btn" onclick="deepDive('${log.query_domain}')" style="padding:2px 6px; font-size:10px; background:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.2);"><i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive</button>
+            </div>` : '-';
+
+        return `
+            <tr>
+                <td style="font-size:11px; color:var(--text-dim);">${new Date(log.timestamp).toLocaleString()}</td>
+                <td>
+                    <div style="font-weight:600; color:var(--accent); font-size:13px;">${log.client_hostname || 'External Gateway'}</div>
+                    <div style="font-size:10px; opacity:0.7;">${log.internal_ip || log.client_ip}</div>
+                </td>
+                <td style="font-weight:600; font-size:13px;">${log.query_domain}</td>
+                <td><span class="badge" style="background:rgba(255,255,255,0.05); font-size:10px;">${log.query_type}</span></td>
+                <td><span style="color:${getRiskColor(log.risk_score)}; font-weight:700;">${Math.round(log.risk_score)}%</span></td>
+                <td><span class="badge ${log.response_code === 'NXDOMAIN' ? 'badge-danger' : 'badge-success'}" style="font-size:10px;">${log.response_code || 'NOERROR'}</span></td>
+                <td>${aiHtml}</td>
+            </tr>`;
+    }).join('');
+}
+
+function logClientFilter() {
+    // Real-time keyword filter on already-fetched page rows (no new API call)
+    if (window.logAllRows) renderLogTable(window.logAllRows);
+}
+
+function setEventFilter(type) {
+    window.logFilterType = type;
+    document.querySelectorAll('.qf-btn').forEach(b => {
+        b.style.opacity = '0.55';
+        b.style.fontWeight = 'normal';
+    });
+    const active = document.getElementById('qf-' + type);
+    if (active) { active.style.opacity = '1'; active.style.fontWeight = '700'; }
+    fetchEventLogs(1);
+}
+
+function resetEventFilters() {
+    document.getElementById('log-from').value = '';
+    document.getElementById('log-to').value = '';
+    document.getElementById('log-filter').value = '';
+    document.getElementById('log-page-size').value = '25';
+    window.logFilterType = 'all';
+    document.querySelectorAll('.qf-btn').forEach(b => { b.style.opacity = '0.55'; b.style.fontWeight = 'normal'; });
+    const allBtn = document.getElementById('qf-all');
+    if (allBtn) { allBtn.style.opacity = '1'; allBtn.style.fontWeight = '700'; }
+    fetchEventLogs(1);
 }
 
 async function deepDive(domain) {
