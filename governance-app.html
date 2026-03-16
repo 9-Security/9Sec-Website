@@ -867,10 +867,12 @@
             fetchOpts.headers = headers;
             const res = await fetch(url, fetchOpts);
             if (res.status === 401 || res.status === 403) {
-                if (!path.includes("/login")) {
-                    localStorage.removeItem('token');
-                    location.reload();
-                    return;
+                if (!path.includes("/login") && !path.includes("/me")) {
+                    if (localStorage.getItem('token')) {
+                        localStorage.removeItem('token');
+                        location.reload();
+                        return;
+                    }
                 }
             }
             const contentType = res.headers.get("content-type") || "";
