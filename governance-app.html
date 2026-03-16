@@ -863,9 +863,19 @@
             const token = localStorage.getItem('token');
             if (token) headers["Authorization"] = "Bearer " + token;
 
-            const fetchOpts = { credentials: "include", ...opts };
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+            const fetchOpts = { credentials: "include", signal: controller.signal, ...opts };
             fetchOpts.headers = headers;
-            const res = await fetch(url, fetchOpts);
+
+            let res;
+            try {
+                res = await fetch(url, fetchOpts);
+                clearTimeout(timeoutId);
+            } catch (e) {
+                clearTimeout(timeoutId);
+                throw e;
+            }
             if (res.status === 401 || res.status === 403) {
                 if (!path.includes("/login") && !path.includes("/me")) {
                     if (localStorage.getItem('token')) {
