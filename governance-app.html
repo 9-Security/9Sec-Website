@@ -70,6 +70,7 @@
             font-size: 1.85rem;
             background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
             display: flex;
@@ -614,9 +615,9 @@
         </div>
 
         <div class="auth-card">
-            <div class="dashboard-tabs" style="margin: 0 auto 2.5rem;">
-                <button type="button" id="tabLogin" class="active">Sign In</button>
-                <button type="button" id="tabSignup">Create Account</button>
+            <div class="dashboard-tabs" style="margin: 0 auto 2.5rem; justify-content: center;">
+                <button type="button" id="tabLogin" class="active"
+                    style="cursor: default; pointer-events: none;">Enterprise Sign In</button>
             </div>
 
             <div id="loginForm">
@@ -631,25 +632,6 @@
                 </div>
                 <button type="button" id="btnLogin" class="btn-primary" style="width: 100%; margin-top: 1rem;">
                     Access Terminal
-                </button>
-            </div>
-
-            <div id="signupForm" class="hidden">
-                <div id="signupMsg" class="msg hidden"></div>
-                <div class="form-group">
-                    <label>Enterprise Name</label>
-                    <input type="text" id="signupOrg" placeholder="Nine Security INC.">
-                </div>
-                <div class="form-group">
-                    <label>Work Email</label>
-                    <input type="email" id="signupEmail" placeholder="admin@company.com">
-                </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="signupPassword" placeholder="Min 8 characters">
-                </div>
-                <button type="button" id="btnSignup" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                    Initialize Account
                 </button>
             </div>
         </div>
@@ -877,13 +859,20 @@
             const url = API_BASE + path;
             const method = (opts.method || "GET").toUpperCase();
             const headers = { ...(opts.headers || {}) };
-            const isStateChange = ["POST", "DELETE", "PUT", "PATCH"].includes(method);
-            if (isStateChange && govCsrfToken && (path.startsWith("/api/governance/") || path.startsWith("/api/compliance/"))) {
-                headers["X-CSRF-Token"] = govCsrfToken;
-            }
+
+            const token = localStorage.getItem('token');
+            if (token) headers["Authorization"] = "Bearer " + token;
+
             const fetchOpts = { credentials: "include", ...opts };
             fetchOpts.headers = headers;
             const res = await fetch(url, fetchOpts);
+            if (res.status === 401 || res.status === 403) {
+                if (!path.includes("/login")) {
+                    localStorage.removeItem('token');
+                    location.reload();
+                    return;
+                }
+            }
             const contentType = res.headers.get("content-type") || "";
             if (contentType.includes("application/json")) return await res.json();
             return res;
@@ -1246,13 +1235,6 @@
             document.getElementById("loginForm").classList.remove("hidden");
             document.getElementById("signupForm").classList.add("hidden");
         });
-        document.getElementById("tabSignup").addEventListener("click", () => {
-            document.getElementById("tabSignup").classList.add("active");
-            document.getElementById("tabLogin").classList.remove("active");
-            document.getElementById("signupForm").classList.remove("hidden");
-            document.getElementById("loginForm").classList.add("hidden");
-        });
-
         document.getElementById("btnLogin").addEventListener("click", async () => {
             hideMsg("loginMsg");
             const email = document.getElementById("loginEmail").value.trim();
@@ -1265,6 +1247,12 @@
                     body: JSON.stringify({ email, password })
                 });
                 if (j && j.ok) {
+                    if (j.user && j.user.modules && !j.user.modules.includes('GOVERNANCE') && j.user.role !== 'admin') {
+                        showMsg("loginMsg", "Your account does not have access to the Governance module.", true);
+                        return;
+                    }
+                    localStorage.setItem('token', j.token);
+                    localStorage.setItem('user', JSON.stringify(j.user));
                     govCsrfToken = j.csrf_token;
                     showDashboard();
                 } else {
@@ -1273,25 +1261,6 @@
             } catch (e) { showMsg("loginMsg", "Network connection failed.", true); }
         });
 
-        document.getElementById("btnSignup").addEventListener("click", async () => {
-            hideMsg("signupMsg");
-            const org_name = document.getElementById("signupOrg").value.trim();
-            const email = document.getElementById("signupEmail").value.trim();
-            const password = document.getElementById("signupPassword").value;
-            if (!org_name || !email || password.length < 8) return;
-            try {
-                const j = await api("/api/governance/signup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password, org_name })
-                });
-                if (j && j.ok) {
-                    showMsg("signupMsg", "Deployment successful. You may now sign in.", false);
-                } else {
-                    showMsg("signupMsg", j.error || "Initialization failed.", true);
-                }
-            } catch (e) { showMsg("signupMsg", "Network connection failed.", true); }
-        });
 
         document.getElementById("btnLogout").addEventListener("click", async () => {
             await api("/api/governance/logout", { method: "POST" });
