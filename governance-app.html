@@ -1231,26 +1231,32 @@
         }
 
         // Event Listeners
-        document.getElementById("tabLogin").addEventListener("click", () => {
-            document.getElementById("tabLogin").classList.add("active");
-            document.getElementById("tabSignup").classList.remove("active");
-            document.getElementById("loginForm").classList.remove("hidden");
-            document.getElementById("signupForm").classList.add("hidden");
-        });
+        // No-op for tabLogin as it is the only tab and already active.
         document.getElementById("btnLogin").addEventListener("click", async () => {
+            const btn = document.getElementById("btnLogin");
+            const originalText = btn.textContent;
             hideMsg("loginMsg");
             const email = document.getElementById("loginEmail").value.trim();
             const password = document.getElementById("loginPassword").value;
             if (!email || !password) return;
+
             try {
+                btn.disabled = true;
+                btn.textContent = "Negotiating Access...";
+
                 const j = await api("/api/governance/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, password })
                 });
+
+                console.log("[Auth] Response:", j);
+
                 if (j && j.ok) {
                     if (j.user && j.user.modules && !j.user.modules.includes('GOVERNANCE') && j.user.role !== 'admin') {
                         showMsg("loginMsg", "Your account does not have access to the Governance module.", true);
+                        btn.disabled = false;
+                        btn.textContent = originalText;
                         return;
                     }
                     localStorage.setItem('token', j.token);
@@ -1258,9 +1264,16 @@
                     govCsrfToken = j.csrf_token;
                     showDashboard();
                 } else {
-                    showMsg("loginMsg", j.error || "Authentication failed.", true);
+                    showMsg("loginMsg", (j && j.error) ? j.error : "Authentication failed. Please check credentials.", true);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
                 }
-            } catch (e) { showMsg("loginMsg", "Network connection failed.", true); }
+            } catch (e) {
+                console.error("[Auth] Error:", e);
+                showMsg("loginMsg", "Network connection failed. Please verify API reachability.", true);
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         });
 
 
