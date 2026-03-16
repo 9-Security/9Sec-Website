@@ -1238,7 +1238,10 @@
             hideMsg("loginMsg");
             const email = document.getElementById("loginEmail").value.trim();
             const password = document.getElementById("loginPassword").value;
-            if (!email || !password) return;
+            if (!email || !password) {
+                showMsg("loginMsg", "Please enter both corporate email and password.", true);
+                return;
+            }
 
             try {
                 btn.disabled = true;
