@@ -1,4 +1,4 @@
-const API_BASE = window.location.hostname === 'nine-security.com' || window.location.hostname === '9-Security.github.io' ? 'https://api.nine-security.com' : '';
+const API_BASE = (window.location.hostname === 'nine-security.com' || window.location.hostname === 'www.nine-security.com' || window.location.hostname === '9-Security.github.io') ? 'https://api.nine-security.com' : '';
 let currentUser = null;
 let egressCidrs = [];
 
