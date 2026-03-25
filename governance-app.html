@@ -797,7 +797,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/dist/fflate.min.js"></script>
     <script>
-        const API_BASE = "https://api.nine-security.com";
+        const API_BASE = (window.location.hostname === 'nine-security.com' || window.location.hostname === 'www.nine-security.com' || window.location.hostname === '9-Security.github.io') ? 'https://api.nine-security.com' : '';
         let govCsrfToken = null;
         let csrfLogoutShown = false;
         let idleTimer = null;
