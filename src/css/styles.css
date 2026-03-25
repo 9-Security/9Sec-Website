@@ -1,0 +1,19 @@
+/* 
+ * 9SEC Global Styles (PostCSS / Vite Entry)
+ */
+
+@import './variables.css';
+@import './base.css';
+@import './components.css';
+@import './controls.css';
+@import './sections.css';
+@import './modals.css';
+@import './smtp.css';
+@import './animations.css';
+
+/* Mobile specific fixes (if not in modules) */
+@media (max-width: 768px) {
+    h1.glitch-title {
+        font-size: 2.5rem;
+    }
+}
