@@ -877,10 +877,11 @@
                 throw e;
             }
             if (res.status === 401 || res.status === 403) {
-                if (!path.includes("/login") && !path.includes("/me")) {
+                if (!path.includes("/login") && !path.includes("/me") && !path.includes("/logout")) {
                     if (localStorage.getItem('token')) {
                         localStorage.removeItem('token');
-                        location.reload();
+                        showToast("Session expired. Please login again.");
+                        setTimeout(() => location.reload(), 2000); // 2s delay to prevent reload-bursts
                         return;
                     }
                 }
@@ -1262,6 +1263,9 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, password })
                 });
+
+                // [Stability Fix] Prevent accidental button reset before response processing
+                await new Promise(r => setTimeout(r, 1000));
 
                 console.log("[Auth] Response:", j);
 
