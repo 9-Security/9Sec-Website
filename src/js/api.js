@@ -7,7 +7,8 @@ async function fetchApi(path) {
     try {
         const r = await fetch(`${API_BASE}${path}`);
         if (!r.ok) return [];
-        return await r.json();
+        const data = await r.json();
+        return Array.isArray(data) ? data : [];
     } catch (e) {
         console.error(`API Fetch Error [${path}]:`, e);
         return [];

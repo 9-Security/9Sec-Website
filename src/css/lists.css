@@ -1,0 +1,146 @@
+/* 6. List Items (News, Threat Intel) & Layouts */
+.list-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 72vh;
+    overflow-y: auto;
+}
+
+#articles .container,
+#security-news .container {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#articles .list-layout,
+#security-news .list-layout {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+#threat-intel .container {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#threat-intel .list-layout {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    border-color: var(--accent-secondary);
+    background: var(--card-hover-bg);
+}
+
+.list-item .date {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    min-width: 120px;
+}
+
+.list-item .content h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-primary);
+}
+
+.list-item .content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.read-btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-secondary);
+    text-decoration: none;
+    border: 1px solid var(--accent-secondary);
+    padding: 0.4rem 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.read-btn:hover {
+    background: var(--accent-secondary);
+    color: #000;
+}
+
+/* Threat Intel specific groups */
+.threat-intel-content.threat-intel-placeholder {
+    padding: 2rem;
+    text-align: center;
+}
+
+.threat-intel-split-inner {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.threat-intel-split-two .threat-intel-split-inner {
+    grid-template-columns: 1fr 1fr;
+}
+
+.threat-intel-group-title {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent-secondary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.source-badge {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-right: 0.35rem;
+}
+
+.source-badge.source-cisa {
+    background: rgba(0, 229, 255, 0.15);
+    color: var(--accent-secondary);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.source-badge.source-otx {
+    background: rgba(0, 255, 65, 0.15);
+    color: var(--accent-color);
+    border: 1px solid rgba(0, 255, 65, 0.4);
+}
+
+.articles-more-wrap,
+.threat-intel-more-wrap {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.articles-more-btn {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--accent-secondary);
+    background: transparent;
+    border: 1px solid var(--accent-secondary);
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.articles-more-btn:hover {
+    background: rgba(0, 229, 255, 0.1);
+}

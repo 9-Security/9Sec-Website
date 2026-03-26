@@ -1,3 +1,4 @@
+/* 2. Base & Global reset */
 * {
     margin: 0;
     padding: 0;
@@ -51,7 +52,7 @@ body {
     z-index: 10;
 }
 
-/* Layout Containers */
+/* Container */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -60,10 +61,4 @@ body {
 
 section {
     padding: 5rem 0;
-}
-
-.line {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    width: 100%;
 }
