@@ -136,7 +136,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // --- API 基底（單一來源，方便換環境／staging）---
-const API_BASE = "https://api.nine-security.com";
+const API_BASE = "https://gov.nine-security.com";
 
 const FREE_EMAIL_DOMAINS = new Set([
     "gmail.com", "googlemail.com", "outlook.com", "hotmail.com", "live.com", "msn.com",
