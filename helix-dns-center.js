@@ -140,6 +140,30 @@ function checkAuth() {
     }
 }
 
+async function resetUserPassword(userId, email) {
+    const newPassword = prompt(`Enter new password for ${email}:`);
+    if (!newPassword) return;
+    if (newPassword.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    try {
+        const res = await fetchApi(`/api/user/users/${userId}/password`, {
+            method: 'PATCH',
+            body: JSON.stringify({ newPassword })
+        });
+        if (res.ok) {
+            alert("Password updated successfully.");
+            fetchUsersData(); // Refresh list if needed
+        } else {
+            alert(`Error: ${res.error || "Failed to update password"}`);
+        }
+    } catch (e) {
+        console.error("Reset password failed:", e);
+    }
+}
+
 async function login() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-pass').value;
@@ -553,7 +577,15 @@ async function refreshUsers() {
                     <td>
                         <div style="display: flex; gap: 8px; justify-content: center;">
                             ${u.two_factor_enabled ? `<button class="btn" style="padding: 4px 8px; font-size: 10px; background: rgba(255,150,0,0.1); color: #ff9f43;" title="Reset 2FA" onclick="resetUser2FA('${u.id}', '${u.email}')"><i class="fa-solid fa-shield-slash"></i></button>` : ''}
-                            ${!isSelf ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteUser('${u.id}', '${u.email}')"><i class="fa-solid fa-user-minus"></i></button>` : `<span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">You</span>`}
+                            ${!isSelf ? `
+                                <button class="btn btn-sm" onclick="resetUserPassword('${u.id}', '${u.email}')" title="Reset Password"
+                                    style="background:var(--accent); color:#000;">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+                                <button class="btn btn-sm" onclick="deleteUser('${u.id}', '${u.email}')" title="Delete User"
+                                    style="background:rgba(239,68,68,0.15); color:var(--danger);">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>` : `<span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">You</span>`}
                         </div>
                     </td>
                 </tr>

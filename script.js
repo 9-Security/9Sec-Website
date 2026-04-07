@@ -415,7 +415,10 @@ const translations = {
             dmarc_benefit_automated: "<strong>Automated Pipeline</strong>: No manual file uploading needed.",
             dmarc_benefit_continuous: "<strong>24/7 Monitoring</strong>: We track your domain reputation around the clock.",
             dmarc_benefit_expert: "<strong>Expert Interpretation</strong>: We don't just show charts; we help you decode the forensic data.",
-            dmarc_benefit_consolidated: "<strong>Unified Portal</strong>: Manage all domains in one dashboard."
+            dmarc_benefit_consolidated: "<strong>Unified Portal</strong>: Manage all domains in one dashboard.",
+            domain_title: "Domain Brand Protection",
+            domain_desc: "Detect phishing, squatting, and homograph domain threats using our Apex variation engine with real-time DNS validation.",
+            cta_scan: "SCAN_NOW"
         },
         model: {
             intro1: "> Beyond Protection. 9 Dimensions of Verifiable Truth.",
