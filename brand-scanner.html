@@ -1,93 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brand Scanner | Nine-Security</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    
     <style>
-        :root {
-            --accent: #6366f1;
-            --danger: #ef4444;
-            --bg: #0f172a;
+        .scanner-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 120px;
+            padding-bottom: 80px;
         }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; }
-        .scanner-container { max-width: 900px; margin: 80px auto; padding: 20px; }
-        .search-box {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 30px; border-radius: 24px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-        }
-        input[type="text"] {
-            width: 100%; max-width: 500px;
-            background: rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-            padding: 15px 25px; border-radius: 12px;
-            color: white; font-size: 18px; margin-bottom: 20px;
-            outline: none; transition: border-color 0.3s;
-        }
-        input[type="text"]:focus { border-color: var(--accent); }
-        .scan-btn {
-            background: var(--accent);
-            color: white; border: none;
-            padding: 15px 40px; border-radius: 12px;
-            font-size: 18px; font-weight: 600; cursor: pointer;
-            transition: transform 0.2s, opacity 0.3s;
-        }
-        .scan-btn:hover { transform: translateY(-2px); opacity: 0.9; }
-        .scan-btn:disabled { background: #4b5563; cursor: not-allowed; }
 
-        .results-area { margin-top: 40px; display: none; }
-        .loading-spinner {
-            display: none; margin: 40px auto;
-            width: 50px; height: 50px;
-            border: 5px solid rgba(255,255,255,0.1);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .search-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            margin-bottom: 3rem;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .search-box::before {
+            content: 'SYSTEM_INPUT';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-color);
+            padding: 0 10px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        .results-area {
+            margin-top: 3rem;
+            display: none;
+        }
 
         .hit-card {
-            background: rgba(239, 68, 68, 0.05);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 15px 20px; border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            animation: slideIn 0.4s ease-out forwards;
+            background: rgba(255, 0, 85, 0.05);
+            border: 1px solid rgba(255, 0, 85, 0.2);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .hit-domain { font-family: monospace; font-size: 16px; color: var(--danger); font-weight: 600; }
-        .hit-ip { color: #94a3b8; font-size: 14px; }
+
+        .hit-card::after {
+            content: 'THREAT';
+            position: absolute;
+            right: -10px;
+            bottom: -5px;
+            font-size: 2rem;
+            font-family: var(--font-mono);
+            color: rgba(255, 0, 85, 0.1);
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        .hit-card:hover {
+            border-color: #ff0055;
+            background: rgba(255, 0, 85, 0.1);
+            transform: translateX(5px);
+        }
+
+        .hit-domain {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: #ff0055;
+            font-weight: 600;
+        }
+
+        .hit-ip {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            margin-top: 0.3rem;
+        }
+
         .hit-rule {
-            font-size: 12px; background: rgba(255,255,255,0.1);
-            padding: 2px 8px; border-radius: 4px; color: #cbd5e1;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            background: rgba(255, 0, 85, 0.2);
+            padding: 0.3rem 0.8rem;
+            color: #ff0055;
+            border: 1px solid rgba(255, 0, 85, 0.5);
         }
-        .status-bar { color: #94a3b8; font-size: 14px; margin-bottom: 20px; text-align: center; }
+
+        .status-bar {
+            font-family: var(--font-mono);
+            color: var(--accent-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--accent-secondary);
+        }
+
+        /* Loading Spinner Overwrite */
+        .loading-spinner {
+            display: none;
+            margin: 3rem auto;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(0, 255, 65, 0.1);
+            border-top-color: var(--accent-color);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
+
 <body>
-    <div class="scanner-container">
-        <h1 style="font-family: 'Outfit'; font-size: 42px; text-align: center; margin-bottom: 10px;">Brand Abuse Scanner</h1>
-        <p style="text-align: center; color: #94a3b8; margin-bottom: 40px;">Deep scan for registered phishing and squatting domains using Apex Engine.</p>
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    <!-- Overlay Scanline Effect -->
+    <div class="scanlines"></div>
 
-        <div class="search-box">
-            <input type="text" id="targetDomain" placeholder="e.g. softnext.com.tw" spellcheck="false">
-            <br>
-            <button class="scan-btn" id="scanBtn">Start Deep Scan</button>
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <a href="./" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="assets/logo_v2.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="./">/Home</a></li>
+                <li><a href="services.html">/Services</a></li>
+                <li><a href="arsenal.html" class="active">/Arsenal</a></li>
+                <li><a href="./#model">/9SEC_Model</a></li>
+                <li><a href="contact.html">/Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="scanner-container">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <p class="terminal-text">Initializing Apex Brand Intelligence Engine... <span class="status-ok">[READY]</span></p>
+                <h1 class="glitch-title" data-text="BRAND ABUSE SCANNER">BRAND ABUSE SCANNER</h1>
+                <p class="subtitle">Deep scan for registered phishing and squatting domains using Apex Engine.</p>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="targetDomain" placeholder="Enter target domain (e.g. softnext.com.tw)" spellcheck="false">
+                <div class="cta-group">
+                    <button class="btn primary-btn" id="scanBtn">
+                        <i class="fa-solid fa-radar"></i> START_DEEP_SCAN
+                    </button>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="loader"></div>
+            
+            <div class="results-area" id="resultsArea">
+                <div class="status-bar" id="statusBar"></div>
+                <div id="hitsList"></div>
+            </div>
         </div>
+    </main>
 
-        <div class="loading-spinner" id="loader"></div>
-        
-        <div class="results-area" id="resultsArea">
-            <div class="status-bar" id="statusBar"></div>
-            <div id="hitsList"></div>
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="copyright">
+                <p>&copy; 2026 Nine-Security. All rights reserved.</p>
+            </div>
         </div>
-    </div>
+    </footer>
 
+    <script type="module" src="src/js/main.js"></script>
     <script>
         const API_BASE = "https://gov.nine-security.com";
         const scanBtn = document.getElementById('scanBtn');
@@ -99,14 +216,14 @@
 
         scanBtn.addEventListener('click', async () => {
             const domain = targetInput.value.trim();
-            if (!domain) return alert("Please enter a domain");
+            if (!domain) return;
 
             // UI Reset
             scanBtn.disabled = true;
             loader.style.display = 'block';
             resultsArea.style.display = 'none';
             hitsList.innerHTML = '';
-            statusBar.innerText = 'Initializing Apex Engine...';
+            statusBar.innerText = '> Initializing Scan Protocol...';
 
             try {
                 const response = await fetch(`${API_BASE}/api/domain/instant-scan`, {
@@ -122,10 +239,15 @@
                 if (!data.ok) throw new Error(data.error);
 
                 resultsArea.style.display = 'block';
-                statusBar.innerText = `Scan complete. Analyzed ${data.total_scanned} variations. Found ${data.hits.length} registered threats.`;
+                statusBar.innerText = `[SUCCESS] Analysis complete. Scanned ${data.total_scanned} variations. Found ${data.hits.length} threats.`;
 
                 if (data.hits.length === 0) {
-                    hitsList.innerHTML = '<p style="text-align:center; color: #10b981; padding: 20px;">✅ No active threats detected for this domain.</p>';
+                    hitsList.innerHTML = `
+                        <div class="card" style="text-align:center; padding: 2rem; border-color: var(--accent-color);">
+                            <i class="fa-solid fa-shield-check" style="font-size: 2rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                            <p style="color: var(--accent-color); font-family: var(--font-mono);">SAFE: No active threats detected for this domain.</p>
+                        </div>
+                    `;
                 } else {
                     data.hits.forEach(hit => {
                         const card = document.createElement('div');
@@ -133,22 +255,22 @@
                         card.innerHTML = `
                             <div>
                                 <div class="hit-domain">${hit.candidate_domain}</div>
-                                <div class="hit-ip">Resolved IP: ${hit.ip}</div>
+                                <div class="hit-ip">RESOLVED_IP: ${hit.ip}</div>
                             </div>
-                            <div class="hit-rule">${hit.rule}</div>
+                            <div class="hit-rule">${hit.rule.toUpperCase()}</div>
                         `;
                         hitsList.appendChild(card);
                     });
                 }
 
             } catch (err) {
-                alert("Scan failed: " + err.message);
+                statusBar.innerText = `[ERROR] ${err.message}`;
                 loader.style.display = 'none';
                 scanBtn.disabled = false;
+                resultsArea.style.display = 'block';
             }
         });
 
-        // Enter key support
         targetInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') scanBtn.click();
         });
