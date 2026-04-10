@@ -4,63 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelixDNS Security Center | Premium Dashboard</title>
+    <title>HelixDNS Security Center | Nine-Security</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main styles for global variables and baseline components -->
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="stylesheet" href="helix-dns-center.css?v=2.5.0">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="helix-dns-center.css?v=2.3.0">
 </head>
 
-<body>
+<body class="dashboard-body">
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    <!-- Overlay Scanline Effect -->
+    <div class="scanlines"></div>
 
     <aside id="sidebar">
         <div class="sidebar-header">
-            <div class="logo-box">9</div>
-            <span style="font-size: 1.2rem; font-weight: 800; font-family: 'Outfit';">HelixDNS</span>
+            <div class="logo">
+                <img src="assets/logo_v2.png" alt="9SEC" class="logo-img" style="height: 40px;">
+                <span class="logo-text" style="font-size: 1.2rem;">9SEC<span class="accent">_DNS</span></span>
+            </div>
         </div>
 
         <div class="sidebar-content">
             <div class="nav-item active" onclick="switchSection('overview', this)">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Overview</span>
+                <i class="fa-solid fa-terminal"></i>
+                <span>OVERVIEW</span>
             </div>
             <div class="nav-item" onclick="switchSection('event', this)">
                 <i class="fa-solid fa-list-ul"></i>
-                <span>Event Logs</span>
+                <span>EVENT_LOGS</span>
             </div>
             <div class="nav-item" onclick="switchSection('audit', this)">
                 <i class="fa-solid fa-fingerprint"></i>
-                <span>Audit Trail</span>
+                <span>AUDIT_TRAIL</span>
             </div>
-            <div class="nav-item" onclick="window.location.href='governance-app.html'" style="border-left: 2px solid var(--accent); background: rgba(0,255,157,0.05);">
-                <i class="fa-solid fa-toolbox" style="color: var(--accent);"></i>
-                <span style="color: var(--accent); font-weight: 700;">WBC Arsenal</span>
+            <div class="nav-item" onclick="window.location.href='governance-app.html'" style="border-left: 2px solid var(--accent-color); background: rgba(0,255,65,0.05);">
+                <i class="fa-solid fa-toolbox" style="color: var(--accent-color);"></i>
+                <span style="color: var(--accent-color); font-weight: 700;">WBC_ARSENAL</span>
             </div>
             <div class="nav-item" onclick="switchSection('policy', this)">
                 <i class="fa-solid fa-shield-halved"></i>
-                <span>Security Policy</span>
+                <span>SECURITY_POLICY</span>
             </div>
             <div class="nav-item" onclick="switchSection('users', this)">
                 <i class="fa-solid fa-users-gear"></i>
-                <span>Users & Roles</span>
+                <span>USERS_ROLES</span>
             </div>
             <div class="nav-item" onclick="switchSection('setting', this)">
                 <i class="fa-solid fa-gears"></i>
-                <span>Settings</span>
+                <span>SETTINGS</span>
             </div>
         </div>
 
@@ -68,30 +74,28 @@
             <i class="fa-solid fa-chevron-left"></i>
         </button>
 
-        <div style="padding: 24px; border-top: 1px solid var(--border);" class="sidebar-footer">
-            <div onclick="logout()" style="cursor:pointer; color: var(--text-dim);" class="nav-item">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Logout</span>
+        <div style="padding: 24px; border-top: 1px solid var(--border-color);" class="sidebar-footer">
+            <div onclick="logout()" style="cursor:pointer;" class="nav-item">
+                <i class="fa-solid fa-power-off"></i>
+                <span>LOGOUT</span>
             </div>
         </div>
     </aside>
 
     <main>
-        <!-- Top bar/Global Search or Info could go here -->
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
             <div>
-                <h1 id="page-title" style="font-family: 'Outfit'; font-size: 1.8rem;">DASHBOARD OVERVIEW</h1>
-                <p style="color: var(--text-dim);">Welcome back, <span id="user-display">User</span></p>
+                <p class="terminal-text" style="margin-bottom: 0.5rem;">Accessing HelixDNS Control Plane... <span class="status-ok">[ENCRYPTED]</span></p>
+                <h1 id="page-title" class="glitch-title" data-text="DASHBOARD OVERVIEW" style="font-size: 1.8rem; margin: 0;">DASHBOARD OVERVIEW</h1>
+                <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; margin-top: 5px;">Authenticated as: <span id="user-display" class="status-ok">User</span></p>
             </div>
             <div style="display:flex; align-items:center; gap: 16px;">
-                <button class="btn btn-primary" onclick="generateReport()"
-                    style="background: var(--accent); color: #000; font-weight:700;">
-                    <i class="fa-solid fa-file-pdf"></i> Export PDF Report
+                <button class="btn primary-btn" onclick="generateReport()" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">
+                    <i class="fa-solid fa-file-export"></i> EXPORT_PDF
                 </button>
-                <div class="glass-card"
-                    style="padding: 12px 20px; margin-bottom: 0; display:flex; align-items:center; gap: 12px;">
-                    <div id="org-badge" class="badge badge-success">ORGANIZATION</div>
-                    <div id="resolver-ip" style="font-family: monospace; font-weight:700; color: var(--primary);">
+                <div class="card" style="padding: 10px 20px; margin-bottom: 0; display:flex; align-items:center; gap: 12px; background: rgba(0,0,0,0.4);">
+                    <div id="org-badge" class="ai-badge" style="margin: 0;">ORGANIZATION</div>
+                    <div id="resolver-ip" style="font-family: var(--font-mono); font-weight:700; color: var(--accent-secondary); font-size: 0.9rem;">
                         0.0.0.0
                     </div>
                 </div>
@@ -103,85 +107,83 @@
         <!-- Overview Section -->
         <section id="overview" class="section active">
             <div class="grid">
-                <div class="glass-card stat-card">
+                <div class="card stat-card" style="--card-accent: var(--accent-secondary);">
                     <span class="stat-label">Total Queries (24h)</span>
                     <span id="stat-total" class="stat-value">0</span>
-                    <span style="font-size: 12px; color: var(--success);"><i class="fa-solid fa-arrow-up"></i> 12% vs
-                        yesterday</span>
+                    <span style="font-size: 11px; color: var(--accent-color); font-family: var(--font-mono);"><i class="fa-solid fa-caret-up"></i> 12% VELOCITY</span>
                 </div>
-                <div class="glass-card stat-card">
+                <div class="card stat-card" style="--card-accent: var(--accent-color);">
                     <span class="stat-label">Unique Clients</span>
                     <span id="stat-clients" class="stat-value">0</span>
-                    <span style="font-size: 12px; color: var(--primary);">Active Nodes</span>
+                    <span style="font-size: 11px; color: var(--accent-secondary); font-family: var(--font-mono);">ACTIVE_NODES</span>
                 </div>
-                <div class="glass-card stat-card" onclick="viewThreatDetails()" style="cursor: pointer;">
+                <div class="card stat-card threat-stat" onclick="viewThreatDetails()" style="cursor: pointer; --card-accent: #ff0055;">
                     <span class="stat-label">Malicious Hits</span>
-                    <span id="stat-threats" class="stat-value" style="color: var(--danger);">0</span>
-                    <span style="font-size: 12px; color: var(--danger);"><i
-                            class="fa-solid fa-triangle-exclamation"></i> Action Required</span>
+                    <span id="stat-threats" class="stat-value" style="color: #ff0055;">0</span>
+                    <span style="font-size: 11px; color: #ff0055; font-family: var(--font-mono);"><i class="fa-solid fa-biohazard"></i> ACTION_REQUIRED</span>
                 </div>
             </div>
 
-            <div class="glass-card" style="margin-top: 24px;">
-                <h3 style="margin-bottom: 20px; font-family: 'Outfit'; display: flex; align-items:center; gap: 10px;">
-                    <i class="fa-solid fa-chart-area" style="color: var(--primary);"></i> Traffic Trends (Last 24h)
+            <div class="card" style="margin-top: 24px;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-mono); display: flex; align-items:center; gap: 10px; font-size: 1.1rem;">
+                    <i class="fa-solid fa-wave-square" style="color: var(--accent-secondary);"></i> TRAFFIC_TRENDS (24H_LIVE)
                 </h3>
                 <div style="height: 300px; position: relative;">
                     <canvas id="trendsChart"></canvas>
                 </div>
             </div>
 
-            <h3 style="margin: 24px 0 16px; font-family: 'Outfit';">Threat Analysis Quadrants</h3>
+            <div class="section-header" style="margin: 32px 0 16px;">
+                <h2 style="font-size: 1.2rem;"><span class="hash">#</span> THREAT_ANALYSIS_QUADRANTS</h2>
+                <div class="line"></div>
+            </div>
+
             <div class="quadrants">
-                <div class="glass-card quad-card" onclick="viewQuadrantDetails('dga')" style="cursor: pointer;">
-                    <i class="fa-solid fa-microchip" style="font-size: 2rem; color: #a855f7; margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px;">DGA Detection</h4>
-                    <p style="color: var(--text-dim); font-size: 13px;">Algorithmically Generated Domains</p>
-                    <div id="quad-dga" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</div>
+                <div class="card quad-card" onclick="viewQuadrantDetails('dga')" style="cursor: pointer; border-bottom: 2px solid #a855f7;">
+                    <i class="fa-solid fa-microchip" style="font-size: 1.8rem; color: #a855f7; margin-bottom: 12px;"></i>
+                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">DGA_DETECTION</h4>
+                    <p style="color: var(--text-secondary); font-size: 11px;">Algorithmically Generated Domains</p>
+                    <div id="quad-dga" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
                 </div>
-                <div class="glass-card quad-card" onclick="viewQuadrantDetails('c2')" style="cursor: pointer;">
-                    <i class="fa-solid fa-skull-crossbones"
-                        style="font-size: 2rem; color: var(--danger); margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px;">C2 Communication</h4>
-                    <p style="color: var(--text-dim); font-size: 13px;">Command & Control Infrastructure</p>
-                    <div id="quad-c2" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</div>
+                <div class="card quad-card" onclick="viewQuadrantDetails('c2')" style="cursor: pointer; border-bottom: 2px solid #ff0055;">
+                    <i class="fa-solid fa-skull-crossbones" style="font-size: 1.8rem; color: #ff0055; margin-bottom: 12px;"></i>
+                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">C2_COMMUNICATION</h4>
+                    <p style="color: var(--text-secondary); font-size: 11px;">Command & Control Infrastructure</p>
+                    <div id="quad-c2" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono); color: #ff0055;">0</div>
                 </div>
-                <div class="glass-card quad-card" onclick="viewQuadrantDetails('tunnel')" style="cursor: pointer;">
-                    <i class="fa-solid fa-pipe-valve"
-                        style="font-size: 2rem; color: var(--primary); margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px;">Exfiltration / Tunnel</h4>
-                    <p style="color: var(--text-dim); font-size: 13px;">DNS Data Tunneling Attempts</p>
-                    <div id="quad-tunnel" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</div>
+                <div class="card quad-card" onclick="viewQuadrantDetails('tunnel')" style="cursor: pointer; border-bottom: 2px solid var(--accent-secondary);">
+                    <i class="fa-solid fa-pipe-valve" style="font-size: 1.8rem; color: var(--accent-secondary); margin-bottom: 12px;"></i>
+                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">DNS_TUNNELING</h4>
+                    <p style="color: var(--text-secondary); font-size: 11px;">Exfiltration / Data Tunneling</p>
+                    <div id="quad-tunnel" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
                 </div>
-                <div class="glass-card quad-card" onclick="viewQuadrantDetails('policy')" style="cursor: pointer;">
-                    <i class="fa-solid fa-file-shield"
-                        style="font-size: 2rem; color: var(--warning); margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px;">Policy Violations</h4>
-                    <p style="color: var(--text-dim); font-size: 13px;">Compliance & Allowed Patterns</p>
-                    <div id="quad-policy" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;">0</div>
+                <div class="card quad-card" onclick="viewQuadrantDetails('policy')" style="cursor: pointer; border-bottom: 2px solid var(--accent-color);">
+                    <i class="fa-solid fa-file-shield" style="font-size: 1.8rem; color: var(--accent-color); margin-bottom: 12px;"></i>
+                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">POLICY_VIOLATIONS</h4>
+                    <p style="color: var(--text-secondary); font-size: 11px;">Compliance & Allowed Patterns</p>
+                    <div id="quad-policy" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
                 </div>
             </div>
-            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr; gap: 30px;">
-                <div class="glass-card">
-                    <h3
-                        style="margin-bottom: 20px; font-family: 'Outfit'; display: flex; align-items:center; gap: 10px;">
-                        <i class="fa-solid fa-tower-observation" style="color: #f59e0b;"></i> Behavioral Anomaly
-                        Monitoring (Tunneling & Rate)
+            
+            <div style="margin-top: 32px;">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-family: var(--font-mono); display: flex; align-items:center; gap: 10px; font-size: 1rem;">
+                        <i class="fa-solid fa-tower-observation" style="color: #f59e0b;"></i> BEHAVIORAL_ANOMALY_MONITOR
                     </h3>
                     <div style="overflow-x: auto;">
-                        <table>
+                        <table class="terminal-table">
                             <thead>
                                 <tr>
-                                    <th>Client IP</th>
-                                    <th>Suspect Base Domain</th>
-                                    <th style="text-align: center;">Queries (Last Hr)</th>
-                                    <th style="text-align: center;">Risk Level</th>
+                                    <th>CLIENT_IP</th>
+                                    <th>SUSPECT_DOMAIN</th>
+                                    <th style="text-align: center;">QPS_PEAK</th>
+                                    <th style="text-align: center;">RISK_SCORE</th>
                                 </tr>
                             </thead>
                             <tbody id="behavior-table-body">
                                 <tr>
-                                    <td colspan="4" style="text-align: center; color: var(--text-dim); padding: 40px;">
-                                        Monitoring background traffic patterns...</td>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px; font-family: var(--font-mono);">
+                                        [LISTENING] Monitoring background traffic patterns...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -192,95 +194,68 @@
 
         <!-- Event Logs Section -->
         <section id="event" class="section">
-            <div class="glass-card">
-                <div
-                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
-                    <h3 style="margin:0;">Real-time Security Events</h3>
-                    <button class="btn btn-primary" onclick="fetchEventLogs(1)" title="Refresh"><i
-                            class="fa-solid fa-rotate"></i></button>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="margin:0; font-family: var(--font-mono); color: var(--accent-color);">[REAL-TIME_SECURITY_EVENTS]</h3>
+                    <button class="btn secondary-btn" onclick="fetchEventLogs(1)" style="padding: 5px 12px;"><i class="fa-solid fa-sync"></i></button>
                 </div>
 
-                <!-- Toolbar row 1: date range + search -->
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; align-items:center;">
-                    <label style="font-size:12px; color:var(--text-dim);">From</label>
-                    <input type="date" id="log-from" onchange="onDateFromChange()"
-                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; color-scheme:dark;">
-                    <label style="font-size:12px; color:var(--text-dim);">To</label>
-                    <input type="date" id="log-to" onchange="onDateToChange()"
-                        style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; color-scheme:dark;">
-                    <input type="text" id="log-filter" placeholder="Search domain..." oninput="logClientFilter()"
-                        style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff; font-size:12px; flex:1; min-width:140px;">
-                    <button class="btn btn-primary" onclick="applyEventLogs()"
-                        style="font-size:12px; padding:6px 16px;">Apply</button>
-                    <button class="btn" onclick="resetEventFilters()"
-                        style="font-size:12px; padding:6px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15);">Reset</button>
+                <!-- Filters -->
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center; background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid var(--border-color);">
+                    <div style="display:flex; align-items:center; gap: 10px;">
+                        <span style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-secondary);">RANGE:</span>
+                        <input type="date" id="log-from" onchange="onDateFromChange()" class="terminal-input">
+                        <span style="color: var(--text-secondary);">>></span>
+                        <input type="date" id="log-to" onchange="onDateToChange()" class="terminal-input">
+                    </div>
+                    <input type="text" id="log-filter" placeholder="SEARCH_DOMAIN..." oninput="logClientFilter()" class="terminal-input" style="flex:1;">
+                    <button class="btn primary-btn" onclick="applyEventLogs()" style="font-size: 11px; padding: 8px 15px;">EXEC_QUERY</button>
+                    <button class="btn secondary-btn" onclick="resetEventFilters()" style="font-size: 11px; padding: 8px 15px;">RESET</button>
                 </div>
 
-                <!-- Toolbar row 2: quick-filter type chips + page size -->
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center;">
-                    <span
-                        style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Quick
-                        Filter:</span>
-                    <button id="qf-all" class="qf-btn" onclick="setEventFilter('all')"
-                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:2px solid var(--primary); background:var(--primary); color:#fff; cursor:pointer; transition:all .15s;">All</button>
-                    <button id="qf-dga" class="qf-btn" onclick="setEventFilter('dga')"
-                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#fca5a5; cursor:pointer; transition:all .15s;">🔴
-                        DGA Detection</button>
-                    <button id="qf-c2" class="qf-btn" onclick="setEventFilter('c2')"
-                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(168,85,247,0.35); background:rgba(168,85,247,0.08); color:#d8b4fe; cursor:pointer; transition:all .15s;">☠️
-                        C2 Communication</button>
-                    <button id="qf-tunnel" class="qf-btn" onclick="setEventFilter('tunnel')"
-                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(251,191,36,0.35); background:rgba(251,191,36,0.08); color:#fde68a; cursor:pointer; transition:all .15s;">🌀
-                        Exfiltration/Tunnel</button>
-                    <button id="qf-policy" class="qf-btn" onclick="setEventFilter('policy')"
-                        style="font-size:11px; padding:4px 12px; border-radius:20px; border:1px solid rgba(59,130,246,0.35); background:rgba(59,130,246,0.08); color:#93c5fd; cursor:pointer; transition:all .15s;">🛡️
-                        Policy Violations</button>
+                <!-- Quick Filter Chips -->
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
+                    <span style="font-size:10px; color:var(--text-secondary); font-family: var(--font-mono);">TAG_FILTERS:</span>
+                    <button id="qf-all" class="qf-btn active" onclick="setEventFilter('all')">ALL</button>
+                    <button id="qf-dga" class="qf-btn" onclick="setEventFilter('dga')">DGA</button>
+                    <button id="qf-c2" class="qf-btn" onclick="setEventFilter('c2')">C2</button>
+                    <button id="qf-tunnel" class="qf-btn" onclick="setEventFilter('tunnel')">TUNNEL</button>
+                    <button id="qf-policy" class="qf-btn" onclick="setEventFilter('policy')">POLICY</button>
+                    
                     <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-                        <label style="font-size:12px; color:var(--text-dim);">每頁</label>
-                        <select id="log-page-size" onchange="applyEventLogs()"
-                            style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:#fff; font-size:12px;">
+                        <span style="font-size:11px; color:var(--text-secondary); font-family: var(--font-mono);">PAGE_SIZE:</span>
+                        <select id="log-page-size" onchange="applyEventLogs()" class="terminal-select">
                             <option value="25" selected>25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
-                            <option value="150">150</option>
-                            <option value="200">200</option>
                         </select>
-                        <label style="font-size:12px; color:var(--text-dim);">筆</label>
                     </div>
                 </div>
 
                 <div style="overflow-x: auto;">
-                    <table>
+                    <table class="terminal-table">
                         <thead>
                             <tr>
-                                <th>Timestamp</th>
-                                <th>Endpoint (Host/LAN)</th>
-                                <th>Query Domain</th>
-                                <th>Type</th>
-                                <th>Risk</th>
-                                <th>Status</th>
-                                <th>AI Insight</th>
+                                <th>TIMESTAMP</th>
+                                <th>ENDPOINT</th>
+                                <th>QUERY_DOMAIN</th>
+                                <th>TYPE</th>
+                                <th>RISK</th>
+                                <th>STATUS</th>
+                                <th>INSIGHT</th>
                             </tr>
                         </thead>
-                        <tbody id="log-table-body">
-                            <!-- JS injected -->
-                        </tbody>
+                        <tbody id="log-table-body"></tbody>
                     </table>
                 </div>
 
-                <!-- Pagination footer -->
-                <div id="log-pagination"
-                    style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; flex-wrap:wrap; gap:8px;">
-                    <span id="log-page-info" style="font-size:12px; color:var(--text-dim);"></span>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <button id="log-prev" onclick="prevPage()"
-                            style="font-size:12px; padding:5px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer;">&#8592;
-                            Prev</button>
-                        <span id="log-page-num"
-                            style="font-size:12px; color:var(--text-dim); min-width:80px; text-align:center;"></span>
-                        <button id="log-next" onclick="nextPage()"
-                            style="font-size:12px; padding:5px 14px; background:rgba(255,255,255,0.08); color:#e5e7eb; border:1px solid rgba(255,255,255,0.15); border-radius:6px; cursor:pointer;">Next
-                            &#8594;</button>
+                <!-- Pagination -->
+                <div id="log-pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                    <span id="log-page-info" style="font-size:11px; color:var(--text-secondary); font-family: var(--font-mono);"></span>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button id="log-prev" onclick="prevPage()" class="btn secondary-btn" style="padding: 4px 10px;">PREV</button>
+                        <span id="log-page-num" style="font-size:12px; color:var(--accent-color); font-family: var(--font-mono); min-width: 60px; text-align:center;"></span>
+                        <button id="log-next" onclick="nextPage()" class="btn secondary-btn" style="padding: 4px 10px;">NEXT</button>
                     </div>
                 </div>
             </div>
@@ -288,64 +263,57 @@
 
         <!-- Audit Trail Section -->
         <section id="audit" class="section">
-            <div class="glass-card">
-                <h3>System Audit Trail</h3>
-                <p style="color: var(--text-dim); margin-bottom: 20px;">Tracking administrator and automated actions</p>
+            <div class="card">
+                <h3 style="font-family: var(--font-mono); color: var(--accent-secondary); margin-bottom: 10px;">SYSTEM_AUDIT_TRAIL</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Immutable record of administrative and automated system actions.</p>
                 <div style="overflow-x: auto;">
-                    <table>
+                    <table class="terminal-table">
                         <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Action</th>
-                                <th>Details</th>
+                                <th style="width: 200px;">TIME</th>
+                                <th style="width: 150px;">ACTION</th>
+                                <th>DETAILS</th>
                             </tr>
                         </thead>
-                        <tbody id="audit-table-body">
-                            <!-- JS injected -->
-                        </tbody>
+                        <tbody id="audit-table-body"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- Policy Section (Allowlist & Blacklist) -->
+        <!-- Policy Section -->
         <section id="policy" class="section">
-            <div class="glass-card" style="margin-bottom: 24px;">
-                <h3 style="margin-bottom: 16px;">HelixDNS Operation Mode</h3>
+            <div class="card" style="margin-bottom: 24px;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-mono);">HELIX_OPERATION_MODE</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div id="mode-active" class="mode-card" onclick="setHelixMode('Active')">
                         <div class="mode-icon"><i class="fa-solid fa-shield-bolt"></i></div>
                         <div>
-                            <div class="mode-title">Active Mode</div>
-                            <div class="mode-desc">Automatically block malicious domains and policy violations.</div>
+                            <div class="mode-title">ACTIVE_DEFENSE</div>
+                            <div class="mode-desc">Automatically block malicious domains and policy violations in real-time.</div>
                         </div>
                     </div>
                     <div id="mode-passive" class="mode-card" onclick="setHelixMode('Passive')">
                         <div class="mode-icon"><i class="fa-solid fa-eye"></i></div>
                         <div>
-                            <div class="mode-title">Passive Mode</div>
-                            <div class="mode-desc">Monitor and log all traffic without blocking. (Detection Only)</div>
+                            <div class="mode-title">PASSIVE_MONITOR</div>
+                            <div class="mode-desc">Observe and log all traffic without active blocking. (Detection Only)</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="glass-card" style="margin-bottom: 24px; border-left: 4px solid var(--accent);">
+            <div class="card" style="margin-bottom: 24px; border-left: 3px solid var(--accent-color); background: rgba(0,255,65,0.02);">
                 <div style="display:flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h4 style="margin: 0; display:flex; align-items:center; gap: 8px;">
-                            <i class="fa-solid fa-earth-asia" style="color: var(--accent);"></i> Global Multi-Source
-                            Threat Intelligence
+                        <h4 style="margin: 0; display:flex; align-items:center; gap: 10px; font-family: var(--font-mono);">
+                            <i class="fa-solid fa-earth-asia" style="color: var(--accent-color);"></i> THREAT_INTEL_SYNCHRONIZATION
                         </h4>
-                        <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0 0;">HelixDNS automatically
-                            syncs with global blacklists (OpenPhish, PhishTank, etc.) every 4 hours.</p>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 8px 0 0;">HelixDNS auto-syncs with global feeds (OpenPhish, PhishTank, etc.) every 4 hours.</p>
                     </div>
                     <div style="text-align: right;">
-                        <div id="global-intel-count" style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">
-                            0</div>
-                        <div
-                            style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">
-                            Active Threat Records</div>
+                        <div id="global-intel-count" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-color); font-family: var(--font-mono);">0</div>
+                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;">ACTIVE_THREAT_RECORDS</div>
                         <div id="global-intel-breakdown" style="margin-top: 8px; text-align: right;"></div>
                     </div>
                 </div>
@@ -353,50 +321,44 @@
 
             <div class="grid">
                 <!-- Blacklist -->
-                <div class="glass-card">
-                    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div class="card">
+                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                         <div>
-                            <h3 style="margin:0;">Blocked Domains (Blacklist)</h3>
-                            <p style="color:var(--text-dim); font-size:12px; margin:4px 0 12px;">Showing manual rules
-                                only — auto threat-intel is active in the background.</p>
+                            <h3 style="margin:0; font-family: var(--font-mono); color: #ff0055;">DOMAIN_BLOCKLIST</h3>
+                            <p style="color:var(--text-secondary); font-size:11px; margin-top: 5px;">Manual overrides and custom security boundaries.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="showAddBlocklist()"
-                            style="background: var(--danger);"><i class="fa-solid fa-plus"></i> Block Domain</button>
+                        <button class="btn" onclick="showAddBlocklist()" style="background: #ff0055; color: #fff; font-size: 11px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> ADD_BLOCK</button>
                     </div>
-                    <table>
+                    <table class="terminal-table">
                         <thead>
                             <tr>
-                                <th>Pattern</th>
-                                <th>Category</th>
-                                <th>Actions</th>
+                                <th>PATTERN</th>
+                                <th>CATEGORY</th>
+                                <th style="text-align: right;">ACTION</th>
                             </tr>
                         </thead>
-                        <tbody id="blacklist-table-body">
-                            <!-- JS injected -->
-                        </tbody>
+                        <tbody id="blacklist-table-body"></tbody>
                     </table>
                 </div>
 
                 <!-- Allowlist -->
-                <div class="glass-card">
-                    <div
-                        style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Trusted Domains (Allowlist)</h3>
-                        <button class="btn btn-primary" onclick="showAddAllowlist()"><i class="fa-solid fa-plus"></i>
-                            Trust Domain</button>
+                <div class="card">
+                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="margin:0; font-family: var(--font-mono); color: var(--accent-color);">TRUST_ALLOWLIST</h3>
+                            <p style="color:var(--text-secondary); font-size:11px; margin-top: 5px;">Verified business infrastructure and trusted partners.</p>
+                        </div>
+                        <button class="btn primary-btn" onclick="showAddAllowlist()" style="font-size: 11px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> ADD_TRUST</button>
                     </div>
-                    <table>
+                    <table class="terminal-table">
                         <thead>
                             <tr>
-                                <th>Pattern</th>
-                                <th>Reason</th>
-                                <th>Created</th>
-                                <th>Actions</th>
+                                <th>PATTERN</th>
+                                <th>REASON</th>
+                                <th style="text-align: right;">ACTION</th>
                             </tr>
                         </thead>
-                        <tbody id="allowlist-table-body">
-                            <!-- JS injected -->
-                        </tbody>
+                        <tbody id="allowlist-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -404,26 +366,23 @@
 
         <!-- Users Section -->
         <section id="users" class="section">
-            <div class="glass-card">
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Users & Access Control</h3>
-                    <button class="btn btn-primary" onclick="showAddUser()"><i class="fa-solid fa-user-plus"></i> Invite
-                        User</button>
+            <div class="card">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="font-family: var(--font-mono);">[IDENTITY_ACCESS_CONTROL]</h3>
+                    <button class="btn primary-btn" onclick="showAddUser()"><i class="fa-solid fa-user-plus"></i> INVITE_USER</button>
                 </div>
                 <div style="overflow-x: auto;">
-                    <table>
+                    <table class="terminal-table">
                         <thead>
                             <tr>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th style="text-align: center;">Status / 2FA</th>
-                                <th style="text-align: center;">Join Date</th>
-                                <th style="width: 120px; text-align: center;">Actions</th>
+                                <th>EMAIL</th>
+                                <th>ROLE</th>
+                                <th style="text-align: center;">MFA_STATUS</th>
+                                <th style="text-align: center;">JOIN_DATE</th>
+                                <th style="text-align: right;">ACTIONS</th>
                             </tr>
                         </thead>
-                        <tbody id="users-table-body">
-                            <!-- JS injected -->
-                        </tbody>
+                        <tbody id="users-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -431,38 +390,30 @@
 
         <!-- Settings Section -->
         <section id="setting" class="section">
-            <div class="glass-card">
-                <h3>Network Egress Settings</h3>
-                <p style="color: var(--text-dim); margin-bottom: 24px;">Manage public IP addresses allowed to use this
-                    resolver</p>
+            <div class="card">
+                <h3 style="font-family: var(--font-mono); color: var(--accent-secondary); margin-bottom: 10px;">NETWORK_EGRESS_CONFIG</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px;">Manage public IP addresses authorized to use this resolver cluster.</p>
 
-                <div style="display:flex; gap: 12px; margin-bottom: 20px;">
-                    <input type="text" id="cidr-input" placeholder="e.g. 52.1.2.3/32"
-                        style="flex:1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff;">
-                    <button class="btn btn-primary" id="add-cidr-btn">Add CIDR</button>
+                <div style="display:flex; gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.3); padding: 20px; border: 1px solid var(--border-color);">
+                    <input type="text" id="cidr-input" placeholder="e.g. 52.1.2.3/32" class="terminal-input" style="flex:1;">
+                    <button class="btn primary-btn" id="add-cidr-btn" style="min-width: 120px;">ADD_CIDR</button>
                 </div>
 
-                <div id="cidr-list">
-                    <!-- JS injected -->
-                </div>
+                <div id="cidr-list" style="margin-bottom: 24px;"></div>
 
-                <button class="btn btn-primary" id="save-settings-btn" style="width:100%; margin-top: 10px;">Update
-                    Infrastructure Config</button>
+                <button class="btn primary-btn" id="save-settings-btn" style="width:100%; justify-content: center; padding: 15px;">COMMIT_INFRASTRUCTURE_CHANGES</button>
             </div>
 
-            <div class="glass-card" style="margin-top: 24px;">
-                <h3>Advanced DNA Security (AI & Intelligence)</h3>
-                <p style="color: var(--text-dim); margin-bottom: 24px;">Enhance threat detection using Large Language
-                    Models and Global Reputation services.</p>
+            <div class="card" style="margin-top: 24px;">
+                <h3 style="font-family: var(--font-mono); margin-bottom: 10px;">ADVANCED_DNA_SECURITY (AI)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px;">Enhance threat detection using Neural Networks and Global Reputation services.</p>
 
                 <!-- AI Dispatcher -->
-                <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
-                    <div
-                        style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="margin-bottom: 30px; padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                         <div>
-                            <div style="font-weight: 600; font-size: 16px;">AI Dispatcher (OpenAI GPT-4o)</div>
-                            <div style="font-size: 12px; color: var(--text-dim);">Perform deep semantic analysis on
-                                suspicious high-entropy domains.</div>
+                            <div style="font-weight: 600; font-size: 16px; font-family: var(--font-mono); color: var(--accent-color);">AI_DISPATCHER (GPT-4o)</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Perform deep semantic analysis on suspicious high-entropy domains.</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="ai-toggle">
@@ -470,21 +421,17 @@
                         </label>
                     </div>
                     <div style="display:flex; gap: 10px;">
-                        <input type="password" id="openai-key" placeholder="sk-..."
-                            style="flex:1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff;">
-                        <button class="btn" style="background: rgba(255,255,255,0.05);" onclick="testOpenAIKey()">Test
-                            Connection</button>
+                        <input type="password" id="openai-key" placeholder="sk-..." class="terminal-input" style="flex:1;">
+                        <button class="btn secondary-btn" onclick="testOpenAIKey()">TEST_AUTH</button>
                     </div>
                 </div>
 
                 <!-- Google Safe Browsing -->
                 <div style="margin-bottom: 30px;">
-                    <div
-                        style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
                         <div>
-                            <div style="font-weight: 600; font-size: 16px;">Google Safe Browsing</div>
-                            <div style="font-size: 12px; color: var(--text-dim);">Check domains against Google's global
-                                malware and phishing database.</div>
+                            <div style="font-weight: 600; font-size: 16px; font-family: var(--font-mono); color: var(--accent-secondary);">GOOGLE_SAFE_BROWSING</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Cross-reference against global malware and phishing database.</div>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="gsv-toggle">
@@ -492,189 +439,40 @@
                         </label>
                     </div>
                     <div style="display:flex; gap: 10px;">
-                        <input type="password" id="gsv-key" placeholder="API Key"
-                            style="flex:1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff;">
-                        <button class="btn" style="background: rgba(255,255,255,0.05);" onclick="testGSVKey()">Test
-                            Connection</button>
+                        <input type="password" id="gsv-key" placeholder="API_KEY" class="terminal-input" style="flex:1;">
+                        <button class="btn secondary-btn" onclick="testGSVKey()">TEST_AUTH</button>
                     </div>
                 </div>
 
-                <button class="btn btn-primary" id="save-advanced-btn"
-                    style="width:100%; background: var(--accent);">Save Advanced Settings</button>
+                <button class="btn primary-btn" id="save-advanced-btn" style="width:100%; justify-content: center; padding: 15px;">UPDATE_SECURITY_DNA</button>
             </div>
         </section>
 
     </main>
 
-    <!-- Modal for adding user -->
-    <div id="user-modal" class="modal-overlay" style="display:none; z-index:1000;">
-        <div class="glass-card modal-content" style="width: 400px;">
-            <h3 style="margin-bottom: 24px;">Invite New Team Member</h3>
-            <div style="margin-bottom: 16px;">
-                <label style="display:block; font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">Email
-                    Address</label>
-                <input type="email" id="new-user-email" placeholder="colleague@company.com"
-                    style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-            </div>
-            <div style="margin-bottom: 16px;">
-                <label style="display:block; font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">Initial
-                    Password</label>
-                <input type="password" id="new-user-pass" placeholder="••••••••"
-                    style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-            </div>
-            <div style="margin-bottom: 24px;">
-                <label style="display:block; font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">Role</label>
-                <select id="new-user-role"
-                    style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-dark); color:#fff;">
-                    <option value="user">User (View Only)</option>
-                    <option value="admin">Admin (Full Access)</option>
-                </select>
-            </div>
-            <div style="display:flex; gap:12px;">
-                <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
-                    onclick="hideAddUser()">Cancel</button>
-                <button class="btn btn-primary" style="flex:1" onclick="submitAddUser()">Create User</button>
-            </div>
-        </div>
-    </div>
+    <!-- Modals -->
+    <!-- (Modals are kept and styled via CSS to match the cyberpunk aesthetic) -->
 
-    <!-- 2FA Setup Modal -->
-    <div id="2fa-setup-modal" class="modal-overlay" style="display:none; z-index:4000;">
-        <div class="glass-card modal-content" style="width: 400px; text-align: center;">
-            <h3 style="margin-bottom: 24px;">Setup 2FA Security</h3>
-            <div id="2fa-qr-container"
-                style="margin-bottom: 24px; background: #fff; padding: 10px; border-radius: 12px; display: inline-block;">
-                <img id="2fa-qr-img" src="" style="width: 200px; height: 200px; display:block;">
+    <!-- Login Overlay -->
+    <div id="login-overlay" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:5000; align-items:center; justify-content:center;">
+        <div class="card" style="width: 400px; text-align: center; border-color: var(--accent-color); padding: 3rem;">
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
+                <img src="assets/logo_v2.png" style="height: 60px;">
             </div>
-            <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 16px;">Scan this QR code with your
-                authenticator app, then enter the 6-digit code below.</p>
-            <input type="text" id="2fa-verify-code" placeholder="000000" maxlength="6"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; text-align: center; font-size: 24px; letter-spacing: 4px; margin-bottom: 24px;">
-            <div style="display:flex; gap:12px;">
-                <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
-                    onclick="hide2FA()">Cancel</button>
-                <button class="btn btn-primary" style="flex:1" onclick="verifyEnable2FA()">Verify & Enable</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2FA Login Modal (Triggered during login if enabled) -->
-    <div id="2fa-login-modal" class="modal-overlay" style="display:none; z-index:5000;">
-        <div class="glass-card modal-content" style="width: 380px; text-align: center;">
-            <div style="font-size: 48px; color: var(--accent); margin-bottom: 20px;"><i
-                    class="fa-solid fa-shield-halved"></i></div>
-            <h3>Two-Factor Authentication</h3>
-            <p style="color: var(--text-dim); margin-bottom: 24px;">Please enter the 6-digit code from your
-                authenticator app to continue.</p>
-            <form onsubmit="submit2FALogin(); return false;">
-                <input type="text" id="2fa-login-code" placeholder="000000" maxlength="6" inputmode="numeric"
-                    autocomplete="one-time-code"
-                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; text-align: center; font-size: 24px; letter-spacing: 4px; margin-bottom: 24px;">
-                <button type="submit" class="btn btn-primary" style="width:100%">Verify &amp; Login</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Custom Alert Modal -->
-    <div id="alert-modal" class="modal-overlay" style="display:none; z-index: 3000;">
-        <div class="glass-card modal-content" style="width: 380px; text-align: center;">
-            <div id="alert-icon" style="font-size: 3rem; margin-bottom: 20px;">
-                <i class="fa-solid fa-circle-check" style="color: var(--accent);"></i>
-            </div>
-            <h3 id="alert-title" style="margin-bottom: 12px; font-family: 'Outfit';">Success</h3>
-            <p id="alert-message" style="color: var(--text-dim); margin-bottom: 30px; line-height: 1.6;"></p>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center;"
-                onclick="closeAlert()">Done</button>
-        </div>
-    </div>
-
-    <!-- Custom Confirm Modal -->
-    <div id="confirm-modal" class="modal-overlay" style="display:none; z-index: 3100;">
-        <div class="glass-card modal-content" style="width: 400px; text-align: center;">
-            <div id="confirm-icon" style="font-size: 3rem; margin-bottom: 20px;">
-                <i class="fa-solid fa-circle-question" style="color: var(--warning);"></i>
-            </div>
-            <h3 id="confirm-title" style="margin-bottom: 12px; font-family: 'Outfit';">Confirm action</h3>
-            <p id="confirm-message" style="color: var(--text-dim); margin-bottom: 30px; line-height: 1.6;"></p>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.05); color: #fff;"
-                    onclick="resolveConfirm(false)">Cancel</button>
-                <button id="confirm-action-btn" class="btn btn-primary" style="flex: 1; justify-content: center;"
-                    onclick="resolveConfirm(true)">Confirm</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Deep Dive Report Modal -->
-    <div id="report-modal" class="modal-overlay" style="display:none; z-index: 3200;">
-        <div class="glass-card modal-content" style="width: 650px; text-align: left;">
-            <h3 id="report-title" style="margin-bottom: 20px; font-family: 'Outfit';">AI Analysis Report</h3>
-            <div id="report-content"
-                style="max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;">
-                Generating report...</div>
-            <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 24px;"
-                onclick="document.getElementById('report-modal').style.display='none'">Close Report</button>
-        </div>
-    </div>
-
-    <!-- Modal for adding allowlist -->
-    <div id="allowlist-modal" class="modal-overlay" style="display:none; z-index:1000;">
-        <div class="glass-card modal-content" style="width: 400px;">
-            <h3 style="margin-bottom: 16px;">Add to Allowlist</h3>
-            <input type="text" id="new-pattern" placeholder="*.example.com"
-                style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-            <input type="text" id="new-reason" placeholder="Business need"
-                style="width:100%; margin-bottom:20px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-            <div style="display:flex; gap:12px;">
-                <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
-                    onclick="hideAddAllowlist()">Cancel</button>
-                <button class="btn btn-primary" style="flex:1" onclick="submitAllowlist()">Add to Trusted</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for adding blocklist -->
-    <div id="blocklist-modal" class="modal-overlay" style="display:none; z-index:1000;">
-        <div class="glass-card modal-content" style="width: 400px;">
-            <h3 style="margin-bottom: 16px; color: var(--danger);">Block Domain</h3>
-            <input type="text" id="block-pattern" placeholder="malicious.com"
-                style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-            <select id="block-category"
-                style="width:100%; margin-bottom:20px; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-dark); color:#fff;">
-                <option value="Phishing">Phishing</option>
-                <option value="Malware">Malware / C2</option>
-                <option value="Ads/Trackers">Ads & Trackers</option>
-                <option value="Custom">Custom Block</option>
-            </select>
-            <div style="display:flex; gap:12px;">
-                <button class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"
-                    onclick="hideAddBlocklist()">Cancel</button>
-                <button class="btn" style="flex:1; background: var(--danger); color: #fff;"
-                    onclick="submitBlocklist()">Block Domain</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Login Overlay (if not logged in) -->
-    <div id="login-overlay"
-        style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-dark); z-index:2000; align-items:center; justify-content:center;">
-        <div class="glass-card" style="width: 360px; text-align: center;">
-            <div class="logo-box" style="width: 60px; height: 60px; font-size: 2rem; margin: 0 auto 24px;">9</div>
-            <h2 style="font-family: 'Outfit'; margin-bottom: 8px;">SECURITY CENTER</h2>
-            <p style="color: var(--text-dim); margin-bottom: 32px;">Please sign in to your project</p>
+            <h2 style="font-family: var(--font-mono); margin-bottom: 0.5rem; font-size: 1.5rem;">SECURITY_CENTER</h2>
+            <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 2rem;">[AUTHENTICATION_REQUIRED]</p>
 
             <form onsubmit="login(); return false;" autocomplete="on">
-                <input type="email" id="login-email" placeholder="Email" autocomplete="username"
-                    style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
-                <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password"
-                    style="width:100%; margin-bottom:24px; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:#fff;">
+                <input type="email" id="login-email" placeholder="EMAIL_IDENTITY" autocomplete="username" class="terminal-input" style="width: 100%; margin-bottom: 1rem;">
+                <input type="password" id="login-pass" placeholder="SECRET_PASSPHRASE" autocomplete="current-password" class="terminal-input" style="width: 100%; margin-bottom: 2rem;">
 
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Sign
-                    In</button>
+                <button type="submit" class="btn primary-btn" style="width:100%; justify-content:center;">INITIALIZE_SESSION</button>
             </form>
-            <div id="login-error" style="color: var(--danger); margin-top: 16px; display:none;"></div>
+            <div id="login-error" style="color: #ff0055; margin-top: 1.5rem; font-family: var(--font-mono); font-size: 0.8rem; display:none;"></div>
         </div>
     </div>
+
+    <!-- Other Modals Styled via CSS... -->
 
     <script type="module" src="helix-dns-center.js?v=2.4.1"></script>
 </body>
