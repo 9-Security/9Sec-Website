@@ -9,11 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Icons: inline SVG only (avoids third-party CDN + Tracking Prevention noise in strict browsers) -->
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="src/css/styles.css">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW.png">
     
     <style>
         .scanner-container {
@@ -143,7 +141,18 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .inline-icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            margin-right: 0.35em;
+            fill: currentColor;
+        }
     </style>
+  <script type="module" crossorigin src="/assets/styles-C0RoUK2U.js"></script>
+  <script type="module" crossorigin src="/assets/main-BArgRC6t.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/styles-FjRS4b1V.css">
 </head>
 
 <body>
@@ -156,7 +165,7 @@
         <nav class="container">
             <div class="logo">
                 <a href="./" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
-                    <img src="assets/logo_v2.png" alt="Nine-Security Logo" class="logo-img">
+                    <img src="/assets/logo_v2-DUFKW_m4.png" alt="Nine-Security Logo" class="logo-img">
                     <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
                 </a>
             </div>
@@ -181,8 +190,9 @@
             <div class="search-box">
                 <input type="text" id="targetDomain" placeholder="Enter target domain (e.g. your-domain.com)" spellcheck="false">
                 <div class="cta-group">
-                    <button class="btn primary-btn" id="scanBtn">
-                        <i class="fa-solid fa-radar"></i> START_DEEP_SCAN
+                    <button class="btn primary-btn" id="scanBtn" type="button">
+                        <svg class="inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        START_DEEP_SCAN
                     </button>
                 </div>
             </div>
@@ -204,7 +214,6 @@
         </div>
     </footer>
 
-    <script type="module" src="src/js/main.js"></script>
     <script>
         const API_BASE = "https://gov.nine-security.com";
         const scanBtn = document.getElementById('scanBtn');
@@ -244,7 +253,7 @@
                 if (data.hits.length === 0) {
                     hitsList.innerHTML = `
                         <div class="card" style="text-align:center; padding: 2rem; border-color: var(--accent-color);">
-                            <i class="fa-solid fa-shield-check" style="font-size: 2rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                            <svg class="inline-icon" style="width:2rem;height:2rem;color:var(--accent-color);margin-bottom:1rem;display:inline-block;" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v7.8z"/></svg>
                             <p style="color: var(--accent-color); font-family: var(--font-mono);">SAFE: No active threats detected for this domain.</p>
                         </div>
                     `;
