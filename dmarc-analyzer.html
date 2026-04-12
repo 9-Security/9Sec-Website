@@ -339,9 +339,13 @@
                     body: formData
                 });
 
-                if (!resp.ok) throw new Error("Analysis failed");
-
-                const json = await resp.json();
+                const json = await resp.json().catch(() => ({}));
+                if (!resp.ok) {
+                    throw new Error((json && json.error) || `Analysis failed (${resp.status})`);
+                }
+                if (!json.ok || !json.data) {
+                    throw new Error((json && json.error) || 'Invalid response from analyzer');
+                }
                 renderReport(json.data);
 
                 // Show results
