@@ -108,6 +108,88 @@
             font-family: var(--font-mono);
             margin-top: 1rem;
         }
+
+        /* Pro CTA / benefits: must work in light mode (no hardcoded #eee on light bg) */
+        .dmarc-pro-cta-block {
+            margin-top: 4rem;
+            text-align: center;
+            padding: 3.5rem;
+            border: 1px solid var(--accent-secondary);
+            background: rgba(0, 229, 255, 0.03);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .dmarc-pro-cta-block {
+            background: rgba(0, 86, 179, 0.06);
+        }
+
+        .dmarc-pro-cta-desc {
+            max-width: 650px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .dmarc-pro-benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+            text-align: left;
+        }
+
+        @media (max-width: 700px) {
+            .dmarc-pro-benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dmarc-pro-benefit-card {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .dmarc-pro-benefit-card {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .dmarc-pro-benefit-card span {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.55;
+        }
+
+        .dmarc-pro-benefit-card strong {
+            color: var(--text-primary);
+        }
+
+        .dmarc-upload-hint {
+            color: var(--text-secondary);
+            margin: 1rem 0;
+        }
+
+        .dmarc-report-meta {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="light"] .chart-card {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="light"] .data-table th,
+        [data-theme="light"] .data-table td {
+            border-bottom-color: var(--border-color);
+        }
     </style>
   <script type="module" crossorigin src="/assets/styles-DGZUac_m.js"></script>
   <script type="module" crossorigin src="/assets/main-ijsaA5l7.js"></script>
@@ -172,7 +254,7 @@
         <div class="upload-box" id="drop-zone">
             <i class="fa-solid fa-file-shield upload-icon"></i>
             <h3>Drag & Drop DMARC Report</h3>
-            <p style="color: #666; margin: 1rem 0;">Supports .xml, .xml.gz, or .zip</p>
+            <p class="dmarc-upload-hint">Supports .xml, .xml.gz, or .zip</p>
             <input type="file" id="file-input" accept=".xml,.gz,.zip" style="display: none;">
             <button class="btn primary-btn"
                 onclick="document.getElementById('file-input').click()">BROWSE_FILES</button>
@@ -185,7 +267,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <div>
                     <h2 class="section-title">> Executive Summary</h2>
-                    <p style="color: #888;" id="report-meta">Org: Google | Date: 2024-02-10</p>
+                    <p class="dmarc-report-meta" id="report-meta">Org: Google | Date: 2024-02-10</p>
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 2rem; font-weight: bold; color: var(--accent-color);" id="pass-rate">98%
@@ -225,47 +307,37 @@
 
         </div>
 
-        <div
-            style="margin-top: 4rem; text-align: center; padding: 3.5rem; border: 1px solid var(--accent-secondary); background: rgba(0, 229, 255, 0.03); border-radius: 12px; position: relative; overflow: hidden;">
+        <div class="dmarc-pro-cta-block">
             <div class="flow-line"></div>
             <i class="fa-solid fa-rocket"
                 style="font-size: 3rem; color: var(--accent-secondary); margin-bottom: 1.5rem;"></i>
-            <h3 style="font-size: 1.8rem; margin-bottom: 1rem;" data-i18n="services.dmarc_pro_title">Need Continuous
+            <h3 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-primary);"
+                data-i18n="services.dmarc_pro_title">Need Continuous
                 Monitoring?</h3>
-            <p style="max-width: 650px; margin: 0 auto 2rem; color: #aaa; line-height: 1.6;"
-                data-i18n="services.dmarc_pro_desc">
+            <p class="dmarc-pro-cta-desc" data-i18n="services.dmarc_pro_desc">
                 Don't manually upload files every day. Our subscription tier offers hands-off automation and
                 professional expert interpretation.
             </p>
 
-            <div
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 800px; margin: 0 auto 2.5rem; text-align: left;">
-                <div
-                    style="display: flex; gap: 1rem; align-items: flex-start; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+            <div class="dmarc-pro-benefits-grid">
+                <div class="dmarc-pro-benefit-card">
                     <i class="fa-solid fa-bolt" style="color: var(--accent-secondary); margin-top: 3px;"></i>
-                    <span style="font-size: 0.9rem; color: #eee;"
-                        data-i18n="services.dmarc_benefit_automated"><strong>Automated Pipeline</strong>: No manual file
+                    <span data-i18n="services.dmarc_benefit_automated"><strong>Automated Pipeline</strong>: No manual file
                         uploading needed.</span>
                 </div>
-                <div
-                    style="display: flex; gap: 1rem; align-items: flex-start; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                <div class="dmarc-pro-benefit-card">
                     <i class="fa-solid fa-shield-halved" style="color: var(--accent-secondary); margin-top: 3px;"></i>
-                    <span style="font-size: 0.9rem; color: #eee;"
-                        data-i18n="services.dmarc_benefit_continuous"><strong>24/7 Monitoring</strong>: We track your
+                    <span data-i18n="services.dmarc_benefit_continuous"><strong>24/7 Monitoring</strong>: We track your
                         domain reputation around the clock.</span>
                 </div>
-                <div
-                    style="display: flex; gap: 1rem; align-items: flex-start; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                <div class="dmarc-pro-benefit-card">
                     <i class="fa-solid fa-user-shield" style="color: var(--accent-secondary); margin-top: 3px;"></i>
-                    <span style="font-size: 0.9rem; color: #eee;"
-                        data-i18n="services.dmarc_benefit_expert"><strong>Expert Interpretation</strong>: We don't just
+                    <span data-i18n="services.dmarc_benefit_expert"><strong>Expert Interpretation</strong>: We don't just
                         show charts; we help you decode the forensic data.</span>
                 </div>
-                <div
-                    style="display: flex; gap: 1rem; align-items: flex-start; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                <div class="dmarc-pro-benefit-card">
                     <i class="fa-solid fa-table-columns" style="color: var(--accent-secondary); margin-top: 3px;"></i>
-                    <span style="font-size: 0.9rem; color: #eee;"
-                        data-i18n="services.dmarc_benefit_consolidated"><strong>Unified Portal</strong>: Manage all
+                    <span data-i18n="services.dmarc_benefit_consolidated"><strong>Unified Portal</strong>: Manage all
                         domains in one dashboard.</span>
                 </div>
             </div>
