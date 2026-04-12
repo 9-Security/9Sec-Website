@@ -1,6 +1,19 @@
 #!/bin/bash
-# Nine-Security Frontend Deployment Script
-# Pushes to GitHub Pages
+# Nine-Security Frontend — push built site to GitHub Pages
+#
+# Prerequisites:
+#   npm run build   (from this directory: core/frontend)
+#   Output: ./dist/  (HTML + hashed assets)
+#
+# This script runs "git add/commit/push" in the CURRENT working directory.
+# It is intended when THIS directory is the git root of the Pages repo
+# (e.g. a standalone clone of github.com/9-Security/9Sec-Website).
+#
+# In the monorepo, core/frontend is usually NOT that repo — then:
+#   rsync -av ./dist/ /path/to/9Sec-Website/ && cd /path/to/9Sec-Website && git commit && git push
+# Or clone 9Sec-Website, rsync dist into it, commit, push.
+#
+# Optional: export GITHUB_TOKEN for HTTPS push without SSH.
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'

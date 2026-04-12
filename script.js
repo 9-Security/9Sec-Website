@@ -172,30 +172,53 @@ const articlesContainer = document.querySelector("#security-news .list-layout");
 let globalNewsList = [];
 let newsShowingCount = ARTICLES_INITIAL;
 
+function buildLegacyNewsArticle(item) {
+    const lang = localStorage.getItem("9sec_lang") || "en";
+    const content = (lang === "tw") ? (item.tw || item) : (lang === "jp" ? (item.jp || item) : (item.en || item));
+
+    const article = document.createElement('article');
+    article.className = 'list-item';
+
+    const date = document.createElement('div');
+    date.className = 'date';
+    date.append(document.createTextNode(String(item.date || '')));
+    if (item.is_ai) {
+        date.append(document.createTextNode(' '));
+        const badge = document.createElement('span');
+        badge.className = 'ai-badge';
+        badge.textContent = 'AI Summary';
+        date.appendChild(badge);
+    }
+
+    const contentWrap = document.createElement('div');
+    contentWrap.className = 'content';
+    const title = document.createElement('h3');
+    title.textContent = String(content.title || '');
+    const excerpt = document.createElement('p');
+    excerpt.textContent = String(content.excerpt || '');
+    contentWrap.append(title, excerpt);
+
+    const action = document.createElement('div');
+    action.className = 'action';
+    const link = document.createElement('a');
+    link.className = 'read-btn';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.href = String(item.url || '#');
+    link.textContent = 'READ';
+    action.appendChild(link);
+
+    article.append(date, contentWrap, action);
+    return article;
+}
+
 function renderNews(list, count) {
     if (!articlesContainer) return;
     newsShowingCount = count;
     const countToShow = Math.min(count, list.length);
     const slice = list.slice(0, countToShow);
 
-    articlesContainer.innerHTML = slice.map((a) => {
-        const lang = localStorage.getItem("9sec_lang") || "en";
-        const content = (lang === "tw") ? (a.tw || a) : (lang === "jp" ? (a.jp || a) : (a.en || a));
-        const aiBadge = a.is_ai ? `<span class="ai-badge">AI Summary</span>` : "";
-
-        return `
-        <article class="list-item">
-            <div class="date">${escapeHtml(a.date || "")} ${aiBadge}</div>
-            <div class="content">
-                <h3>${escapeHtml(content.title || "")}</h3>
-                <p>${escapeHtml(content.excerpt || "")}</p>
-            </div>
-            <div class="action">
-                <a href="${escapeHtml(a.url || "#")}" class="read-btn" target="_blank" rel="noopener noreferrer">READ</a>
-            </div>
-        </article>
-        `;
-    }).join("");
+    articlesContainer.replaceChildren(...slice.map(buildLegacyNewsArticle));
 
     let btnWrap = articlesSection.querySelector(".articles-more-wrap");
     if (list.length > ARTICLES_INITIAL) {
@@ -207,10 +230,16 @@ function renderNews(list, count) {
         const isAll = countToShow >= list.length;
         const remaining = list.length - countToShow;
         const btnText = getArticlesButtonLabel(isAll, remaining);
-        btnWrap.innerHTML = `<button type="button" class="articles-more-btn" data-expanded="${isAll}" data-remaining="${remaining}">${escapeHtml(btnText)}</button>`;
-        btnWrap.querySelector("button").onclick = () => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'articles-more-btn';
+        button.dataset.expanded = String(isAll);
+        button.dataset.remaining = String(remaining);
+        button.textContent = btnText;
+        button.onclick = () => {
             renderNews(list, isAll ? ARTICLES_INITIAL : list.length);
         };
+        btnWrap.replaceChildren(button);
     } else if (btnWrap) btnWrap.remove();
 }
 
@@ -1001,7 +1030,7 @@ function updateLanguage(lang) {
         });
 
         if (val) {
-            element.innerHTML = val;
+            element.textContent = String(val);
         }
     });
 
@@ -1498,11 +1527,44 @@ function renderTrendSummary(meta = {}) {
     `;
 }
 
+const LEGACY_REPORT_BLOCKED_TAGS = new Set(['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'form']);
+
+function sanitizeLegacyReportHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = String(html || '');
+
+    template.content.querySelectorAll('*').forEach((node) => {
+        const tag = node.tagName.toLowerCase();
+        if (LEGACY_REPORT_BLOCKED_TAGS.has(tag)) {
+            node.remove();
+            return;
+        }
+
+        [...node.attributes].forEach((attr) => {
+            const name = attr.name.toLowerCase();
+            const value = attr.value || '';
+            if (name.startsWith('on')) {
+                node.removeAttribute(attr.name);
+                return;
+            }
+            if ((name === 'href' || name === 'src' || name === 'xlink:href') && /^\s*javascript:/i.test(value)) {
+                node.removeAttribute(attr.name);
+                return;
+            }
+            if (name === 'style' && /expression\s*\(|url\s*\(\s*javascript:/i.test(value)) {
+                node.removeAttribute(attr.name);
+            }
+        });
+    });
+
+    return template.innerHTML;
+}
+
 function renderForensicReportHtml(html, domainHint, meta) {
     const reportDomain = document.getElementById('report-domain');
     const reportContent = document.getElementById('report-content');
     const btnDownload = document.getElementById('btn-download-report');
-    window.currentReportHtml = String(html || "");
+    window.currentReportHtml = sanitizeLegacyReportHtml(html);
     window.currentTrendData = meta || null;
     window.currentReportData = { domain: domainHint || "unknown" };
 

@@ -1,5 +1,7 @@
 import { translations } from './translations.js';
 
+const HTML_TRANSLATION_KEYS = new Set([]);
+
 /**
  * Get translation for a given path and fallback.
  */
@@ -47,7 +49,15 @@ export function updateLanguage(lang) {
         });
 
         if (val) {
-            element.innerHTML = val;
+            if (HTML_TRANSLATION_KEYS.has(key)) {
+                element.innerHTML = val;
+            } else {
+                element.textContent = String(val);
+            }
+            // Glitch effect duplicates use attr(data-text); keep it in sync or EN/CJK stack on top of each other.
+            if (element.classList.contains('glitch-title')) {
+                element.setAttribute('data-text', element.textContent.trim());
+            }
         }
     });
 

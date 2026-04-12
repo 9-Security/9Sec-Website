@@ -81,16 +81,22 @@ export function initBackToTop() {
 export function showNotice(msg) {
     const notice = document.createElement('div');
     notice.className = 'api-notice';
-    notice.innerHTML = `
-        <div class="api-notice-content">
-            <div class="api-notice-header">SYSTEM_NOTIFICATION</div>
-            <div class="api-notice-body">${msg}</div>
-            <button class="api-notice-close">[ ACKNOWLEDGE ]</button>
-        </div>
-    `;
+    const content = document.createElement('div');
+    content.className = 'api-notice-content';
+    const header = document.createElement('div');
+    header.className = 'api-notice-header';
+    header.textContent = 'SYSTEM_NOTIFICATION';
+    const body = document.createElement('div');
+    body.className = 'api-notice-body';
+    body.textContent = String(msg ?? '');
+    const button = document.createElement('button');
+    button.className = 'api-notice-close';
+    button.textContent = '[ ACKNOWLEDGE ]';
+    content.append(header, body, button);
+    notice.appendChild(content);
     document.body.appendChild(notice);
 
-    notice.querySelector('.api-notice-close').onclick = () => notice.remove();
+    button.onclick = () => notice.remove();
     setTimeout(() => notice.remove(), 10000);
 }
 

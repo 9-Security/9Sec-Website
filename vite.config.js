@@ -15,6 +15,7 @@ export default defineConfig({
                 smtp: resolve(__dirname, 'smtp-check.html'),
                 portal: resolve(__dirname, '9sec-p6x-portal.html'),
                 dns: resolve(__dirname, 'helix-dns-center.html'),
+                brand: resolve(__dirname, 'brand-scanner.html'),
             },
         },
     },

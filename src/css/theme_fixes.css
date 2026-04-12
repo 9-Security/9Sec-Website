@@ -4,9 +4,25 @@
     border-color: var(--accent-secondary);
 }
 
+[data-theme="light"] #smtp-step-verify .copy-box.smtp-verify-address-frame {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: inset 0 1px 0 rgba(0, 86, 179, 0.08);
+}
+
+[data-theme="light"] #smtp-step-verify .smtp-copy-btn.copy-btn {
+    background: rgba(0, 86, 179, 0.1);
+    color: var(--accent-color);
+}
+
 [data-theme="light"] .form-group input {
     background: rgba(255, 255, 255, 0.8);
     color: #000;
+}
+
+[data-theme="light"] .check-interface #smtp-form #email-input {
+    background: rgba(255, 255, 255, 0.92);
+    color: #050505;
+    border-color: var(--border-color);
 }
 
 .lang-menu {
@@ -18,7 +34,17 @@
     color: var(--text-primary) !important;
 }
 
-[data-theme="light"] .back-to-top {
-    color: white;
-    box-shadow: 0 0 20px rgba(0, 86, 179, 0.4);
+/* LIGHT: same panel language as cards — blue accent bar, readable on #f0f2f5 */
+[data-theme="light"] #back-to-top.back-to-top {
+    color: var(--accent-color);
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    border-left-color: var(--accent-color);
+    box-shadow: 0 6px 22px rgba(0, 50, 120, 0.18);
+}
+
+[data-theme="light"] #back-to-top.back-to-top:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 18px rgba(0, 86, 179, 0.28);
 }

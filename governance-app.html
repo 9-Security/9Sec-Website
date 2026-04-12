@@ -474,19 +474,24 @@
             return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
         }
 
+        function escapeAttr(s) {
+            return escapeHtml(s).replace(/"/g, "&quot;");
+        }
+
+        const GOV_CSRF_STORAGE_KEY = 'gov_csrf_token';
+
         async function api(path, opts = {}) {
             const url = API_BASE + path;
             const headers = { ...(opts.headers || {}) };
-            const token = localStorage.getItem('token');
-            if (token) headers["Authorization"] = "Bearer " + token;
+            const csrfToken = sessionStorage.getItem(GOV_CSRF_STORAGE_KEY);
+            const method = String(opts.method || "GET").toUpperCase();
+            if (csrfToken && !["GET", "HEAD", "OPTIONS"].includes(method)) headers["X-CSRF-Token"] = csrfToken;
             const fetchOpts = { credentials: "include", ...opts, headers };
             const res = await fetch(url, fetchOpts);
             if (res.status === 401 || res.status === 403) {
-                if (localStorage.getItem('token')) {
-                    localStorage.removeItem('token');
-                    location.reload();
-                    return;
-                }
+                sessionStorage.removeItem(GOV_CSRF_STORAGE_KEY);
+                location.reload();
+                return;
             }
             if (res.headers.get("content-type")?.includes("application/json")) return await res.json();
             return res;
@@ -524,6 +529,7 @@
         async function loadMe() {
             const j = await api("/api/governance/me");
             if (j && j.ok && j.user) {
+                if (j.csrf_token) sessionStorage.setItem(GOV_CSRF_STORAGE_KEY, j.csrf_token);
                 document.getElementById("userInfo").textContent = j.user.email;
             }
         }
@@ -575,7 +581,7 @@
                             <h3 style="margin:0; font-size: 1.2rem; display: flex; align-items: center; gap: 14px; font-family:var(--font-mono);">
                                 <i class="fa-solid fa-server" style="color:var(--accent-color)"></i>
                                 ${name}
-                                <span class="score-badge lvl-${riskLvl}" style="font-size: 0.7rem; border: 1px solid currentColor; padding: 2px 8px;">${r?.risk_level || 'D'}</span>
+                                <span class="score-badge lvl-${riskLvl}" style="font-size: 0.7rem; border: 1px solid currentColor; padding: 2px 8px;">${escapeHtml(r?.risk_level || 'D')}</span>
                             </h3>
                         </div>
                 `;
@@ -591,7 +597,7 @@
                             <div class="domain-card">
                                 <div class="domain-header">
                                     <span class="domain-name">${escapeHtml(x.domain_name)}</span>
-                                    <span class="domain-score ${dCls}">${dScore}</span>
+                                    <span class="domain-score ${dCls}">${escapeHtml(dScore)}</span>
                                 </div>
                                 <div class="progress-container">
                                     <div class="progress-fill" style="width: ${dScore}%; background: var(--fill)"></div>
@@ -616,11 +622,14 @@
                         <div class="card" style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <div style="font-family:var(--font-mono); font-weight:600;">${escapeHtml(e.name || e.id)}</div>
-                                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">UID: ${e.id}</div>
+                                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">UID: ${escapeHtml(e.id)}</div>
                             </div>
-                            <button class="btn secondary-btn" style="padding: 5px 12px; font-size:0.7rem;" onclick="runDirectDownload('${e.id}')">DOWNLOAD_COLLECTOR</button>
+                            <button class="btn secondary-btn js-run-download" data-env-id="${escapeAttr(e.id)}" style="padding: 5px 12px; font-size:0.7rem;">DOWNLOAD_COLLECTOR</button>
                         </div>
                     `).join("");
+                    el.querySelectorAll('.js-run-download').forEach((button) => {
+                        button.addEventListener('click', () => runDirectDownload(button.dataset.envId));
+                    });
                 }
             } catch (e) { el.innerHTML = "Sync Error."; }
         }
@@ -636,13 +645,20 @@
         document.getElementById("dashTabEnvs").onclick = () => switchDashboardTab("Environments");
         document.getElementById("dashTabAudit").onclick = () => switchDashboardTab("Audit");
         document.getElementById("btnRefresh").onclick = () => { loadInsights(); showToast("Synchronizing with Governance Cluster..."); };
-        document.getElementById("btnLogout").onclick = () => { localStorage.removeItem('token'); location.reload(); };
+        document.getElementById("btnLogout").onclick = async () => {
+            sessionStorage.removeItem(GOV_CSRF_STORAGE_KEY);
+            await api("/api/governance/logout", { method: "POST" });
+            location.reload();
+        };
 
         document.getElementById("btnLogin").onclick = async () => {
             const email = document.getElementById("loginEmail").value;
             const password = document.getElementById("loginPassword").value;
             const res = await api("/api/governance/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
-            if (res.ok) { localStorage.setItem('token', res.token); showDashboard(); }
+            if (res.ok) {
+                if (res.csrf_token) sessionStorage.setItem(GOV_CSRF_STORAGE_KEY, res.csrf_token);
+                showDashboard();
+            }
             else { showMsg("loginMsg", res.error || "Access Denied", true); }
         };
 

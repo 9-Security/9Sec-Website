@@ -8,6 +8,7 @@ import { initNews } from './news.js';
 import { initThreatIntel } from './threatIntel.js';
 import { initSmtp } from './smtp.js';
 import { initTheme, initMobileMenu, initSmoothScroll, initBackToTop } from './ui.js';
+import { initPromoModal } from './promoModal.js';
 
 // Wait for DOM content to load
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Core UI Services
     initTheme();
     initI18n();
+    initPromoModal();
     initMobileMenu();
     initSmoothScroll();
     initBackToTop();

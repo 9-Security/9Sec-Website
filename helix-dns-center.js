@@ -5,9 +5,30 @@ let egressCidrs = [];
 let trendsChart = null;
 let logFilterMode = 'all'; // 'all' or 'malicious'
 
+function escapeHtml(value) {
+    if (value == null) return '';
+    const div = document.createElement('div');
+    div.textContent = String(value);
+    return div.innerHTML;
+}
+
+function escapeAttr(value) {
+    return escapeHtml(value).replace(/"/g, '&quot;');
+}
+
+function setIconMarkup(container, icon, color) {
+    if (!container) return;
+    const safeIcon = String(icon || '').match(/^[a-z0-9-]+$/i) ? icon : 'fa-circle-info';
+    container.replaceChildren();
+    const iconEl = document.createElement('i');
+    iconEl.className = `fa-solid ${safeIcon}`;
+    if (color) iconEl.style.color = color;
+    container.appendChild(iconEl);
+}
+
 // Initial Load
-document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth();
     setupSidebar();
     initTrendsChart();
 
@@ -96,7 +117,7 @@ function showAlert(message, title = 'Notification', icon = 'fa-circle-check', co
     const modal = document.getElementById('alert-modal');
     document.getElementById('alert-title').textContent = title;
     document.getElementById('alert-message').textContent = message;
-    document.getElementById('alert-icon').innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i>`;
+    setIconMarkup(document.getElementById('alert-icon'), icon, color);
     modal.style.display = 'flex';
     return new Promise(resolve => { alertResolver = resolve; });
 }
@@ -111,7 +132,7 @@ function showConfirm(message, title = 'Confirm action', icon = 'fa-circle-questi
     const modal = document.getElementById('confirm-modal');
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-message').textContent = message;
-    document.getElementById('confirm-icon').innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i>`;
+    setIconMarkup(document.getElementById('confirm-icon'), icon, color);
     document.getElementById('confirm-action-btn').style.background = color === 'var(--danger)' ? 'var(--danger)' : 'var(--primary)';
     modal.style.display = 'flex';
     return new Promise(resolve => { confirmResolver = resolve; });
@@ -123,21 +144,32 @@ function resolveConfirm(result) {
 }
 
 // Auth Logic
-function checkAuth() {
-    const saved = localStorage.getItem('9sec_user');
-    const token = localStorage.getItem('9sec_token');
-
-    if (saved && token) {
-        currentUser = JSON.parse(saved);
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('user-display').textContent = currentUser.email;
-        document.getElementById('org-badge').textContent = currentUser.organization_id;
-        loadSectionData('overview');
-        refreshSettings(); // Get IP info
-        refresh2FAStatus(); // Get 2FA info
-    } else {
-        document.getElementById('login-overlay').style.display = 'flex';
+async function checkAuth() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/user/me`, {
+            credentials: 'include'
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        if (data.ok && data.user) {
+            currentUser = data.user;
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('login-email').value = currentUser.email || '';
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('user-display').textContent = currentUser.email;
+            document.getElementById('org-badge').textContent = currentUser.organization_id;
+            loadSectionData('overview');
+            refreshSettings();
+            refresh2FAStatus();
+            return;
+        }
+    } catch (_e) {
+        currentUser = null;
     }
+
+    currentUser = null;
+    document.getElementById('login-overlay').style.display = 'flex';
 }
 
 async function resetUserPassword(userId, email) {
@@ -173,6 +205,7 @@ async function login() {
         const resp = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ email, password })
         });
         const data = await resp.json();
@@ -184,9 +217,8 @@ async function login() {
                 document.getElementById('login-overlay').style.display = 'none';
                 return;
             }
-            localStorage.setItem('9sec_user', JSON.stringify(data.user));
-            localStorage.setItem('9sec_token', data.token);
-            checkAuth();
+            currentUser = data.user;
+            await checkAuth();
         } else {
             errorDiv.textContent = data.error || "Login Failed";
             errorDiv.style.display = 'block';
@@ -205,14 +237,14 @@ async function submit2FALogin() {
         const resp = await fetch(`${API_BASE}/api/auth/verify-2fa`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ temp_token: window.tempToken2FA, code })
         });
         const data = await resp.json();
         if (data.ok) {
             document.getElementById('2fa-login-modal').style.display = 'none';
-            localStorage.setItem('9sec_user', JSON.stringify(data.user));
-            localStorage.setItem('9sec_token', data.token);
-            checkAuth();
+            currentUser = data.user;
+            await checkAuth();
         } else {
             showAlert(data.error || "Invalid 2FA code", "Auth Error", "fa-triangle-exclamation", "var(--danger)");
         }
@@ -221,20 +253,23 @@ async function submit2FALogin() {
     }
 }
 
-function logout() {
-    localStorage.removeItem('9sec_user');
-    localStorage.removeItem('9sec_token');
+async function logout() {
+    try {
+        await fetch(`${API_BASE}/api/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (_e) {}
+    currentUser = null;
     location.reload();
 }
 
 // Data Handling Helpers
 async function apiFetch(endpoint, method = 'GET', body = null) {
-    const token = localStorage.getItem('9sec_token');
     const options = {
         method,
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        headers: {},
+        credentials: 'include'
     };
     if (body) {
         options.headers['Content-Type'] = 'application/json';
@@ -354,7 +389,7 @@ function renderLogTable(logs, filter) {
         const label = filterLabels[filter || window.logFilterType] || filter;
         body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-dim);">
             <i class="fa-solid fa-filter-circle-xmark" style="font-size:1.4rem; display:block; margin-bottom:10px; opacity:0.4;"></i>
-            <strong>${label}</strong>：查無符合條件的 Log 記錄（共 0 筆）
+            <strong>${escapeHtml(label)}</strong>：查無符合條件的 Log 記錄（共 0 筆）
         </td></tr>`;
         return;
     }
@@ -363,24 +398,27 @@ function renderLogTable(logs, filter) {
         const ai = (window.aiVerdicts || {})[log.query_domain];
         const aiHtml = ai ? `
             <div style="display:flex; align-items:center; gap:8px;">
-                <span class="badge" title="${ai.reasoning}" style="background:rgba(168,85,247,0.1); color:#a855f7; border:1px solid rgba(168,85,247,0.2); font-size:10px; cursor:help; padding:2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${ai.verdict}</span>
-                <button class="btn" onclick="deepDive('${log.query_domain}')" style="padding:2px 6px; font-size:10px; background:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.2);"><i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive</button>
+                <span class="badge" title="${escapeAttr(ai.reasoning || '')}" style="background:rgba(168,85,247,0.1); color:#a855f7; border:1px solid rgba(168,85,247,0.2); font-size:10px; cursor:help; padding:2px 6px;"><i class="fa-solid fa-robot" style="margin-right:4px;"></i>${escapeHtml(ai.verdict || '')}</span>
+                <button class="btn js-deep-dive" data-domain="${escapeAttr(log.query_domain || '')}" style="padding:2px 6px; font-size:10px; background:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.2);"><i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive</button>
             </div>` : '-';
 
         return `
             <tr>
-                <td style="font-size:11px; color:var(--text-dim);">${new Date(log.timestamp).toLocaleString()}</td>
+                <td style="font-size:11px; color:var(--text-dim);">${escapeHtml(new Date(log.timestamp).toLocaleString())}</td>
                 <td>
-                    <div style="font-weight:600; color:var(--accent); font-size:13px;">${log.client_hostname || 'External Gateway'}</div>
-                    <div style="font-size:10px; opacity:0.7;">${log.internal_ip || log.client_ip}</div>
+                    <div style="font-weight:600; color:var(--accent); font-size:13px;">${escapeHtml(log.client_hostname || 'External Gateway')}</div>
+                    <div style="font-size:10px; opacity:0.7;">${escapeHtml(log.internal_ip || log.client_ip || '')}</div>
                 </td>
-                <td style="font-weight:600; font-size:13px;">${log.query_domain}</td>
-                <td><span class="badge" style="background:rgba(255,255,255,0.05); font-size:10px;">${log.query_type}</span></td>
-                <td><span style="color:${getRiskColor(log.risk_score)}; font-weight:700;">${Math.round(log.risk_score)}%</span></td>
-                <td><span class="badge ${log.response_code === 'NXDOMAIN' ? 'badge-danger' : 'badge-success'}" style="font-size:10px;">${log.response_code || 'NOERROR'}</span></td>
+                <td style="font-weight:600; font-size:13px;">${escapeHtml(log.query_domain || '')}</td>
+                <td><span class="badge" style="background:rgba(255,255,255,0.05); font-size:10px;">${escapeHtml(log.query_type || '')}</span></td>
+                <td><span style="color:${getRiskColor(log.risk_score)}; font-weight:700;">${escapeHtml(Math.round(log.risk_score) + '%')}</span></td>
+                <td><span class="badge ${log.response_code === 'NXDOMAIN' ? 'badge-danger' : 'badge-success'}" style="font-size:10px;">${escapeHtml(log.response_code || 'NOERROR')}</span></td>
                 <td>${aiHtml}</td>
             </tr>`;
     }).join('');
+    body.querySelectorAll('.js-deep-dive').forEach((button) => {
+        button.addEventListener('click', () => deepDive(button.dataset.domain || ''));
+    });
 }
 
 // Fix 4: update all pagination UI elements
@@ -484,7 +522,8 @@ async function deepDive(domain) {
         if (data.ok) {
             content.textContent = data.explanation;
         } else {
-            content.innerHTML = `<div style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Analysis failed: ${data.error}</div>`;
+            content.textContent = `Analysis failed: ${data.error || 'Unknown error'}`;
+            content.style.color = 'var(--danger)';
         }
     } catch (e) {
         content.textContent = "Connection error while reaching the AI dispatcher.";
@@ -498,9 +537,9 @@ async function refreshAuditLogs() {
         const body = document.getElementById('audit-table-body');
         body.innerHTML = data.data.map(log => `
             <tr>
-                <td style="font-size: 12px; color: var(--text-dim);">${new Date(log.timestamp).toLocaleString()}</td>
-                <td style="font-weight:600; color: var(--primary);">${log.action}</td>
-                <td style="font-size: 13px;">${log.details}</td>
+                <td style="font-size: 12px; color: var(--text-dim);">${escapeHtml(new Date(log.timestamp).toLocaleString())}</td>
+                <td style="font-weight:600; color: var(--primary);">${escapeHtml(log.action || '')}</td>
+                <td style="font-size: 13px;">${escapeHtml(log.details || '')}</td>
             </tr>
         `).join('');
     }
@@ -513,14 +552,17 @@ async function refreshAllowlist() {
         const body = document.getElementById('allowlist-table-body');
         body.innerHTML = data.data.map(item => `
             <tr>
-                <td style="font-family: monospace;">${item.pattern}</td>
-                <td>${item.reason || '-'}</td>
-                <td style="font-size: 12px; color: var(--text-dim);">${new Date(item.created_at).toLocaleDateString()}</td>
+                <td style="font-family: monospace;">${escapeHtml(item.pattern || '')}</td>
+                <td>${escapeHtml(item.reason || '-')}</td>
+                <td style="font-size: 12px; color: var(--text-dim);">${escapeHtml(new Date(item.created_at).toLocaleDateString())}</td>
                 <td>
-                    ${item.organization_id ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteAllowlist(${item.id})"><i class="fa-solid fa-trash"></i></button>` : `<span class="badge badge-warning">Global</span>`}
+                    ${item.organization_id ? `<button class="btn btn-danger js-delete-allowlist" data-id="${escapeAttr(item.id)}" style="padding: 4px 8px; font-size: 10px;"><i class="fa-solid fa-trash"></i></button>` : `<span class="badge badge-warning">Global</span>`}
                 </td>
             </tr>
         `).join('');
+        body.querySelectorAll('.js-delete-allowlist').forEach((button) => {
+            button.addEventListener('click', () => deleteAllowlist(button.dataset.id));
+        });
     }
 }
 
@@ -550,7 +592,7 @@ async function refreshUsers() {
     const data = await apiFetch('/api/user/users');
     if (data.ok) {
         const body = document.getElementById('users-table-body');
-        const selfEmail = JSON.parse(localStorage.getItem('9sec_user')).email;
+        const selfEmail = currentUser?.email;
         body.innerHTML = data.data.map(u => {
             const isSelf = u.email === selfEmail;
             const statusCell = isSelf ? `
@@ -570,19 +612,19 @@ async function refreshUsers() {
 
             return `
                 <tr>
-                    <td>${u.email}</td>
-                    <td><span class="badge ${u.role === 'admin' ? 'badge-warning' : 'badge-success'}">${u.role}</span></td>
+                    <td>${escapeHtml(u.email || '')}</td>
+                    <td><span class="badge ${u.role === 'admin' ? 'badge-warning' : 'badge-success'}">${escapeHtml(u.role || '')}</span></td>
                     <td>${statusCell}</td>
-                    <td style="font-size: 12px; color: var(--text-dim); text-align: center;">${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td style="font-size: 12px; color: var(--text-dim); text-align: center;">${escapeHtml(new Date(u.created_at).toLocaleDateString())}</td>
                     <td>
                         <div style="display: flex; gap: 8px; justify-content: center;">
-                            ${u.two_factor_enabled ? `<button class="btn" style="padding: 4px 8px; font-size: 10px; background: rgba(255,150,0,0.1); color: #ff9f43;" title="Reset 2FA" onclick="resetUser2FA('${u.id}', '${u.email}')"><i class="fa-solid fa-shield-slash"></i></button>` : ''}
+                            ${u.two_factor_enabled ? `<button class="btn js-reset-2fa" data-id="${escapeAttr(u.id)}" data-email="${escapeAttr(u.email)}" style="padding: 4px 8px; font-size: 10px; background: rgba(255,150,0,0.1); color: #ff9f43;" title="Reset 2FA"><i class="fa-solid fa-shield-slash"></i></button>` : ''}
                             ${!isSelf ? `
-                                <button class="btn btn-sm" onclick="resetUserPassword('${u.id}', '${u.email}')" title="Reset Password"
+                                <button class="btn btn-sm js-reset-password" data-id="${escapeAttr(u.id)}" data-email="${escapeAttr(u.email)}" title="Reset Password"
                                     style="background:var(--accent); color:#000;">
                                     <i class="fa-solid fa-key"></i>
                                 </button>
-                                <button class="btn btn-sm" onclick="deleteUser('${u.id}', '${u.email}')" title="Delete User"
+                                <button class="btn btn-sm js-delete-user" data-id="${escapeAttr(u.id)}" data-email="${escapeAttr(u.email)}" title="Delete User"
                                     style="background:rgba(239,68,68,0.15); color:var(--danger);">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>` : `<span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-dim);">You</span>`}
@@ -591,6 +633,15 @@ async function refreshUsers() {
                 </tr>
             `;
         }).join('');
+        body.querySelectorAll('.js-reset-password').forEach((button) => {
+            button.addEventListener('click', () => resetUserPassword(button.dataset.id, button.dataset.email));
+        });
+        body.querySelectorAll('.js-delete-user').forEach((button) => {
+            button.addEventListener('click', () => deleteUser(button.dataset.id, button.dataset.email));
+        });
+        body.querySelectorAll('.js-reset-2fa').forEach((button) => {
+            button.addEventListener('click', () => resetUser2FA(button.dataset.id, button.dataset.email));
+        });
     }
 }
 
@@ -664,10 +715,13 @@ function renderSettings() {
     const list = document.getElementById('cidr-list');
     list.innerHTML = egressCidrs.map((c, i) => `
         <div style="display:flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);">
-            <div style="font-family: monospace;">${c}</div>
-            <button class="btn" style="color: var(--danger); background: transparent;" onclick="removeCidr(${i})"><i class="fa-solid fa-xmark"></i></button>
+            <div style="font-family: monospace;">${escapeHtml(c)}</div>
+            <button class="btn js-remove-cidr" data-index="${i}" style="color: var(--danger); background: transparent;"><i class="fa-solid fa-xmark"></i></button>
         </div>
     `).join('');
+    list.querySelectorAll('.js-remove-cidr').forEach((button) => {
+        button.addEventListener('click', () => removeCidr(Number(button.dataset.index)));
+    });
 }
 
 function removeCidr(i) {
@@ -827,14 +881,14 @@ function updateUser2FAUI(isEnabled) {
             statusText.style.color = "var(--accent)";
         }
         if (toggleInput) toggleInput.checked = true;
-        if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield-check" style="color: var(--accent);"></i>';
+        setIconMarkup(iconDiv, 'fa-shield-check', 'var(--accent)');
     } else {
         if (statusText) {
             statusText.textContent = "No 2FA";
             statusText.style.color = "var(--text-dim)";
         }
         if (toggleInput) toggleInput.checked = false;
-        if (iconDiv) iconDiv.innerHTML = '<i class="fa-solid fa-shield" style="color: var(--text-dim);"></i>';
+        setIconMarkup(iconDiv, 'fa-shield', 'var(--text-dim)');
     }
 }
 
@@ -890,10 +944,10 @@ async function refreshBehaviorAlerts() {
 
             return `
                 <tr>
-                    <td><code style="color: var(--primary);">${a.client_ip}</code></td>
-                    <td style="font-weight: 600;">${a.base_domain}</td>
-                    <td style="text-align: center;">${a.query_count}</td>
-                    <td style="text-align: center;"><span class="badge ${badgeClass}">${risk}</span></td>
+                    <td><code style="color: var(--primary);">${escapeHtml(a.client_ip || '')}</code></td>
+                    <td style="font-weight: 600;">${escapeHtml(a.base_domain || '')}</td>
+                    <td style="text-align: center;">${escapeHtml(a.query_count)}</td>
+                    <td style="text-align: center;"><span class="badge ${badgeClass}">${escapeHtml(risk)}</span></td>
                 </tr>
             `;
         }).join('');
@@ -911,7 +965,7 @@ async function refreshGlobalIntelStats() {
             const sourceIcons = { openphish: '🎣', urlhaus: '🦠', phishtank: '🐟', manual: '✏️' };
             breakdown.innerHTML = data.sources.map(s => {
                 const icon = sourceIcons[s.source] || '📋';
-                return `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); border-radius:20px; padding:2px 10px; font-size:0.72rem; color:#fca5a5; margin:2px;">${icon} ${s.source} <strong>${s.count.toLocaleString()}</strong></span>`;
+                return `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.25); border-radius:20px; padding:2px 10px; font-size:0.72rem; color:#fca5a5; margin:2px;">${icon} ${escapeHtml(s.source || '')} <strong>${escapeHtml(s.count.toLocaleString())}</strong></span>`;
             }).join('');
         }
     }
@@ -1066,13 +1120,16 @@ async function refreshBlocklist() {
         }
         body.innerHTML = data.data.map(row => `
             <tr>
-                <td style="font-weight:700; color: var(--danger);">${row.pattern}</td>
-                <td><span class="badge badge-danger">${row.category}</span></td>
+                <td style="font-weight:700; color: var(--danger);">${escapeHtml(row.pattern || '')}</td>
+                <td><span class="badge badge-danger">${escapeHtml(row.category || '')}</span></td>
                 <td>
-                    <button class="btn" style="color:var(--danger);" onclick="deleteBlacklist('${row.id}')"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn js-delete-blacklist" data-id="${escapeAttr(row.id)}" style="color:var(--danger);"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
+        body.querySelectorAll('.js-delete-blacklist').forEach((button) => {
+            button.addEventListener('click', () => deleteBlacklist(button.dataset.id));
+        });
     }
 }
 

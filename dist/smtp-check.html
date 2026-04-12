@@ -45,9 +45,9 @@
         }
     </style>
     <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW.png">
-  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/main-BBKVFTcH.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-BYjIv3oh.css">
+  <script type="module" crossorigin src="/assets/styles-DNt-iECB.js"></script>
+  <script type="module" crossorigin src="/assets/main-DrFHyMuV.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/styles-BxbEqz2_.css">
 </head>
 
 <body>
@@ -133,9 +133,13 @@
                     <p data-i18n="smtp.verify_desc">To prove domain control, please send an empty email from your
                         address to:</p>
 
-                    <div class="copy-box">
-                        <code id="verification-email">loading...</code>
-                        <button class="copy-btn" id="btn-copy-email"><i class="fa-regular fa-copy"></i></button>
+                    <div class="copy-box smtp-verify-address-frame" role="group"
+                        aria-label="Verification email address">
+                        <code id="verification-email" class="smtp-verify-email-text">loading...</code>
+                        <button type="button" class="copy-btn smtp-copy-btn" id="btn-copy-email"
+                            aria-label="Copy verification email">
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                        </button>
                     </div>
 
                     <div class="loader-box">
