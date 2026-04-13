@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exposure Intel (EASM) | Nine-Security</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=20260215-1">
+    <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW.png">
+    <meta name="description" content="Tenant-scoped external exposure intelligence: passive discovery, fingerprints, and explainable scoring (Gov API). Not personal OSINT; no aggressive scanning.">
+    <style>
+        .easm-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem 5rem; }
+        .dmarc-hero { text-align: center; margin-top: clamp(1.75rem, 3.5vw, 2.75rem); margin-bottom: 1.5rem; }
+        .dmarc-hero .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-secondary); text-decoration: none; font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 0.85rem; }
+        .panel { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem 1.75rem; margin-bottom: 1.5rem; position: relative; }
+        .panel label { display: block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-secondary); margin-bottom: 0.35rem; }
+        .panel input[type="text"], .panel input[type="email"], .panel input[type="password"] {
+            width: 100%; max-width: 100%; background: rgba(0,0,0,0.45); border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; color: var(--text-primary); font-family: var(--font-mono); margin-bottom: 1rem;
+        }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
+        .btn { font-family: var(--font-mono); padding: 0.65rem 1.2rem; border: 1px solid var(--border-color); background: rgba(0,255,65,0.08); color: var(--accent-color); cursor: pointer; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn.secondary { background: transparent; color: var(--text-secondary); }
+        .note { font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); line-height: 1.5; margin-top: 0.75rem; }
+        .status { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-secondary); margin: 0.5rem 0 1rem; padding-left: 0.75rem; border-left: 2px solid var(--accent-secondary); }
+        .asset-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem; }
+        .asset-table th, .asset-table td { border: 1px solid var(--border-color); padding: 0.5rem 0.6rem; text-align: left; }
+        .asset-table th { color: var(--accent-secondary); }
+        .loading-spinner { display: none; margin: 1rem auto; width: 36px; height: 36px; border: 2px solid rgba(0,255,65,0.12); border-top-color: var(--accent-color); animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #appPanel { display: none; }
+    </style>
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/styles-BxbEqz2_-Bw8gVkgQ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_.css">
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <a href="./" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="./">/Home</a></li>
+                <li><a href="arsenal.html">/Arsenal</a></li>
+                <li><a href="services.html">/Services</a></li>
+            </ul>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">DARK</button>
+            </div>
+            <div class="mobile-menu-btn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></div>
+        </nav>
+    </header>
+
+    <main class="easm-wrap">
+        <section class="dmarc-hero">
+            <a href="arsenal.html" class="back-link"><i class="fa-solid fa-chevron-left"></i> RETURN_TO_ARSENAL</a>
+            <p class="terminal-text">Gov API · Tenant-scoped · Passive-first <span class="status-ok">[EASM_MVP]</span></p>
+            <h1 class="glitch-title" data-text="EXPOSURE_INTEL">EXPOSURE_INTEL</h1>
+            <p class="subtitle">External asset hints from certificate transparency, DNS, and light HTTP/TLS fingerprints. Requires a Governance (Gov) login.</p>
+        </section>
+
+        <div id="loginPanel" class="panel">
+            <label>Email</label>
+            <input type="email" id="loginEmail" autocomplete="username" placeholder="user@organization">
+            <label>Password</label>
+            <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+            <div class="btn-row">
+                <button type="button" class="btn" id="loginBtn"><i class="fa-solid fa-key"></i> Sign in (Gov)</button>
+            </div>
+            <p class="note">Uses <code>POST /api/auth/login</code> with <code>include_token: true</code> so this page (GitHub Pages origin) can call Gov with a Bearer token. SameSite cookies alone would not be sent cross-site.</p>
+        </div>
+
+        <div id="appPanel">
+            <div class="panel">
+                <div class="btn-row" style="margin-bottom: 1rem;">
+                    <button type="button" class="btn secondary" id="logoutBtn">Sign out</button>
+                </div>
+                <label>Primary domain (apex)</label>
+                <input type="text" id="apexInput" placeholder="example.com" spellcheck="false">
+                <div class="btn-row">
+                    <button type="button" class="btn" id="discoverBtn">Discover (CT + scope)</button>
+                    <button type="button" class="btn secondary" id="mutateBtn">Run brand mutations</button>
+                    <button type="button" class="btn secondary" id="refreshAlertsBtn">Refresh alerts</button>
+                </div>
+                <p class="note">scope_id: <span id="scopeIdLabel">—</span></p>
+                <div class="loading-spinner" id="loader"></div>
+                <div class="status" id="statusBar"></div>
+            </div>
+
+            <div class="panel">
+                <label>Enrich one hostname</label>
+                <input type="text" id="enrichInput" placeholder="www.example.com" spellcheck="false">
+                <div class="btn-row">
+                    <button type="button" class="btn" id="enrichBtn">Enrich (DNS / TLS / HTTP)</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3 style="font-family:var(--font-mono);font-size:0.9rem;color:var(--accent-secondary);margin:0 0 0.75rem;">Assets</h3>
+                <div style="overflow-x:auto;">
+                    <table class="asset-table" id="assetTable">
+                        <thead><tr><th>FQDN</th><th>Source</th><th>Class</th><th>Action</th></tr></thead>
+                        <tbody id="assetBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3 style="font-family:var(--font-mono);font-size:0.9rem;color:var(--accent-secondary);margin:0 0 0.75rem;">Alerts</h3>
+                <ul id="alertsList" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);padding-left:1.2rem;"></ul>
+            </div>
+        </div>
+    </main>
+
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="copyright"><p>&copy; 2026 Nine-Security. Passive discovery only; no exploitation.</p></div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = 'https://gov.nine-security.com';
+        const TOKEN_KEY = 'ninesec_easm_token';
+        const loader = document.getElementById('loader');
+        const statusBar = document.getElementById('statusBar');
+
+        function token() { return sessionStorage.getItem(TOKEN_KEY); }
+        function setToken(t) { sessionStorage.setItem(TOKEN_KEY, t); }
+        function clearToken() { sessionStorage.removeItem(TOKEN_KEY); }
+
+        function showApp(on) {
+            document.getElementById('loginPanel').style.display = on ? 'none' : 'block';
+            document.getElementById('appPanel').style.display = on ? 'block' : 'none';
+        }
+
+        async function api(path, opts = {}) {
+            const headers = Object.assign(
+                { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                opts.headers || {}
+            );
+            const t = token();
+            if (t) headers['Authorization'] = 'Bearer ' + t;
+            const r = await fetch(API_BASE + path, Object.assign({}, opts, { headers }));
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+            return data;
+        }
+
+        let currentScopeId = null;
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPass').value;
+            statusBar.textContent = '';
+            loader.style.display = 'block';
+            try {
+                const r = await fetch(API_BASE + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, include_token: true }),
+                });
+                const data = await r.json();
+                if (!r.ok || !data.ok) throw new Error(data.error || 'Login failed');
+                if (!data.token) throw new Error('No token in response; enable include_token on server');
+                setToken(data.token);
+                showApp(true);
+                statusBar.textContent = 'Authenticated.';
+            } catch (e) {
+                statusBar.textContent = 'Error: ' + e.message;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            clearToken();
+            currentScopeId = null;
+            showApp(false);
+            statusBar.textContent = 'Signed out.';
+        });
+
+        document.getElementById('discoverBtn').addEventListener('click', async () => {
+            const domain = document.getElementById('apexInput').value.trim();
+            if (!domain) return;
+            loader.style.display = 'block';
+            statusBar.textContent = 'Discovering via passive CT…';
+            try {
+                const q = new URLSearchParams({ domain });
+                if (currentScopeId) q.set('scope_id', currentScopeId);
+                const data = await api('/api/easm/v1/search?' + q.toString(), { method: 'GET' });
+                currentScopeId = data.scope_id;
+                document.getElementById('scopeIdLabel').textContent = currentScopeId;
+                statusBar.textContent = 'Found ' + data.discovered + ' CT names; new entities: ' + data.new_entities;
+                renderAssets(data.assets || []);
+            } catch (e) {
+                statusBar.textContent = 'Error: ' + e.message;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        document.getElementById('enrichBtn').addEventListener('click', async () => {
+            const fqdn = document.getElementById('enrichInput').value.trim();
+            if (!fqdn || !currentScopeId) {
+                statusBar.textContent = 'Set scope (run Discover) and enter FQDN.';
+                return;
+            }
+            loader.style.display = 'block';
+            try {
+                const data = await api('/api/easm/v1/enrich', {
+                    method: 'POST',
+                    body: JSON.stringify({ scope_id: currentScopeId, fqdn }),
+                });
+                statusBar.textContent = 'Enriched ' + data.fqdn + ' · score ' + data.score.score + ' (' + data.score.severity + ')';
+            } catch (e) {
+                statusBar.textContent = 'Error: ' + e.message;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        document.getElementById('mutateBtn').addEventListener('click', async () => {
+            const primary_domain = document.getElementById('apexInput').value.trim();
+            if (!primary_domain || !currentScopeId) {
+                statusBar.textContent = 'Run Discover first (creates scope) or enter apex domain.';
+                return;
+            }
+            loader.style.display = 'block';
+            try {
+                const data = await api('/api/easm/v1/mutate', {
+                    method: 'POST',
+                    body: JSON.stringify({ scope_id: currentScopeId, primary_domain, max_candidates: 120 }),
+                });
+                statusBar.textContent = 'Mutations: ' + data.active_resolutions + ' resolving hits (evaluated ' + data.candidates_evaluated + ')';
+                const reload = await api('/api/easm/v1/assets?scope_id=' + encodeURIComponent(currentScopeId), { method: 'GET' });
+                renderAssets(reload.assets || []);
+            } catch (e) {
+                statusBar.textContent = 'Error: ' + e.message;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        document.getElementById('refreshAlertsBtn').addEventListener('click', loadAlerts);
+
+        function renderAssets(rows) {
+            const tb = document.getElementById('assetBody');
+            tb.innerHTML = '';
+            for (const a of rows) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + escapeHtml(a.value) + '</td><td>' + escapeHtml(a.source || '') + '</td><td>' + escapeHtml(a.classification || '') + '</td><td><button type="button" class="btn secondary row-enrich" data-host="' + escapeAttr(a.value) + '">Enrich</button></td>';
+                tb.appendChild(tr);
+            }
+            tb.querySelectorAll('.row-enrich').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const host = btn.getAttribute('data-host');
+                    document.getElementById('enrichInput').value = host;
+                    document.getElementById('enrichBtn').click();
+                });
+            });
+        }
+
+        async function loadAlerts() {
+            if (!currentScopeId) {
+                statusBar.textContent = 'No scope yet.';
+                return;
+            }
+            try {
+                const data = await api('/api/easm/v1/alerts?scope_id=' + encodeURIComponent(currentScopeId), { method: 'GET' });
+                const ul = document.getElementById('alertsList');
+                ul.innerHTML = '';
+                for (const a of data.alerts || []) {
+                    const li = document.createElement('li');
+                    li.textContent = '[' + a.severity + '] ' + (a.fqdn || a.entity_id) + ' — ' + (a.verdict || '');
+                    ul.appendChild(li);
+                }
+            } catch (e) {
+                statusBar.textContent = 'Alerts error: ' + e.message;
+            }
+        }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+        function escapeAttr(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        }
+
+        if (token()) {
+            showApp(true);
+            statusBar.textContent = 'Session restored from tab storage.';
+        }
+    </script>
+</body>
+
+</html>
