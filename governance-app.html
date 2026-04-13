@@ -4,6 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('9sec_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
     <title>Governance Maturity Terminal | Nine-Security</title>
     <meta name="robots" content="noindex, nofollow">
     <!-- Fonts -->
@@ -228,6 +236,67 @@
             margin-left: 10px;
             vertical-align: middle;
         }
+
+        /* Full-screen login only (aligned with helix-dns-center.html) */
+        .gov-login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .gov-login-back {
+            position: fixed;
+            top: 1.25rem;
+            left: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            z-index: 5001;
+        }
+
+        .gov-login-back:hover {
+            text-decoration: underline;
+        }
+
+        .gov-login-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border-color: var(--accent-color);
+            padding: 3rem;
+        }
+
+        .gov-login-card .terminal-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .gov-login-card .terminal-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+        }
+
+        [data-theme="light"] .gov-login-card .terminal-input {
+            background: rgba(0, 0, 0, 0.06);
+        }
     </style>
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
   <script type="module" crossorigin src="/assets/styles-BxbEqz2_-Bw8gVkgQ.js"></script>
@@ -240,6 +309,7 @@
     <!-- Overlay Scanline Effect -->
     <div class="scanlines"></div>
 
+    <div id="gov-authenticated-shell" class="hidden">
     <header>
         <nav class="container">
             <div class="logo">
@@ -266,31 +336,6 @@
                     data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
             </a>
         </section>
-        <!-- Auth Section -->
-        <div id="loginScreen" class="auth-container">
-            <div style="text-align: center; margin-bottom: 3rem;">
-                <p class="terminal-text">Accessing Governance Subsystem... <span class="status-ok">[ENCRYPTED]</span></p>
-                <h1 class="glitch-title" data-text="GOVERNANCE TERMINAL" style="font-size: 2.5rem;">GOVERNANCE TERMINAL</h1>
-                <p class="subtitle">Advanced Maturity Analysis & Compliance Operations.</p>
-            </div>
-
-            <div class="auth-card">
-                <div id="loginForm">
-                    <div id="loginMsg" class="msg hidden"></div>
-                    <div class="form-group">
-                        <label>CORPORATE_IDENTITY (EMAIL)</label>
-                        <input type="email" id="loginEmail" placeholder="name@company.com">
-                    </div>
-                    <div class="form-group">
-                        <label>SECRET_PASSPHRASE</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••">
-                    </div>
-                    <button type="button" id="btnLogin" class="btn primary-btn" style="width: 100%; margin-top: 1rem;">
-                        INITIALIZE_SESSION
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- Dashboard Section -->
         <div id="dashboard" class="hidden">
@@ -426,6 +471,32 @@
             </div>
         </div>
     </main>
+    </div><!-- #gov-authenticated-shell -->
+
+    <!-- Login only until session valid (same pattern as helix-dns-center.html) -->
+    <div id="gov-login-overlay" class="gov-login-overlay">
+        <a href="services.html" class="gov-login-back">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
+        </a>
+        <div class="card gov-login-card">
+            <div class="logo" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" alt="Nine-Security" style="height: 56px;">
+            </div>
+            <p class="terminal-text" style="margin-bottom: 0.75rem; font-size: 0.85rem;">Accessing Governance Subsystem... <span class="status-ok">[ENCRYPTED]</span></p>
+            <h2 style="font-family: var(--font-mono); margin-bottom: 0.35rem; font-size: 1.35rem;">GOVERNANCE_TERMINAL</h2>
+            <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 1.75rem;">[AUTHENTICATION_REQUIRED]</p>
+
+            <div id="loginForm">
+                <div id="loginMsg" class="msg hidden"></div>
+                <input type="email" id="loginEmail" autocomplete="username" class="terminal-input" placeholder="EMAIL_IDENTITY" style="margin-bottom: 1rem;">
+                <input type="password" id="loginPassword" autocomplete="current-password" class="terminal-input" placeholder="SECRET_PASSPHRASE" style="margin-bottom: 1.25rem;">
+                <button type="button" id="btnLogin" class="btn primary-btn" style="width: 100%; justify-content: center;">
+                    INITIALIZE_SESSION
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Global Modal System -->
     <div id="customModal" class="modal-overlay">
@@ -505,7 +576,10 @@
         }
 
         function showDashboard() {
-            document.getElementById("loginScreen").classList.add("hidden");
+            const overlay = document.getElementById("gov-login-overlay");
+            const shell = document.getElementById("gov-authenticated-shell");
+            if (overlay) overlay.style.display = "none";
+            if (shell) shell.classList.remove("hidden");
             document.getElementById("dashboard").classList.remove("hidden");
             loadMe();
             loadInsights();
