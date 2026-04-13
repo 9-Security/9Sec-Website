@@ -29,36 +29,36 @@
         }
 
         .tool-header {
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             text-align: center;
         }
 
-        /* Inline here: smtp-check bundle CSS (arsenal-*.css) does not include src/css/smtp.css */
-        .check-container .tool-header {
-            position: relative;
-            isolation: isolate;
-        }
-
-        .check-container .tool-header .back-link {
-            position: relative;
-            z-index: 2;
-            display: inline-flex;
+        /*
+         * Back link lives inside the card so glitch-title ::before/::after cannot paint over it.
+         * Explicit hex colors: visible before initTheme() sets data-theme on <html>.
+         */
+        .check-interface>.smtp-back-link {
+            display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            color: var(--accent-color);
-            text-decoration: none;
+            width: 100%;
+            margin: 0 0 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
             font-family: var(--font-mono);
             font-size: 0.9rem;
-            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #00e5ff;
         }
 
-        .check-container .tool-header .back-link:hover {
+        [data-theme="light"] .check-interface>.smtp-back-link {
+            color: #0056b3;
+        }
+
+        .check-interface>.smtp-back-link:hover {
             text-decoration: underline;
-        }
-
-        .check-container .tool-header .glitch-title {
-            position: relative;
-            z-index: 1;
         }
     </style>
     <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW.png">
@@ -112,12 +112,12 @@
 
     <main class="container check-container">
         <div class="tool-header">
-            <a href="services.html" class="back-link"><i class="fa-solid fa-chevron-left"></i> <span
-                    data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span></a>
             <h1 class="glitch-title" data-text="SMTP_SECURITY_CHECK" data-i18n="section.smtp">SMTP_Security_Check</h1>
         </div>
 
         <div class="card check-interface">
+            <a href="services.html" class="smtp-back-link"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                <span data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span></a>
             <!-- State 1: Input -->
             <div id="smtp-step-input" class="smtp-step">
                 <div class="smtp-intro">
