@@ -23,11 +23,39 @@
         content="SMTP check, email security, brand protection, phishing monitoring, SPF check, DMARC analyzer, lookalike domains">
     <link rel="canonical" href="https://nine-security.com/smtp-check.html">
     <style>
+        /* Match dmarc-analyzer.html: main padding + .dmarc-hero (back link vertical rhythm) */
         .check-container {
-            padding-top: 8rem;
+            padding: 1.5rem 2rem 2rem;
             min-height: 80vh;
         }
 
+        .dmarc-hero {
+            text-align: center;
+            margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+            margin-bottom: 1.5rem;
+        }
+
+        .dmarc-hero .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .dmarc-hero h1.glitch-title {
+            margin-bottom: 0.35rem;
+        }
+
+        @media (max-width: 768px) {
+            .dmarc-hero {
+                margin-top: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+        }
     </style>
     <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW.png">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
@@ -79,10 +107,8 @@
     </header>
 
     <main class="container check-container">
-        <!-- Match dmarc-analyzer.html / brand-scanner.html: back-link + glitch title in one centered block -->
-        <section style="text-align: center; margin-bottom: 3rem; margin-top: 0;">
-            <a href="services.html" class="back-link"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-secondary); text-decoration: none; font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        <section class="dmarc-hero">
+            <a href="services.html" class="back-link">
                 <i class="fa-solid fa-chevron-left"></i> <span
                     data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
             </a>
