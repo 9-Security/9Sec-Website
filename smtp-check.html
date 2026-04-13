@@ -43,34 +43,6 @@
             font-size: 0.9rem;
             margin-bottom: 1.5rem;
         }
-
-        /* Fixed header: always-visible return to services (alongside theme / lang) */
-        .smtp-header-back-services {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: var(--accent-secondary);
-            text-decoration: none;
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            padding: 0.35rem 0.65rem;
-            border: 1px solid rgba(0, 229, 255, 0.35);
-            border-radius: 4px;
-            white-space: nowrap;
-            transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        }
-
-        .smtp-header-back-services:hover {
-            color: var(--accent-color);
-            border-color: var(--accent-secondary);
-            background: rgba(0, 229, 255, 0.06);
-        }
-
-        @media (max-width: 1100px) {
-            .smtp-header-back-services .smtp-header-back-label {
-                display: none;
-            }
-        }
     </style>
     <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW.png">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
@@ -103,10 +75,6 @@
                 <li><a href="contact.html" data-i18n="nav.contact">/Contact</a></li>
             </ul>
             <div class="header-controls">
-                <a href="services.html" class="smtp-header-back-services" title="Services">
-                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-                    <span class="smtp-header-back-label" data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
-                </a>
                 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">
                     DARK
                 </button>
