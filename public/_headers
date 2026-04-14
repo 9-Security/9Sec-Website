@@ -3,4 +3,4 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://*.nine-security.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://nine-security.com; connect-src 'self' https://*.nine-security.com https://*.workers.dev;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-EoEMHvabwGac6i7V+r9JW1TAGLf+DxjsSMD/zQ7L+bI=' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://*.nine-security.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://nine-security.com; connect-src 'self' https://*.nine-security.com https://*.workers.dev;

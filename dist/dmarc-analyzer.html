@@ -236,8 +236,9 @@
             border-bottom-color: var(--border-color);
         }
     </style>
-  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/styles-BxbEqz2_-Bw8gVkgQ.js"></script>
+  <script type="module" crossorigin src="/assets/dmarc-EpUdAat8.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/styles-BxbEqz2_-Bw8gVkgQ.js">
   <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_.css">
 </head>
 
@@ -400,137 +401,6 @@
 
     <!-- Visual Effects -->
 
-    <script>
-        // Logic
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const loading = document.getElementById('loading-indicator');
-        const results = document.getElementById('results');
-
-        // Drag & Drop Events
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-        });
-
-        dropZone.addEventListener('drop', handleDrop, false);
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                uploadFile(files[0]);
-            }
-        }
-
-        async function uploadFile(file) {
-            loading.style.display = 'block';
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                // Determine API URL (Local vs Prod)
-                // Use relative path if on same domain, or full URL to worker
-                const API_URL = "https://api.nine-security.com/api/dmarc/analyze";
-
-                const resp = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const json = await resp.json().catch(() => ({}));
-                if (!resp.ok) {
-                    throw new Error((json && json.error) || `Analysis failed (${resp.status})`);
-                }
-                if (!json.ok || !json.data) {
-                    throw new Error((json && json.error) || 'Invalid response from analyzer');
-                }
-                renderReport(json.data);
-
-                // Show results
-                loading.style.display = 'none';
-                dropZone.style.display = 'none'; // Hide upload box on success? Or keep at top?
-                results.style.display = 'block';
-
-            } catch (e) {
-                alert("Error processing file: " + e.message);
-                loading.style.display = 'none';
-            }
-        }
-
-        function renderReport(data) {
-            // 1. Meta
-            document.getElementById('report-meta').innerText = `Org: ${data.meta.org} | Messages: ${data.meta.total_messages}`;
-            document.getElementById('pass-rate').innerText = `${data.stats.pass_rate}%`;
-
-            // 2. Charts
-            const ctxAuth = document.getElementById('authChart').getContext('2d');
-            new Chart(ctxAuth, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Fully Aligned', 'Auth Failed', 'Partial'],
-                    datasets: [{
-                        data: [data.stats.fully_aligned, data.stats.auth_failed, data.stats.partially_aligned],
-                        backgroundColor: ['#00ff41', '#ff0055', '#ffaa00'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { plugins: { legend: { position: 'bottom', labels: { color: '#ccc' } } } }
-            });
-
-            const ctxSource = document.getElementById('sourceChart').getContext('2d');
-            new Chart(ctxSource, {
-                type: 'bar',
-                data: {
-                    labels: data.sources.slice(0, 5).map(s => s.ip),
-                    datasets: [{
-                        label: 'Volume',
-                        data: data.sources.slice(0, 5).map(s => s.count),
-                        backgroundColor: '#00e5ff'
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: { ticks: { color: '#888' } },
-                        y: { ticks: { color: '#888' } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // 3. Table
-            const tbody = document.querySelector('#data-table tbody');
-            tbody.innerHTML = data.sources.map(s => {
-                const status = (s.dkim_fail === 0 && s.spf_fail === 0) ? 'pass' : 'fail';
-                return `
-                    <tr>
-                        <td>${s.ip}</td>
-                        <td>${s.count}</td>
-                        <td><span class="badge ${s.dkim_fail > 0 ? 'fail' : 'pass'}">${s.dkim_fail > 0 ? 'FAIL' : 'PASS'}</span></td>
-                        <td><span class="badge ${s.spf_fail > 0 ? 'fail' : 'pass'}">${s.spf_fail > 0 ? 'FAIL' : 'PASS'}</span></td>
-                        <td><span class="badge ${status}">${status.toUpperCase()}</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
-    </script>
 </body>
 
 </html><!-- force redraw -->
