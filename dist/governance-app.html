@@ -1,500 +1,515 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/theme-init.js"></script>
-    <title>HelixDNS Security Center | Nine-Security</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <title>Governance Maturity Terminal | Nine-Security</title>
+    <meta name="robots" content="noindex, nofollow">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <!-- PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/helix-dns-0l7ayLJ2.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/helix-dns-C7fDzeGC.css">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main styles -->
+    
+    <style>
+        /* Governance Specific Overrides */
+        .gov-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 5rem;
+        }
+
+        .maturity-card {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Dashboard Tabs */
+        .gov-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .gov-tabs button {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .gov-tabs button.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        /* Domain Cards */
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .domain-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .domain-card:hover {
+            border-color: var(--accent-secondary);
+            transform: translateY(-5px);
+        }
+
+        .domain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .domain-name {
+            font-weight: 600;
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .domain-score {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .progress-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Score Colors */
+        .lvl-a { color: var(--accent-color); --fill: var(--accent-color); }
+        .lvl-b { color: var(--accent-secondary); --fill: var(--accent-secondary); }
+        .lvl-c { color: #fbbf24; --fill: #fbbf24; }
+        .lvl-d { color: #ff0055; --fill: #ff0055; }
+
+        .terminal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .terminal-table th {
+            text-align: left;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-secondary);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .terminal-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+        }
+
+        /* Login Screen */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            padding: 3rem;
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        input[type="email"], input[type="password"], textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .hidden { display: none !important; }
+        
+        .msg {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid transparent;
+        }
+
+        .msg.err { background: rgba(255, 0, 85, 0.1); color: #ff0055; border-color: rgba(255, 0, 85, 0.3); }
+        .msg.ok { background: rgba(0, 255, 65, 0.1); color: var(--accent-color); border-color: rgba(0, 255, 65, 0.3); }
+
+        .ai-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--font-mono);
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Full-screen login only (aligned with helix-dns-center.html) */
+        .gov-login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .gov-login-back {
+            position: fixed;
+            top: 1.25rem;
+            left: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            z-index: 5001;
+        }
+
+        .gov-login-back:hover {
+            text-decoration: underline;
+        }
+
+        .gov-login-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border-color: var(--accent-color);
+            padding: 3rem;
+        }
+
+        .gov-login-card .terminal-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .gov-login-card .terminal-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+        }
+
+        [data-theme="light"] .gov-login-card .terminal-input {
+            background: rgba(0, 0, 0, 0.06);
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/governance-C-Fy3byy.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 
-<body class="dashboard-body">
+<body>
     <!-- Background Canvas -->
     <canvas id="bg-canvas"></canvas>
     <!-- Overlay Scanline Effect -->
     <div class="scanlines"></div>
 
-    <aside id="sidebar">
-        <div class="sidebar-header">
+    <div id="gov-authenticated-shell" class="hidden">
+    <header>
+        <nav class="container">
             <div class="logo">
-                <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" alt="9SEC" class="logo-img" style="height: 40px;">
-                <span class="logo-text" style="font-size: 1.2rem;">9SEC<span class="accent">_DNS</span></span>
+                <a href="./" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
             </div>
-        </div>
+            <ul class="nav-links">
+                <li><a href="./">/Home</a></li>
+                <li><a href="services.html">/Services</a></li>
+                <li><a href="arsenal.html" class="active">/Arsenal</a></li>
+                <li><a href="./#model">/9SEC_Model</a></li>
+                <li><a href="contact.html">/Contact</a></li>
+            </ul>
+        </nav>
+    </header>
 
-        <div class="sidebar-content">
-            <div id="nav-overview" class="nav-item active">
-                <i class="fa-solid fa-terminal"></i>
-                <span>OVERVIEW</span>
-            </div>
-            <div id="nav-event" class="nav-item">
-                <i class="fa-solid fa-list-ul"></i>
-                <span>EVENT_LOGS</span>
-            </div>
-            <div id="nav-audit" class="nav-item">
-                <i class="fa-solid fa-fingerprint"></i>
-                <span>AUDIT_TRAIL</span>
-            </div>
-            
-            <!-- External Module Link - Clearly separated from internal navigation -->
-            <div id="nav-gov" style="margin: 15px 14px; padding: 12px; border: 1px dashed var(--accent-color); border-radius: 4px; background: rgba(0,255,65,0.02); cursor: pointer;" 
-                 title="Governance Arsenal">
-                <div style="display: flex; align-items: center; gap: 15px; color: var(--accent-color);">
-                    <i class="fa-solid fa-toolbox" style="font-size: 16px;"></i>
-                    <span style="font-weight: 700; font-size: 0.85rem; font-family: var(--font-mono);">WBC_ARSENAL</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; margin-left: auto; opacity: 0.5;"></i>
-                </div>
-            </div>
-
-            <div id="nav-policy" class="nav-item">
-                <i class="fa-solid fa-shield-halved"></i>
-                <span>SECURITY_POLICY</span>
-            </div>
-            <div id="nav-users" class="nav-item">
-                <i class="fa-solid fa-users-gear"></i>
-                <span>USERS_ROLES</span>
-            </div>
-            <div id="nav-setting" class="nav-item">
-                <i class="fa-solid fa-gears"></i>
-                <span>SETTINGS</span>
-            </div>
-        </div>
-
-        <button class="toggle-btn" id="sidebar-toggle">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-
-        <div style="padding: 24px; border-top: 1px solid var(--border-color);" class="sidebar-footer">
-            <div id="nav-back-services" style="cursor:pointer;" class="nav-item" title="Services">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
-            </div>
-            <div id="nav-logout" style="cursor:pointer;" class="nav-item">
-                <i class="fa-solid fa-power-off"></i>
-                <span>LOGOUT</span>
-            </div>
-        </div>
-    </aside>
-
-    <main>
-        <div style="margin-bottom: 16px;">
+    <main class="gov-container">
+        <section style="text-align: center; margin-bottom: 1rem;">
             <a href="services.html" class="back-link"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-secondary); text-decoration: none; font-family: var(--font-mono); font-size: 0.9rem;">
+                style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-secondary); text-decoration: none; font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 1.5rem;">
                 <i class="fa-solid fa-chevron-left"></i> <span
                     data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
             </a>
-        </div>
-        <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-            <div>
-                <p class="terminal-text" style="margin-bottom: 0.5rem;">Accessing HelixDNS Control Plane... <span class="status-ok">[ENCRYPTED]</span></p>
-                <h1 id="page-title" class="glitch-title" data-text="DASHBOARD OVERVIEW" style="font-size: 1.8rem; margin: 0;">DASHBOARD OVERVIEW</h1>
-                <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; margin-top: 5px;">Authenticated as: <span id="user-display" class="status-ok">User</span></p>
+        </section>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="hidden">
+            <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+                <div>
+                    <p class="terminal-text" style="margin-bottom: 0.5rem;">Synchronizing with Governance Cluster... <span class="status-ok">[ACTIVE]</span></p>
+                    <h1 class="glitch-title" data-text="GOVERNANCE DASHBOARD" style="font-size: 2rem; margin: 0;">GOVERNANCE DASHBOARD</h1>
+                    <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; margin-top: 5px;">Operator: <span id="userInfo" class="status-ok">---</span></p>
+                </div>
+                <div style="display:flex; gap: 15px;">
+                    <button type="button" id="btnNewTaskTop" class="btn primary-btn" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">
+                        <i class="fa-solid fa-plus-circle"></i> REGISTER_ENV
+                    </button>
+                    <button type="button" id="btnLogout" class="btn secondary-btn" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">
+                        <i class="fa-solid fa-power-off"></i> EXIT
+                    </button>
+                </div>
             </div>
-            <div style="display:flex; align-items:center; gap: 16px;">
-                <button id="btn-generate-report" class="btn primary-btn" style="font-size: 0.8rem; padding: 0.6rem 1.2rem;">
-                    <i class="fa-solid fa-file-export"></i> EXPORT_PDF
+
+            <div class="gov-tabs">
+                <button type="button" id="dashTabOverview" class="active">/MATURITY_INDEX</button>
+                <button type="button" id="dashTabCompliance">/COMPLIANCE_CENTER</button>
+                <button type="button" id="dashTabEnvs">/RESOURCE_MGMT</button>
+                <button type="button" id="dashTabAudit">/AUDIT_TRAIL</button>
+                <button type="button" id="btnRefresh" style="margin-left: auto; color: var(--accent-secondary);">
+                    <i class="fa-solid fa-sync"></i> SYNC_DATA
                 </button>
-                <div class="card helix-org-strip" style="padding: 10px 20px; margin-bottom: 0; display:flex; align-items:center; gap: 12px;">
-                    <div id="org-badge" class="ai-badge" style="margin: 0;">ORGANIZATION</div>
-                    <div id="resolver-ip" style="font-family: var(--font-mono); font-weight:700; color: var(--accent-secondary); font-size: 0.9rem;">
-                        0.0.0.0
+            </div>
+
+            <!-- Overview Panel -->
+            <div id="panelOverview" class="dashboard-panel">
+                <div id="insightsArea">
+                    <div class="card" style="text-align: center; padding: 4rem 1rem;">
+                        <div style="color: var(--text-secondary); font-family: var(--font-mono);">[LISTENING] Synchronizing posture analytics...</div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Sections -->
+            <!-- Compliance Panel -->
+            <div id="panelCompliance" class="dashboard-panel hidden">
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="val-readiness">0%</div>
+                        <div class="stat-label">Readiness_Level</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="val-controls" style="color: var(--accent-secondary);">0 / 0</div>
+                        <div class="stat-label">Controls_Verified</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="val-comp-etmi" style="color: #fff">--</div>
+                        <div class="stat-label">Risk_Index_Link</div>
+                    </div>
+                </div>
 
-        <!-- Overview Section -->
-        <section id="overview" class="section active">
-            <div class="grid">
-                <div class="card stat-card" style="--card-accent: var(--accent-secondary);">
-                    <span class="stat-label">Total Queries (24h)</span>
-                    <span id="stat-total" class="stat-value">0</span>
-                    <span style="font-size: 11px; color: var(--accent-color); font-family: var(--font-mono);"><i class="fa-solid fa-caret-up"></i> 12% VELOCITY</span>
-                </div>
-                <div class="card stat-card" style="--card-accent: var(--accent-color);">
-                    <span class="stat-label">Unique Clients</span>
-                    <span id="stat-clients" class="stat-value">0</span>
-                    <span style="font-size: 11px; color: var(--accent-secondary); font-family: var(--font-mono);">ACTIVE_NODES</span>
-                </div>
-                <div id="stat-threats-card" class="card stat-card threat-stat" style="cursor: pointer; --card-accent: #ff0055;">
-                    <span class="stat-label">Malicious Hits</span>
-                    <span id="stat-threats" class="stat-value" style="color: #ff0055;">0</span>
-                    <span style="font-size: 11px; color: #ff0055; font-family: var(--font-mono);"><i class="fa-solid fa-biohazard"></i> ACTION_REQUIRED</span>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 24px;">
-                <h3 style="margin-bottom: 20px; font-family: var(--font-mono); display: flex; align-items:center; gap: 10px; font-size: 1.1rem;">
-                    <i class="fa-solid fa-wave-square" style="color: var(--accent-secondary);"></i> TRAFFIC_TRENDS (24H_LIVE)
-                </h3>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="trendsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="section-header" style="margin: 32px 0 16px;">
-                <h2 style="font-size: 1.2rem;"><span class="hash">#</span> THREAT_ANALYSIS_QUADRANTS</h2>
-                <div class="line"></div>
-            </div>
-
-            <div class="quadrants">
-                <div id="quad-card-dga" class="card quad-card" style="cursor: pointer; border-bottom: 2px solid #a855f7;">
-                    <i class="fa-solid fa-microchip" style="font-size: 1.8rem; color: #a855f7; margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">DGA_DETECTION</h4>
-                    <p style="color: var(--text-secondary); font-size: 11px;">Algorithmically Generated Domains</p>
-                    <div id="quad-dga" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
-                </div>
-                <div id="quad-card-c2" class="card quad-card" style="cursor: pointer; border-bottom: 2px solid #ff0055;">
-                    <i class="fa-solid fa-skull-crossbones" style="font-size: 1.8rem; color: #ff0055; margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">C2_COMMUNICATION</h4>
-                    <p style="color: var(--text-secondary); font-size: 11px;">Command & Control Infrastructure</p>
-                    <div id="quad-c2" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono); color: #ff0055;">0</div>
-                </div>
-                <div id="quad-card-tunnel" class="card quad-card" style="cursor: pointer; border-bottom: 2px solid var(--accent-secondary);">
-                    <i class="fa-solid fa-pipe-valve" style="font-size: 1.8rem; color: var(--accent-secondary); margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">DNS_TUNNELING</h4>
-                    <p style="color: var(--text-secondary); font-size: 11px;">Exfiltration / Data Tunneling</p>
-                    <div id="quad-tunnel" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
-                </div>
-                <div id="quad-card-policy" class="card quad-card" style="cursor: pointer; border-bottom: 2px solid var(--accent-color);">
-                    <i class="fa-solid fa-file-shield" style="font-size: 1.8rem; color: var(--accent-color); margin-bottom: 12px;"></i>
-                    <h4 style="margin-bottom: 4px; font-family: var(--font-mono);">POLICY_VIOLATIONS</h4>
-                    <p style="color: var(--text-secondary); font-size: 11px;">Compliance & Allowed Patterns</p>
-                    <div id="quad-policy" style="font-size: 1.5rem; font-weight: 700; margin-top: 8px; font-family: var(--font-mono);">0</div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 32px;">
-                <div class="card">
-                    <h3 style="margin-bottom: 20px; font-family: var(--font-mono); display: flex; align-items:center; gap: 10px; font-size: 1rem;">
-                        <i class="fa-solid fa-tower-observation" style="color: #f59e0b;"></i> BEHAVIORAL_ANOMALY_MONITOR
-                    </h3>
-                    <div style="overflow-x: auto;">
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="section-header">
+                        <h2 style="font-size: 1.2rem;"><span class="hash">#</span> FRAMEWORK_CONTROL_GAP_ANALYSIS</h2>
+                        <div class="line"></div>
+                    </div>
+                    <div style="margin-bottom: 2rem; display: flex; gap: 12px;">
+                        <button class="btn secondary-btn" id="btnShowFwManager" style="font-size: 0.75rem; padding: 6px 12px;">MANAGE_FRAMEWORKS</button>
+                        <button class="btn secondary-btn" id="btnShowFactExplorer" style="font-size: 0.75rem; padding: 6px 12px;">FACT_EXPLORER</button>
+                    </div>
+                    <div id="complianceResultsArea" style="overflow-x: auto;">
                         <table class="terminal-table">
                             <thead>
                                 <tr>
-                                    <th>CLIENT_IP</th>
-                                    <th>SUSPECT_DOMAIN</th>
-                                    <th style="text-align: center;">QPS_PEAK</th>
-                                    <th style="text-align: center;">RISK_SCORE</th>
+                                    <th>CONTROL_ID</th>
+                                    <th>TITLE</th>
+                                    <th>CRITICALITY</th>
+                                    <th>STATUS</th>
+                                    <th>TECH_COVERAGE</th>
                                 </tr>
                             </thead>
-                            <tbody id="behavior-table-body">
-                                <tr>
-                                    <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px; font-family: var(--font-mono);">
-                                        [LISTENING] Monitoring background traffic patterns...</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="table-controls-body"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Event Logs Section -->
-        <section id="event" class="section">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 style="margin:0; font-family: var(--font-mono); color: var(--accent-color);">[REAL-TIME_SECURITY_EVENTS]</h3>
-                    <button id="btn-refresh-logs" class="btn secondary-btn" style="padding: 5px 12px;"><i class="fa-solid fa-sync"></i></button>
-                </div>
-
-                <!-- Filters -->
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center; background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid var(--border-color);">
-                    <div style="display:flex; align-items:center; gap: 10px;">
-                        <span style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-secondary);">RANGE:</span>
-                        <input type="date" id="log-from" class="terminal-input">
-                        <span style="color: var(--text-secondary);">>></span>
-                        <input type="date" id="log-to" class="terminal-input">
-                    </div>
-                    <input type="text" id="log-filter" placeholder="SEARCH_DOMAIN..." class="terminal-input" style="flex:1;">
-                    <button id="btn-apply-logs" class="btn primary-btn" style="font-size: 11px; padding: 8px 15px;">EXEC_QUERY</button>
-                    <button id="btn-reset-filters" class="btn secondary-btn" style="font-size: 11px; padding: 8px 15px;">RESET</button>
-                </div>
-
-                <!-- Quick Filter Chips -->
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
-                    <span style="font-size:10px; color:var(--text-secondary); font-family: var(--font-mono);">TAG_FILTERS:</span>
-                    <button id="qf-all" class="qf-btn active">ALL</button>
-                    <button id="qf-dga" class="qf-btn">DGA</button>
-                    <button id="qf-c2" class="qf-btn">C2</button>
-                    <button id="qf-tunnel" class="qf-btn">TUNNEL</button>
-                    <button id="qf-policy" class="qf-btn">POLICY</button>
-                    
-                    <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:11px; color:var(--text-secondary); font-family: var(--font-mono);">PAGE_SIZE:</span>
-                        <select id="log-page-size" class="terminal-select">
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
+                <!-- Framework Manager Modal Component -->
+                <div id="compModalFw" class="card hidden" style="margin-top: 2rem; border-color: var(--accent-secondary);">
+                    <h3 style="font-family: var(--font-mono); margin-bottom: 1.5rem;">LOAD_FRAMEWORK_DEFINITION (YAML)</h3>
+                    <textarea id="framework-yaml" rows="8" placeholder="Paste framework definition YAML here..."></textarea>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 12px;">
+                        <button id="btn-load-fw" class="btn primary-btn" style="font-size: 0.8rem; padding: 8px 16px;">INGEST_DATA</button>
+                        <button class="btn secondary-btn btnCloseModal" style="font-size: 0.8rem; padding: 8px 16px;">CLOSE</button>
                     </div>
                 </div>
 
-                <div style="overflow-x: auto;">
-                    <table class="terminal-table">
-                        <thead>
-                            <tr>
-                                <th>TIMESTAMP</th>
-                                <th>ENDPOINT</th>
-                                <th>QUERY_DOMAIN</th>
-                                <th>TYPE</th>
-                                <th>RISK</th>
-                                <th>STATUS</th>
-                                <th>INSIGHT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="log-table-body"></tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div id="log-pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                    <span id="log-page-info" style="font-size:11px; color:var(--text-secondary); font-family: var(--font-mono);"></span>
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <button id="log-prev" class="btn secondary-btn" style="padding: 4px 10px;">PREV</button>
-                        <span id="log-page-num" style="font-size:12px; color:var(--accent-color); font-family: var(--font-mono); min-width: 60px; text-align:center;"></span>
-                        <button id="log-next" class="btn secondary-btn" style="padding: 4px 10px;">NEXT</button>
+                <!-- Fact Explorer Component -->
+                <div id="compModalFacts" class="card hidden" style="margin-top: 2rem; border-color: var(--accent-color);">
+                    <h3 style="font-family: var(--font-mono); margin-bottom: 1.5rem;">TECHNICAL_FACTS_REGISTRY</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="terminal-table" id="table-facts">
+                            <thead>
+                                <tr>
+                                    <th>FACT_KEY</th>
+                                    <th>VALUE</th>
+                                    <th>CONFIDENCE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-facts-body"></tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Audit Trail Section -->
-        <section id="audit" class="section">
-            <div class="card">
-                <h3 style="font-family: var(--font-mono); color: var(--accent-secondary); margin-bottom: 10px;">SYSTEM_AUDIT_TRAIL</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Immutable record of administrative and automated system actions.</p>
-                <div style="overflow-x: auto;">
-                    <table class="terminal-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 200px;">TIME</th>
-                                <th style="width: 150px;">ACTION</th>
-                                <th>DETAILS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="audit-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Policy Section -->
-        <section id="policy" class="section">
-            <div class="card" style="margin-bottom: 24px;">
-                <h3 style="margin-bottom: 20px; font-family: var(--font-mono);">HELIX_OPERATION_MODE</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div id="mode-active" class="mode-card">
-                        <div class="mode-icon"><i class="fa-solid fa-shield-bolt"></i></div>
-                        <div>
-                            <div class="mode-title">ACTIVE_DEFENSE</div>
-                            <div class="mode-desc">Automatically block malicious domains and policy violations in real-time.</div>
-                        </div>
-                    </div>
-                    <div id="mode-passive" class="mode-card">
-                        <div class="mode-icon"><i class="fa-solid fa-eye"></i></div>
-                        <div>
-                            <div class="mode-title">PASSIVE_MONITOR</div>
-                            <div class="mode-desc">Observe and log all traffic without active blocking. (Detection Only)</div>
-                        </div>
-                    </div>
+                    <button class="btn secondary-btn btnCloseModal" style="margin-top: 1.5rem; font-size: 0.8rem; padding: 8px 16px;">CLOSE_EXPLORER</button>
                 </div>
             </div>
 
-            <div class="card" style="margin-bottom: 24px; border-left: 3px solid var(--accent-color); background: rgba(0,255,65,0.02);">
-                <div style="display:flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h4 style="margin: 0; display:flex; align-items:center; gap: 10px; font-family: var(--font-mono);">
-                            <i class="fa-solid fa-earth-asia" style="color: var(--accent-color);"></i> THREAT_INTEL_SYNCHRONIZATION
-                        </h4>
-                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 8px 0 0;">HelixDNS auto-syncs with global feeds (OpenPhish, PhishTank, etc.) every 4 hours.</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <div id="global-intel-count" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-color); font-family: var(--font-mono);">0</div>
-                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;">ACTIVE_THREAT_RECORDS</div>
-                        <div id="global-intel-breakdown" style="margin-top: 8px; text-align: right;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid">
-                <!-- Blacklist -->
+            <!-- Resource Mgmt Panel -->
+            <div id="panelEnvs" class="dashboard-panel hidden">
                 <div class="card">
-                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <h3 style="margin:0; font-family: var(--font-mono); color: #ff0055;">DOMAIN_BLOCKLIST</h3>
-                            <p style="color:var(--text-secondary); font-size:11px; margin-top: 5px;">Manual overrides and custom security boundaries.</p>
-                        </div>
-                        <button id="btn-show-add-block" class="btn" style="background: #ff0055; color: #fff; font-size: 11px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> ADD_BLOCK</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2 style="margin:0; font-family: var(--font-mono);">ENVIRONMENT_INVENTORY</h2>
+                        <button type="button" id="btnNewTask" class="btn primary-btn" style="font-size: 0.8rem; padding: 8px 16px;">
+                            REGISTER_NEW_ENV
+                        </button>
                     </div>
-                    <table class="terminal-table">
-                        <thead>
-                            <tr>
-                                <th>PATTERN</th>
-                                <th>CATEGORY</th>
-                                <th style="text-align: right;">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="blacklist-table-body"></tbody>
-                    </table>
+                    <div id="envsArea">
+                        [SEARCHING] Synchronizing asset database...
+                    </div>
                 </div>
+            </div>
 
-                <!-- Allowlist -->
+            <!-- Audit Panel -->
+            <div id="panelAudit" class="dashboard-panel hidden">
                 <div class="card">
-                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <h3 style="margin:0; font-family: var(--font-mono); color: var(--accent-color);">TRUST_ALLOWLIST</h3>
-                            <p style="color:var(--text-secondary); font-size:11px; margin-top: 5px;">Verified business infrastructure and trusted partners.</p>
-                        </div>
-                        <button id="btn-show-add-trust" class="btn primary-btn" style="font-size: 11px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> ADD_TRUST</button>
+                    <h2 style="font-family: var(--font-mono); margin-bottom: 2rem;">IMMUTABLE_AUDIT_TRAIL</h2>
+                    <div id="auditArea">
+                        [ACCESSING] Retrieving audit history...
                     </div>
-                    <table class="terminal-table">
-                        <thead>
-                            <tr>
-                                <th>PATTERN</th>
-                                <th>REASON</th>
-                                <th style="text-align: right;">ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allowlist-table-body"></tbody>
-                    </table>
                 </div>
             </div>
-        </section>
-
-        <!-- Users Section -->
-        <section id="users" class="section">
-            <div class="card">
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h3 style="font-family: var(--font-mono);">[IDENTITY_ACCESS_CONTROL]</h3>
-                    <button id="btn-show-invite-user" class="btn primary-btn"><i class="fa-solid fa-user-plus"></i> INVITE_USER</button>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="terminal-table">
-                        <thead>
-                            <tr>
-                                <th>EMAIL</th>
-                                <th>ROLE</th>
-                                <th style="text-align: center;">MFA_STATUS</th>
-                                <th style="text-align: center;">JOIN_DATE</th>
-                                <th style="text-align: right;">ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Settings Section -->
-        <section id="setting" class="section">
-            <div class="card">
-                <h3 style="font-family: var(--font-mono); color: var(--accent-secondary); margin-bottom: 10px;">NETWORK_EGRESS_CONFIG</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px;">Manage public IP addresses authorized to use this resolver cluster.</p>
-
-                <div style="display:flex; gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.3); padding: 20px; border: 1px solid var(--border-color);">
-                    <input type="text" id="cidr-input" placeholder="e.g. 52.1.2.3/32" class="terminal-input" style="flex:1;">
-                    <button class="btn primary-btn" id="add-cidr-btn" style="min-width: 120px;">ADD_CIDR</button>
-                </div>
-
-                <div id="cidr-list" style="margin-bottom: 24px;"></div>
-
-                <button class="btn primary-btn" id="save-settings-btn" style="width:100%; justify-content: center; padding: 15px;">COMMIT_INFRASTRUCTURE_CHANGES</button>
-            </div>
-
-            <div class="card" style="margin-top: 24px;">
-                <h3 style="font-family: var(--font-mono); margin-bottom: 10px;">ADVANCED_DNA_SECURITY (AI)</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px;">Enhance threat detection using Neural Networks and Global Reputation services.</p>
-
-                <!-- AI Dispatcher -->
-                <div style="margin-bottom: 30px; padding-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <div style="font-weight: 600; font-size: 16px; font-family: var(--font-mono); color: var(--accent-color);">AI_DISPATCHER (GPT-4o)</div>
-                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Perform deep semantic analysis on suspicious high-entropy domains.</div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="ai-toggle">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display:flex; gap: 10px;">
-                        <input type="password" id="openai-key" placeholder="sk-..." class="terminal-input" style="flex:1;">
-                        <button id="btn-test-openai" class="btn secondary-btn">TEST_AUTH</button>
-                    </div>
-                </div>
-
-                <!-- Google Safe Browsing -->
-                <div style="margin-bottom: 30px;">
-                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <div style="font-weight: 600; font-size: 16px; font-family: var(--font-mono); color: var(--accent-secondary);">GOOGLE_SAFE_BROWSING</div>
-                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Cross-reference against global malware and phishing database.</div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="gsv-toggle">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <div style="display:flex; gap: 10px;">
-                        <input type="password" id="gsv-key" placeholder="API_KEY" class="terminal-input" style="flex:1;">
-                        <button id="btn-test-gsv" class="btn secondary-btn">TEST_AUTH</button>
-                    </div>
-                </div>
-
-                <button class="btn primary-btn" id="save-advanced-btn" style="width:100%; justify-content: center; padding: 15px;">UPDATE_SECURITY_DNA</button>
-            </div>
-        </section>
-
+        </div>
     </main>
+    </div><!-- #gov-authenticated-shell -->
 
-    <!-- Modals -->
-    <!-- (Modals are kept and styled via CSS to match the cyberpunk aesthetic) -->
-
-    <!-- Login Overlay -->
-    <div id="login-overlay" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:5000; align-items:center; justify-content:center;">
-        <a href="services.html" class="helix-login-back back-link">
+    <!-- Login only until session valid (same pattern as helix-dns-center.html) -->
+    <div id="gov-login-overlay" class="gov-login-overlay">
+        <a href="services.html" class="gov-login-back">
             <i class="fa-solid fa-chevron-left"></i>
             <span data-i18n="nav.back_to_services">RETURN_TO_SERVICES</span>
         </a>
-        <div class="card" style="width: 400px; text-align: center; border-color: var(--accent-color); padding: 3rem;">
-            <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
-                <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" style="height: 60px;">
+        <div class="card gov-login-card">
+            <div class="logo" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <img src="/assets/logo_v2-DUFKW_m4-DUFKW_m4.png" alt="Nine-Security" style="height: 56px;">
             </div>
-            <h2 style="font-family: var(--font-mono); margin-bottom: 0.5rem; font-size: 1.5rem;">SECURITY_CENTER</h2>
-            <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 2rem;">[AUTHENTICATION_REQUIRED]</p>
+            <p class="terminal-text" style="margin-bottom: 0.75rem; font-size: 0.85rem;">Accessing Governance Subsystem... <span class="status-ok">[ENCRYPTED]</span></p>
+            <h2 style="font-family: var(--font-mono); margin-bottom: 0.35rem; font-size: 1.35rem;">GOVERNANCE_TERMINAL</h2>
+            <p style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 1.75rem;">[AUTHENTICATION_REQUIRED]</p>
 
-            <form id="login-form" autocomplete="on">
-                <input type="email" id="login-email" placeholder="EMAIL_IDENTITY" autocomplete="username" class="terminal-input" style="width: 100%; margin-bottom: 1rem;">
-                <input type="password" id="login-pass" placeholder="SECRET_PASSPHRASE" autocomplete="current-password" class="terminal-input" style="width: 100%; margin-bottom: 2rem;">
-
-                <button type="submit" class="btn primary-btn" style="width:100%; justify-content:center;">INITIALIZE_SESSION</button>
-            </form>
-            <div id="login-error" style="color: #ff0055; margin-top: 1.5rem; font-family: var(--font-mono); font-size: 0.8rem; display:none;"></div>
+            <div id="loginForm">
+                <div id="loginMsg" class="msg hidden"></div>
+                <input type="email" id="loginEmail" autocomplete="username" class="terminal-input" placeholder="EMAIL_IDENTITY" style="margin-bottom: 1rem;">
+                <input type="password" id="loginPassword" autocomplete="current-password" class="terminal-input" placeholder="SECRET_PASSPHRASE" style="margin-bottom: 1.25rem;">
+                <button type="button" id="btnLogin" class="btn primary-btn" style="width: 100%; justify-content: center;">
+                    INITIALIZE_SESSION
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- Global Modal System -->
+    <div id="customModal" class="modal-overlay">
+        <div class="card" style="width: 450px; padding: 3rem; border-color: var(--accent-secondary);">
+            <div style="margin-bottom: 2rem;">
+                <h3 id="modalTitle" style="font-family: var(--font-mono); margin-bottom: 1rem;">MODAL_TITLE</h3>
+                <p id="modalDesc" style="color: var(--text-secondary); font-size: 0.9rem;">Supporting description goes here.</p>
+            </div>
+            <div style="margin-bottom: 2.5rem;">
+                <input type="text" id="modalInput" placeholder="...">
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn secondary-btn modal-cancel">CANCEL</button>
+                <button class="btn primary-btn modal-confirm">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/dist/fflate.min.js"></script>
 </body>
 
 </html>
