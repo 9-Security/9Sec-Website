@@ -1,0 +1,32 @@
+/* 1. Variables & Themes */
+:root {
+    --bg-color: #050505;
+    --card-bg: rgba(20, 20, 20, 0.7);
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent-color: #00ff41;
+    /* Hacker Green */
+    --accent-secondary: #00e5ff;
+    /* Cyber Blue */
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'Inter', sans-serif;
+    --border-color: rgba(0, 255, 65, 0.3);
+    --header-bg: rgba(5, 5, 5, 0.8);
+    --scanline-opacity: 0.15;
+    --card-hover-bg: rgba(30, 30, 30, 0.8);
+}
+
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --text-primary: #050505;
+    --text-secondary: #444444;
+    --accent-color: #0056b3;
+    /* Professional Blue */
+    --accent-secondary: #004494;
+    /* Darker Blue */
+    --border-color: rgba(0, 86, 179, 0.3);
+    --header-bg: rgba(240, 242, 245, 0.95);
+    --scanline-opacity: 0.03;
+    --card-hover-bg: rgba(255, 255, 255, 1);
+}

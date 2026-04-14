@@ -1,0 +1,57 @@
+/* 8. 9SEC Model Specific Styles */
+.model-intro {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.model-intro .highlight-text {
+    color: var(--accent-color);
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.model-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.layer-card {
+    border-top: 3px solid var(--layer-color, var(--accent-color));
+}
+
+.layer-card .card-header h3 {
+    margin-left: 0.5rem;
+}
+
+.layer-num {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.layer-desc {
+    font-style: italic;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.layer-details li {
+    margin-bottom: 0.5rem;
+    position: relative;
+    padding-left: 1rem;
+    list-style: none;
+}
+
+.layer-details li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--layer-color, var(--accent-color));
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+}

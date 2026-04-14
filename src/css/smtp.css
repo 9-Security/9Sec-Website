@@ -1,0 +1,426 @@
+/* SMTP Assessment Stepper & Report */
+.hidden {
+    display: none !important;
+}
+
+/*
+ * SMTP check tool form: modular bundle does not import legacy style.css, so these
+ * rules must live here. Make the work-email field the visual hero of the card.
+ */
+.check-interface #smtp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    width: 100%;
+    max-width: 40rem;
+    margin: 1.5rem auto 0;
+}
+
+.check-interface #smtp-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.check-interface #smtp-form .form-group label {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent-secondary);
+    letter-spacing: 0.03em;
+}
+
+.check-interface #smtp-form #email-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 3.35rem;
+    padding: 1rem 1.15rem;
+    font-size: 1.125rem;
+    line-height: 1.45;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.check-interface #smtp-form #email-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.check-interface #smtp-form #email-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color), 0 0 24px rgba(0, 255, 65, 0.18);
+}
+
+.check-interface #smtp-form .form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.check-interface #smtp-form .form-checkbox input {
+    margin-top: 0.35rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.check-interface #smtp-form .primary-btn {
+    width: 100%;
+    max-width: 40rem;
+    margin-inline: auto;
+    min-height: 3rem;
+    padding: 0.9rem 1.25rem;
+    font-size: 1.05rem;
+    font-family: var(--font-mono);
+    justify-content: center;
+}
+
+.smtp-card {
+    background: var(--card-bg);
+    border: 1px solid var(--accent-color);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.verify-step {
+    text-align: center;
+}
+
+.terminal-log {
+    background: #000;
+    color: var(--accent-color);
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    margin: 1.5rem 0;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.log-line.warn {
+    color: #ffaa00;
+}
+
+.log-line.success {
+    color: #00ff41;
+}
+
+.verification-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px dashed var(--accent-secondary);
+}
+
+/* Verification step (legacy rules lived in root style.css — not bundled with Vite) */
+#smtp-step-verify .verify-content {
+    width: 100%;
+    max-width: 44rem;
+    margin-inline: auto;
+    padding: 1.25rem 0.25rem 1.5rem;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+#smtp-step-verify .verify-content .step-icon i {
+    font-size: 3rem;
+    color: var(--accent-color);
+}
+
+#smtp-step-verify .verify-content > h3 {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    margin: 0;
+    max-width: 36rem;
+}
+
+#smtp-step-verify .verify-content > p {
+    margin: 0;
+    max-width: 36rem;
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+
+#smtp-step-verify .loader-box {
+    margin-top: 0.25rem;
+    width: 100%;
+    max-width: 44rem;
+    padding: 0 0.25rem;
+    box-sizing: border-box;
+}
+
+#smtp-step-verify .loader-text {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+    text-align: center;
+}
+
+#smtp-step-verify .progress-bar {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="light"] #smtp-step-verify .progress-bar {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#smtp-step-verify .bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 30%;
+    border-radius: 4px;
+    background: var(--accent-color);
+    animation: smtp-verify-loading 2s infinite ease-in-out;
+}
+
+@keyframes smtp-verify-loading {
+    0% {
+        left: -30%;
+        width: 30%;
+    }
+    50% {
+        left: 30%;
+        width: 50%;
+    }
+    100% {
+        left: 100%;
+        width: 30%;
+    }
+}
+
+#smtp-step-verify .terminal-log {
+    width: 100%;
+    max-width: 44rem;
+    margin: 0.5rem 0 0;
+    box-sizing: border-box;
+}
+
+#smtp-step-verify .copy-box.smtp-verify-address-frame {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.6rem 0.5rem 0.85rem;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(0, 255, 65, 0.06);
+    overflow: hidden;
+}
+
+#smtp-step-verify .smtp-verify-email-text {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0.65rem 0.25rem 0.65rem 0;
+    align-self: center;
+    font-family: var(--font-mono);
+    font-size: clamp(0.8rem, 2.4vw, 1.05rem);
+    line-height: 1.45;
+    color: var(--accent-secondary);
+    word-break: break-all;
+    white-space: normal;
+    background: transparent;
+    text-align: left;
+}
+
+#smtp-step-verify .smtp-copy-btn.copy-btn {
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.1rem;
+    min-height: 3.1rem;
+    padding: 0.5rem 0.65rem;
+    margin: 0;
+    background: rgba(0, 255, 65, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--accent-color);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#smtp-step-verify .smtp-copy-btn.copy-btn:hover {
+    background: rgba(0, 255, 65, 0.2);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 16px rgba(0, 255, 65, 0.25);
+}
+
+#smtp-step-verify .smtp-copy-btn.copy-btn i {
+    font-size: 1.4rem;
+    line-height: 1;
+    width: 1.4rem;
+    height: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Report View */
+#smtp-step-report {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.risk-item {
+    border-left: 4px solid #666;
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 0.8rem;
+    padding: 1rem;
+}
+
+.remediation-card {
+    display: none;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+}
+
+.remediation-title {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+/* ========== Unified Executive Report Styles ========== */
+#report-content .report-header {
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#report-content .report-header h1 {
+    color: #00ff41;
+    margin: 0;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+#report-content .section-title {
+    color: #00ff41;
+    font-family: monospace;
+    margin: 30px 0 15px;
+    font-size: 1.1rem;
+    border-left: 4px solid #00ff41;
+    padding-left: 15px;
+    text-transform: uppercase;
+}
+
+#report-content .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 600px) {
+    #report-content .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+#report-content .card {
+    background: #111;
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+#report-content .label {
+    color: #888;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+#report-content .value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+#report-content .value.pass {
+    color: #00ff41;
+}
+
+#report-content .value.fail {
+    color: #ff0055;
+}
+
+#report-content .value.warn {
+    color: #ffaa00;
+}
+
+#report-content .risk-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #333;
+    margin-bottom: 8px;
+    border-left: 4px solid #ff0055;
+}
+
+#report-content .gap-warning {
+    font-size: 0.7rem;
+    color: #ff0055;
+    margin-top: 8px;
+    font-style: italic;
+    border-top: 1px solid #222;
+    padding-top: 5px;
+}
+
+#report-content .cta-box {
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid #00ff41;
+    padding: 25px;
+    margin-top: 40px;
+    text-align: center;
+}
+
+#report-content .report-footer {
+    margin-top: 50px;
+    text-align: center;
+    color: #555;
+    font-size: 0.8rem;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+}

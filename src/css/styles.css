@@ -1,0 +1,38 @@
+/* 
+ * 9SEC V3 Global Styles (Comprehensive Modularization)
+ * This entry point imports all logical sections to restore the full legacy experience.
+ */
+
+@import './variables.css';
+@import './base.css';
+@import './header.css';
+@import './hero.css';
+@import './common.css';
+@import './lists.css';
+@import './model.css';
+@import './controls.css';
+@import './footer.css';
+@import './responsive.css';
+@import './smtp.css';
+@import './modals.css';
+@import './notices.css';
+@import './theme_fixes.css';
+@import './tools.css';
+@import './misc.css';
+
+/* Local animation aliases if needed */
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
