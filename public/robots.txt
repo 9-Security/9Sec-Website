@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /config/
-Disallow: /search
-Disallow: /api/
-
-Sitemap: https://nine-security.com/sitemap.xml
