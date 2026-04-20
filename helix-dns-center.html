@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/theme-init.js"></script>
+    <link rel="icon" href="data:,">
     <title>HelixDNS Security Center | Nine-Security</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -17,30 +18,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Instance Conflict & Lifecycle Guard -->
     <script>
-        // Enhanced Chart.js Lifecycle Guard
         (function() {
             const OriginalChart = window.Chart;
             if (!OriginalChart) return;
 
+            // 1. Hook into Constructor
             window.Chart = function(ctx, config) {
                 try {
-                    // 1. Resolve element
                     const el = (typeof ctx === 'string') ? document.getElementById(ctx) : ctx;
                     if (el) {
-                        // 2. Safely destroy existing instance
                         const existing = OriginalChart.getChart(el);
-                        if (existing) {
-                            existing.destroy();
-                        }
+                        if (existing) { existing.destroy(); }
                     }
-                } catch (e) {
-                    console.warn("[Chart Guard] Cleanup failed:", e);
-                }
-                // 3. Create new instance
-                return new OriginalChart(ctx, config);
+                } catch (e) {}
+                const instance = new OriginalChart(ctx, config);
+                
+                // 2. Wrap instance update method to catch 'parentNode' errors
+                const originalUpdate = instance.update;
+                instance.update = function(mode) {
+                    try {
+                        if (!this.canvas || !this.canvas.parentNode) {
+                            console.warn("[Chart Guard] Skipping update: Canvas detached from DOM.");
+                            return;
+                        }
+                        return originalUpdate.apply(this, arguments);
+                    } catch (e) {
+                        console.error("[Chart Guard] Update crash suppressed:", e);
+                    }
+                };
+                return instance;
             };
-            // Maintain static methods
             Object.assign(window.Chart, OriginalChart);
         })();
     </script>
@@ -515,6 +524,13 @@
         </div>
     </div>
 
+    <div id="safety-padding" style="display:none;">
+        <span id="alert-title"></span>
+        <span id="alert-message"></span>
+        <span id="stat-total">0</span>
+        <span id="stat-blocked">0</span>
+        <span id="stat-threats">0</span>
+    </div>
 </body>
 
 </html>
