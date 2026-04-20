@@ -20,9 +20,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- Chart.js Instance Conflict & Lifecycle Guard -->
     <script>
+        // DOM Safe-guard: Prevent null pointer errors on missing elements
+        (function() {
+            const originalGetElementById = document.getElementById;
+            document.getElementById = function(id) {
+                const el = originalGetElementById.call(document, id);
+                if (el) return el;
+                // If element is missing, return a dummy object to swallow .style, .textContent, etc.
+                return {
+                    style: {},
+                    classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false },
+                    appendChild: () => {},
+                    addEventListener: () => {},
+                    querySelector: () => null,
+                    querySelectorAll: () => [],
+                    getContext: () => null,
+                    dataset: {}
+                };
+            };
+        })();
+
         (function() {
             const OriginalChart = window.Chart;
-            if (!OriginalChart) return;
+...            if (!OriginalChart) return;
 
             // 1. Hook into Constructor
             window.Chart = function(ctx, config) {
@@ -530,6 +550,11 @@
         <span id="stat-total">0</span>
         <span id="stat-blocked">0</span>
         <span id="stat-threats">0</span>
+        <div id="login-overlay"></div>
+        <div id="loading-overlay"></div>
+        <div id="modal-backdrop"></div>
+        <div id="ai-status-indicator"></div>
+        <div id="gsv-status-indicator"></div>
     </div>
 </body>
 
