@@ -42,7 +42,7 @@
 
         (function() {
             const OriginalChart = window.Chart;
-...            if (!OriginalChart) return;
+            if (!OriginalChart) return;
 
             // 1. Hook into Constructor
             window.Chart = function(ctx, config) {
