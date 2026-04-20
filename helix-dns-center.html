@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://nine-security.com; connect-src 'self' https://api.nine-security.com https://api.ipify.org;">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
     <script src="/js/theme-init.js"></script>
     <title>HelixDNS Security Center | Nine-Security</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -20,21 +18,30 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script>
-        // Emergency Patch: Prevent "Canvas is already in use" errors by auto-destroying existing charts
+        // Enhanced Chart.js Lifecycle Guard
         (function() {
             const OriginalChart = window.Chart;
-            if (OriginalChart) {
-                window.Chart = new Proxy(OriginalChart, {
-                    construct(target, args) {
-                        const [ctx] = args;
-                        try {
-                            const existing = target.getChart(ctx);
-                            if (existing) { existing.destroy(); }
-                        } catch(e) {}
-                        return new target(...args);
+            if (!OriginalChart) return;
+
+            window.Chart = function(ctx, config) {
+                try {
+                    // 1. Resolve element
+                    const el = (typeof ctx === 'string') ? document.getElementById(ctx) : ctx;
+                    if (el) {
+                        // 2. Safely destroy existing instance
+                        const existing = OriginalChart.getChart(el);
+                        if (existing) {
+                            existing.destroy();
+                        }
                     }
-                });
-            }
+                } catch (e) {
+                    console.warn("[Chart Guard] Cleanup failed:", e);
+                }
+                // 3. Create new instance
+                return new OriginalChart(ctx, config);
+            };
+            // Maintain static methods
+            Object.assign(window.Chart, OriginalChart);
         })();
     </script>
     <!-- PDF Export -->
