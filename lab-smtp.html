@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9SEC | SMTP Technical Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/arsenal-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_.css">
+    <style>
+        .lab-container { padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
+        .lab-header { text-align: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem; }
+        .lab-input-group { display: flex; gap: 1rem; margin-bottom: 3rem; }
+        input[type="text"] { 
+            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); 
+            color: var(--accent-color); padding: 1rem; font-family: var(--font-mono); font-size: 1.2rem;
+        }
+        .scan-btn { 
+            background: var(--accent-color); color: #000; border: none; padding: 0 2rem; 
+            font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+        #lab-results { display: none; margin-top: 2rem; }
+        /* Reuse Report Styles from smtp.css */
+        .ai-advice-container { background: rgba(187, 102, 255, 0.05); border: 1px solid rgba(187, 102, 255, 0.3); border-left: 4px solid #bb66ff; padding: 20px; margin-bottom: 30px; }
+        .ai-advice-header { color: #bb66ff; font-family: var(--font-mono); margin-bottom: 10px; font-weight: bold; }
+        .ai-advice-content { color: #d199ff; font-family: var(--font-mono); white-space: pre-wrap; font-size: 0.9rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1rem; }
+        .label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .value { font-family: var(--font-mono); font-size: 1rem; margin-top: 5px; }
+        .value.pass { color: #00ff41; }
+        .value.fail { color: #ff0055; }
+        .bimi-preview img { max-width: 60px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="lab-container">
+        <div class="lab-header">
+            <h1 class="glitch-title">9SEC_SMTP_TECHNICAL_LAB</h1>
+            <p>Internal reconnaissance tool for advanced mail security auditing.</p>
+        </div>
+
+        <div class="lab-input-group">
+            <input type="text" id="target-domain" placeholder="enter-target-domain.com">
+            <button class="scan-btn" id="btn-scan">Execute_Scan</button>
+        </div>
+
+        <div id="loading" style="display: none; text-align: center; color: var(--accent-color);">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> INTERROGATING DNS INFRASTRUCTURE...
+        </div>
+
+        <div id="lab-results">
+            <div id="ai-section"></div>
+            <div class="grid" id="report-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://gov.nine-security.com';
+        
+        document.getElementById('btn-scan').addEventListener('click', async () => {
+            const domain = document.getElementById('target-domain').value.trim();
+            if (!domain) return;
+
+            const resArea = document.getElementById('lab-results');
+            const loader = document.getElementById('loading');
+            resArea.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/assessment/lab-scan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain })
+                });
+                
+                if (!response.ok) {
+                    const errBody = await response.json().catch(() => ({}));
+                    throw new Error(errBody.error || `HTTP_STATUS_${response.status}`);
+                }
+
+                const data = await response.json();
+                renderLabReport(data);
+            } catch (err) {
+                console.error(err);
+                alert('SCAN_ERROR: ' + err.message + '\n\nPossible Causes:\n1. Origin Rejected (CORS)\n2. Server Timeout\n3. Invalid Domain');
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+
+        function renderLabReport(data) {
+            const aiSection = document.getElementById('ai-section');
+            const grid = document.getElementById('report-grid');
+            const resArea = document.getElementById('lab-results');
+
+            // Render AI Advice
+            aiSection.innerHTML = `
+                <div class="ai-advice-container">
+                    <div class="ai-advice-header"><i class="fa-solid fa-microchip-ai"></i> AI_CONSULTANT_RECON_REPORT</div>
+                    <div class="ai-advice-content">${data.ai_advice || 'No AI advice generated.'}</div>
+                </div>
+            `;
+
+            // Render Advanced Metrics
+            const adv = data.advanced_posture || {};
+            grid.innerHTML = `
+                <div class="card"><div class="label">SPF Status</div><div class="value ${data.dns_posture.spf === 'pass' ? 'pass' : 'fail'}">${data.dns_posture.spf.toUpperCase()}</div></div>
+                <div class="card"><div class="label">DMARC Status</div><div class="value ${data.dns_posture.dmarc === 'pass' ? 'pass' : 'fail'}">${data.dns_posture.dmarc.toUpperCase()}</div></div>
+                <div class="card"><div class="label">DANE (TLSA)</div><div class="value ${adv.dane?.status === 'pass' ? 'pass' : 'fail'}">${(adv.dane?.status || 'MISSING').toUpperCase()}</div></div>
+                <div class="card"><div class="label">MTA-STS Mode</div><div class="value pass">${adv.mta_sts_policy?.mode || 'NOT FOUND'}</div></div>
+                <div class="card">
+                    <div class="label">BIMI Brand Identity</div>
+                    <div class="value ${adv.bimi?.status === 'pass' ? 'pass' : 'fail'}">${(adv.bimi?.status || 'MISSING').toUpperCase()}</div>
+                    ${adv.bimi?.logo_url ? `<div class="bimi-preview"><img src="${adv.bimi.logo_url}"></div>` : ''}
+                </div>
+                <div class="card"><div class="label">VMC Certificate</div><div class="value ${adv.bimi?.has_vmc ? 'pass' : 'fail'}">${adv.bimi?.has_vmc ? 'CERTIFIED' : 'NOT FOUND'}</div></div>
+            `;
+
+            resArea.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
