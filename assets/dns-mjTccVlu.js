@@ -6,17 +6,34 @@ function Tn() {
     const e = document.getElementById("sidebar-toggle"), t = document.getElementById("sidebar");
     if(e && t) e.onclick = () => t.classList.toggle("collapsed");
 }
-function Gn() { console.log("System components initialized."); }
+function Gn() { console.log("Security modules online."); }
 function We() { 
     ["log-filter", "log-from", "log-to"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
     R(1); 
 }
 
+// 智慧請求器：支援 Cookie 與 Token 雙模式
+async function f(path, method="GET", body=null) {
+    const token = localStorage.getItem("9sec_token");
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (body) headers["Content-Type"] = "application/json";
+
+    const opts = { method, headers, credentials: "include" };
+    if (body) opts.body = JSON.stringify(body);
+
+    const r = await fetch(J + path, opts);
+    
+    if (r.status === 401 && !path.includes("/auth/login")) {
+        B = null;
+        document.getElementById("login-overlay").style.display = "flex";
+    }
+    return r.json();
+}
+
 async function he() {
     try {
-        const r = await fetch(J + "/api/user/me", { credentials: "include" });
-        if (r.status === 401) { B = null; document.getElementById("login-overlay").style.display = "flex"; return; }
-        const t = await r.json();
+        const t = await f("/api/user/me");
         if(t.ok && t.user) {
             B = t.user;
             document.getElementById("login-overlay").style.display = "none";
@@ -31,25 +48,17 @@ async function he() {
 async function He(){
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-pass").value;
+    const errEl = document.getElementById("login-error");
     try {
-        const r = await fetch(J + "/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email, password })
-        });
-        const a = await r.json();
-        if(a.ok) await he();
-        else alert(a.error || "Login Failed");
-    } catch(e) { alert("Server connection failed."); }
-}
-
-async function f(p, m="GET", b=null) {
-    const o = { method:m, headers: {}, credentials: "include" };
-    if(b) { o.headers["Content-Type"] = "application/json"; o.body = JSON.stringify(b); }
-    const r = await fetch(J + p, o);
-    if(r.status === 401) { B = null; document.getElementById("login-overlay").style.display = "flex"; }
-    return r.json();
+        const a = await f("/api/auth/login", "POST", { email, password });
+        if(a.ok) {
+            // 如果後端有回傳 token，存入 localStorage 繞過 Cookie 攔截
+            if (a.token) localStorage.setItem("9sec_token", a.token);
+            await he();
+        } else {
+            if(errEl) { errEl.textContent = a.error || "Login Failed"; errEl.style.display = "block"; }
+        }
+    } catch(e) { alert("API Connection Failed."); }
 }
 
 async function R(page=1) {
@@ -82,9 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ["overview", "event", "audit", "policy", "users", "setting"].forEach(id => {
         document.getElementById("nav-"+id)?.addEventListener("click", e => de(id, e.currentTarget));
     });
-    document.getElementById("nav-logout")?.addEventListener("click", async () => { await fetch(J+"/api/auth/logout", {method:"POST", credentials:"include"}); location.reload(); });
-    document.getElementById("btn-show-add-block")?.addEventListener("click", () => document.getElementById("blocklist-modal").style.display="flex");
-    document.getElementById("btn-show-add-trust")?.addEventListener("click", () => document.getElementById("allowlist-modal").style.display="flex");
+    document.getElementById("nav-logout")?.addEventListener("click", () => { 
+        localStorage.removeItem("9sec_token");
+        location.reload(); 
+    });
 });
 
 window.Gn = Gn; window.We = We; window.switchSection = de; window.login = He;
