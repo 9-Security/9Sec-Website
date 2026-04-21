@@ -1,31 +1,42 @@
 const J = "https://api.nine-security.com";
 let B = null;
 
+// [Core] Utility for HTML escaping
 function m(e) { return e == null ? "" : String(e).replace(/[&<>"']/g, s => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[s])); }
-function Tn() { 
-    const e = document.getElementById("sidebar-toggle"), t = document.getElementById("sidebar");
-    if(e && t) e.onclick = () => t.classList.toggle("collapsed");
-}
-function Gn() { console.log("Security modules online."); }
-function We() { 
-    ["log-filter", "log-from", "log-to"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
-    R(1); 
+
+// [UI] Modal Controls
+const ct = () => { const el = document.getElementById("blocklist-modal"); if(el) el.style.display="flex"; };
+const Rn = () => { const el = document.getElementById("blocklist-modal"); if(el) el.style.display="none"; };
+const dt = () => { const el = document.getElementById("allowlist-modal"); if(el) el.style.display="flex"; };
+const rt = () => { const el = document.getElementById("allowlist-modal"); if(el) el.style.display="none"; };
+const lt = () => { const el = document.getElementById("user-modal"); if(el) el.style.display="flex"; };
+const st = () => { const el = document.getElementById("user-modal"); if(el) el.style.display="none"; };
+
+// [UI] Section Switching
+function de(sec, btn) {
+    console.log("Switching to section:", sec);
+    document.querySelectorAll(".nav-item").forEach(a => a.classList.remove("active"));
+    if(btn) {
+        btn.classList.add("active");
+    } else {
+        const navBtn = document.getElementById("nav-" + sec);
+        if(navBtn) navBtn.classList.add("active");
+    }
+    document.querySelectorAll(".section").forEach(a => a.classList.remove("active"));
+    const target = document.getElementById(sec);
+    if(target) target.classList.add("active");
 }
 
-// 智慧請求器：支援 Cookie 與 Token 雙模式
+// [Auth] Smart Requester
 async function f(path, method="GET", body=null) {
     const token = localStorage.getItem("9sec_token");
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
     if (body) headers["Content-Type"] = "application/json";
-
     const opts = { method, headers, credentials: "include" };
     if (body) opts.body = JSON.stringify(body);
-
     const r = await fetch(J + path, opts);
-    
     if (r.status === 401 && !path.includes("/auth/login")) {
-        B = null;
         document.getElementById("login-overlay").style.display = "flex";
     }
     return r.json();
@@ -39,28 +50,28 @@ async function he() {
             document.getElementById("login-overlay").style.display = "none";
             document.getElementById("user-display").textContent = B.email;
             pt(); R(1);
-            return;
         }
-    } catch(e) {}
-    document.getElementById("login-overlay").style.display = "flex";
+    } catch(e) {
+        document.getElementById("login-overlay").style.display = "flex";
+    }
 }
 
 async function He(){
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-pass").value;
-    const errEl = document.getElementById("login-error");
     try {
         const a = await f("/api/auth/login", "POST", { email, password });
         if(a.ok) {
-            // 如果後端有回傳 token，存入 localStorage 繞過 Cookie 攔截
             if (a.token) localStorage.setItem("9sec_token", a.token);
             await he();
         } else {
-            if(errEl) { errEl.textContent = a.error || "Login Failed"; errEl.style.display = "block"; }
+            const errEl = document.getElementById("login-error");
+            if(errEl) { errEl.textContent = a.error; errEl.style.display = "block"; }
         }
-    } catch(e) { alert("API Connection Failed."); }
+    } catch(e) { alert("API Error"); }
 }
 
+// [Data] Fetchers
 async function R(page=1) {
     const res = await f("/api/user/dns-analytics?page=" + page);
     if(res.ok && res.stats) {
@@ -77,26 +88,40 @@ async function pt() {
     }
 }
 
-function de(sec, btn) {
-    document.querySelectorAll(".nav-item").forEach(a => a.classList.remove("active"));
-    if(btn) btn.classList.add("active");
-    document.querySelectorAll(".section").forEach(a => a.classList.remove("active"));
-    const target = document.getElementById(sec);
-    if(target) target.classList.add("active");
-}
-
+// [Init] Startup
 document.addEventListener("DOMContentLoaded", () => {
-    he(); Tn(); Gn();
+    console.log("HelixDNS Dashboard Initializing...");
+    
+    // 1. Critical Listeners
     document.getElementById("login-form")?.addEventListener("submit", e => { e.preventDefault(); He(); });
+    document.getElementById("sidebar-toggle")?.addEventListener("click", () => document.getElementById("sidebar")?.classList.toggle("collapsed"));
+    
     ["overview", "event", "audit", "policy", "users", "setting"].forEach(id => {
         document.getElementById("nav-"+id)?.addEventListener("click", e => de(id, e.currentTarget));
     });
+
     document.getElementById("nav-logout")?.addEventListener("click", () => { 
         localStorage.removeItem("9sec_token");
         location.reload(); 
     });
+
+    // 2. Action Buttons
+    document.getElementById("btn-show-add-block")?.addEventListener("click", ct);
+    document.getElementById("btn-show-add-trust")?.addEventListener("click", dt);
+    document.getElementById("btn-show-invite-user")?.addEventListener("click", lt);
+
+    // 3. Start Session Check
+    he();
 });
 
-window.Gn = Gn; window.We = We; window.switchSection = de; window.login = He;
-window.hideAddBlocklist = () => document.getElementById("blocklist-modal").style.display="none";
-window.hideAddAllowlist = () => document.getElementById("allowlist-modal").style.display="none";
+// [Expose] Make functions available to HTML onclick attributes
+window.switchSection = de;
+window.login = He;
+window.showAddBlocklist = ct;
+window.hideAddBlocklist = Rn;
+window.showAddAllowlist = dt;
+window.hideAddAllowlist = rt;
+window.showAddUser = lt;
+window.hideAddUser = st;
+window.Gn = () => {}; 
+window.We = () => { R(1); };
