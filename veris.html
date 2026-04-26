@@ -193,6 +193,151 @@
             margin-top: 0.2rem;
         }
 
+        .veris-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .veris-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .veris-field {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .veris-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .veris-field label {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .veris-field input,
+        .veris-field select {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-primary);
+            padding: 0.8rem 0.95rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+        }
+
+        .veris-field input::file-selector-button {
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            padding: 0.55rem 0.85rem;
+            border-radius: 4px;
+            margin-right: 0.85rem;
+            cursor: pointer;
+        }
+
+        .veris-field input:focus,
+        .veris-field select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.25);
+        }
+
+        .veris-form-hint {
+            margin: -0.1rem 0 0;
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .veris-feedback {
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .veris-feedback[hidden] {
+            display: none;
+        }
+
+        .veris-feedback.success {
+            border-color: rgba(0, 255, 157, 0.4);
+            background: rgba(0, 255, 157, 0.06);
+        }
+
+        .veris-feedback.error {
+            border-color: rgba(255, 77, 77, 0.42);
+            background: rgba(255, 77, 77, 0.08);
+        }
+
+        .veris-feedback.pending {
+            border-color: rgba(0, 229, 255, 0.4);
+            background: rgba(0, 229, 255, 0.07);
+        }
+
+        .veris-feedback strong {
+            display: block;
+            margin-bottom: 0.45rem;
+        }
+
+        .veris-feedback code {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .veris-feedback-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+        }
+
+        .veris-feedback-actions .btn {
+            min-width: 0;
+        }
+
+        .veris-summary {
+            margin: 0.9rem 0 0;
+            display: grid;
+            gap: 0.45rem;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            color: var(--text-primary);
+        }
+
+        .veris-summary div {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.45rem;
+        }
+
+        .veris-report {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            max-height: 420px;
+            overflow: auto;
+        }
+
         [data-theme=light] .veris-action-card,
         [data-theme=light] .veris-note {
             background: #ffffff !important;
@@ -213,6 +358,10 @@
 
             .veris-action-card {
                 padding: 1.5rem;
+            }
+
+            .veris-form-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -286,10 +435,48 @@
                     <li><span>02</span> Download and run it on the Windows endpoint with the signed token.</li>
                     <li><span>03</span> Review the Central job and full report.</li>
                 </ol>
-                <a href="https://gov.nine-security.com/api/veris/requests/new" class="btn primary-btn" target="_blank"
-                    rel="noopener noreferrer">
-                    <i class="fa-solid fa-download"></i> GENERATE_SCANNER
-                </a>
+                <form id="scannerRequestForm" class="veris-form">
+                    <div class="veris-form-grid">
+                        <div class="veris-field">
+                            <label for="scanner-case-id">Case ID</label>
+                            <input id="scanner-case-id" name="case_id" type="text" placeholder="case-2026-001">
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-requester-name">Name</label>
+                            <input id="scanner-requester-name" name="requester_name" type="text" placeholder="Analyst name" required>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-contact">Contact</label>
+                            <input id="scanner-contact" name="contact" type="text" placeholder="email or phone">
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-window">Observation Window</label>
+                            <select id="scanner-window" name="observation_window_sec">
+                                <option value="0">Off</option>
+                                <option value="60">60 seconds</option>
+                                <option value="180">180 seconds</option>
+                                <option value="300">300 seconds</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-ttl">Token TTL</label>
+                            <select id="scanner-ttl" name="token_ttl_hours">
+                                <option value="24">24 hours</option>
+                                <option value="72">72 hours</option>
+                                <option value="168">7 days</option>
+                            </select>
+                        </div>
+                        <div class="veris-field full">
+                            <label for="scanner-note">Note</label>
+                            <input id="scanner-note" name="note" type="text" placeholder="Optional case note">
+                        </div>
+                    </div>
+                    <p class="veris-form-hint">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API.</p>
+                    <button class="btn primary-btn" id="generateScannerBtn" type="submit">
+                        <i class="fa-solid fa-download"></i> GENERATE_SCANNER
+                    </button>
+                </form>
+                <div id="scannerRequestStatus" class="veris-feedback" hidden></div>
             </article>
 
             <article class="veris-action-card secondary">
@@ -301,10 +488,23 @@
                     <li><span>02</span> Assign a case identifier.</li>
                     <li><span>03</span> Open the generated report or result JSON.</li>
                 </ol>
-                <a href="https://gov.nine-security.com/api/veris/upload" class="btn secondary-btn" target="_blank"
-                    rel="noopener noreferrer">
-                    <i class="fa-solid fa-file-arrow-up"></i> UPLOAD_EVIDENCE
-                </a>
+                <form id="uploadEvidenceForm" class="veris-form" enctype="multipart/form-data">
+                    <div class="veris-form-grid">
+                        <div class="veris-field">
+                            <label for="upload-case-id">Case ID</label>
+                            <input id="upload-case-id" name="case_id" type="text" placeholder="case-2026-001">
+                        </div>
+                        <div class="veris-field full">
+                            <label for="upload-package">Evidence Package</label>
+                            <input id="upload-package" name="package" type="file" accept=".zip,.json" required>
+                        </div>
+                    </div>
+                    <p class="veris-form-hint">The upload stays on this page. The internal VERIS API validates, analyzes, and returns status in the background.</p>
+                    <button class="btn secondary-btn" id="uploadEvidenceBtn" type="submit">
+                        <i class="fa-solid fa-file-arrow-up"></i> UPLOAD_EVIDENCE
+                    </button>
+                </form>
+                <div id="uploadEvidenceStatus" class="veris-feedback" hidden></div>
             </article>
         </section>
 
@@ -355,6 +555,191 @@
             </div>
         </div>
     </footer>
+    <script>
+        (() => {
+            const GOV_API_BASE = 'https://gov.nine-security.com/api/veris';
+            const scannerForm = document.getElementById('scannerRequestForm');
+            const scannerStatus = document.getElementById('scannerRequestStatus');
+            const scannerButton = document.getElementById('generateScannerBtn');
+            const uploadForm = document.getElementById('uploadEvidenceForm');
+            const uploadStatus = document.getElementById('uploadEvidenceStatus');
+            const uploadButton = document.getElementById('uploadEvidenceBtn');
+
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char]));
+            }
+
+            function setFeedback(element, type, html) {
+                element.hidden = false;
+                element.className = `veris-feedback ${type}`;
+                element.innerHTML = html;
+            }
+
+            function parseRequestId(url) {
+                const match = String(url || '').match(/\/requests\/([^/?#]+)/);
+                return match ? match[1] : '';
+            }
+
+            function parseJobId(url) {
+                const match = String(url || '').match(/\/jobs\/([^/?#]+)/);
+                return match ? match[1] : '';
+            }
+
+            async function fetchTextOrThrow(response, fallbackMessage) {
+                const text = await response.text();
+                if (!response.ok) {
+                    throw new Error(`${fallbackMessage} (HTTP ${response.status})`);
+                }
+                return text;
+            }
+
+            async function downloadBlob(url, filename) {
+                const response = await fetch(url, { method: 'GET' });
+                if (!response.ok) {
+                    throw new Error(`Download failed (HTTP ${response.status})`);
+                }
+                const blob = await response.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(objectUrl);
+            }
+
+            async function fetchReportText(jobUrl) {
+                const response = await fetch(`${jobUrl}/report`, { method: 'GET' });
+                if (!response.ok) return '';
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const pre = doc.querySelector('pre');
+                return pre ? pre.textContent || '' : '';
+            }
+
+            function buildSummary(summary) {
+                const items = [
+                    ['Host', summary.host || '-'],
+                    ['Evidence Count', summary.evidence_count ?? '-'],
+                    ['Matched Rules', summary.matched_rules_count ?? '-'],
+                    ['Trust Grade', summary.evidence_trust_grade || '-'],
+                    ['Score Delta', summary.total_score_delta ?? '-']
+                ];
+                return items.map(([label, value]) => (
+                    `<div><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`
+                )).join('');
+            }
+
+            async function pollJob(jobUrl, statusElement) {
+                const resultUrl = `${jobUrl}/result.json`;
+                for (let attempt = 0; attempt < 30; attempt += 1) {
+                    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1200 : 3000));
+                    const response = await fetch(resultUrl, { method: 'GET', cache: 'no-store' });
+                    if (response.status === 404) {
+                        continue;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`Job polling failed (HTTP ${response.status})`);
+                    }
+                    const payload = await response.json();
+                    const reportText = await fetchReportText(jobUrl);
+                    setFeedback(statusElement, 'success',
+                        `<strong>Analysis completed.</strong>` +
+                        `<div class="veris-summary">${buildSummary(payload.summary || {})}</div>` +
+                        (reportText ? `<pre class="veris-report">${escapeHtml(reportText)}</pre>` : '')
+                    );
+                    return;
+                }
+
+                setFeedback(statusElement, 'pending',
+                    `<strong>Analysis is still running.</strong>` +
+                    `<p>The evidence package was accepted and queued. Stay on this page and try again in a moment.</p>`
+                );
+            }
+
+            scannerForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                scannerButton.disabled = true;
+                setFeedback(scannerStatus, 'pending', '<strong>Creating dedicated scanner request...</strong><p>Packaging launcher and preparing signed token.</p>');
+
+                try {
+                    const params = new URLSearchParams(new FormData(scannerForm));
+                    const response = await fetch(`${GOV_API_BASE}/requests`, {
+                        method: 'POST',
+                        body: params,
+                        redirect: 'follow'
+                    });
+                    await fetchTextOrThrow(response, 'Request creation failed');
+                    const requestUrl = response.url;
+                    const requestId = parseRequestId(requestUrl);
+                    if (!requestId) {
+                        throw new Error('Unable to resolve request identifier from response.');
+                    }
+
+                    const downloadUrl = `${requestUrl}/download`;
+                    await downloadBlob(downloadUrl, `NineSTriage_${requestId}.exe`);
+                    setFeedback(scannerStatus, 'success',
+                        `<strong>Dedicated scanner is ready.</strong>` +
+                        `<p>Request <code>${escapeHtml(requestId)}</code> was created and the launcher download has started.</p>` +
+                        `<div class="veris-feedback-actions">` +
+                        `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> DOWNLOAD_AGAIN</button>` +
+                        `</div>`
+                    );
+                    document.getElementById('downloadAgainBtn')?.addEventListener('click', () => {
+                        downloadBlob(downloadUrl, `NineSTriage_${requestId}.exe`).catch((error) => {
+                            setFeedback(scannerStatus, 'error', `<strong>Download failed.</strong><p>${escapeHtml(error.message)}</p>`);
+                        });
+                    });
+                } catch (error) {
+                    setFeedback(scannerStatus, 'error',
+                        `<strong>Unable to create scanner request.</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
+                    );
+                } finally {
+                    scannerButton.disabled = false;
+                }
+            });
+
+            uploadForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                uploadButton.disabled = true;
+                setFeedback(uploadStatus, 'pending', '<strong>Uploading evidence package...</strong><p>Central validation and analysis will start automatically.</p>');
+
+                try {
+                    const formData = new FormData(uploadForm);
+                    const response = await fetch(`${GOV_API_BASE}/upload`, {
+                        method: 'POST',
+                        body: formData,
+                        redirect: 'follow'
+                    });
+                    await fetchTextOrThrow(response, 'Evidence upload failed');
+                    const jobUrl = response.url;
+                    const jobId = parseJobId(jobUrl);
+                    if (!jobId) {
+                        throw new Error('Unable to resolve job identifier from response.');
+                    }
+
+                    setFeedback(uploadStatus, 'pending',
+                        `<strong>Evidence accepted.</strong><p>Job <code>${escapeHtml(jobId)}</code> is running. The page will refresh status automatically.</p>`
+                    );
+                    await pollJob(jobUrl, uploadStatus);
+                } catch (error) {
+                    setFeedback(uploadStatus, 'error',
+                        `<strong>Upload failed.</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
+                    );
+                } finally {
+                    uploadButton.disabled = false;
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
