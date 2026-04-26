@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIS Endpoint Triage | Nine-Security</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=20260215-1">
+    <meta name="description"
+        content="VERIS is Nine-Security's agentless Windows endpoint triage service with offline token-gated scanner execution and a single full report path.">
+    <meta name="keywords"
+        content="VERIS, endpoint triage, incident response, evidence package, Windows scanner, token-gated scanner, full report">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://nine-security.com/veris.html">
+    <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW.png">
+    <script type="module" crossorigin src="/assets/services-DUa3Catr.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_.css">
+    <style>
+        .veris-page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 6rem;
+        }
+
+        .veris-hero {
+            text-align: center;
+            margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+            margin-bottom: 2.5rem;
+        }
+
+        .veris-hero .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .veris-hero .subtitle {
+            max-width: 760px;
+            margin: 0.5rem auto 0;
+        }
+
+        .veris-badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.35rem;
+        }
+
+        .veris-badge {
+            border: 1px solid rgba(0, 229, 255, 0.55);
+            color: var(--accent-secondary);
+            background: rgba(0, 229, 255, 0.08);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 4px;
+        }
+
+        .veris-flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .veris-action-card {
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 4px;
+            min-height: 100%;
+            position: relative;
+        }
+
+        .veris-action-card.secondary {
+            border-top-color: var(--accent-secondary);
+        }
+
+        .veris-action-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .veris-action-card p {
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+        }
+
+        .veris-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.75rem;
+        }
+
+        .veris-steps li {
+            display: grid;
+            grid-template-columns: 2.2rem 1fr;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            margin-bottom: 0.85rem;
+            line-height: 1.45;
+        }
+
+        .veris-steps span {
+            width: 2.2rem;
+            height: 2.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .secondary .veris-steps span {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .veris-note-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 2.25rem;
+        }
+
+        .veris-note {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.25rem;
+            border-radius: 4px;
+        }
+
+        .veris-note h3 {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            color: var(--accent-color);
+        }
+
+        .veris-note p {
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .veris-fit {
+            margin-top: 3rem;
+        }
+
+        .veris-fit .section-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .veris-fit-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .veris-fit-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            padding: 1rem 0;
+        }
+
+        .veris-fit-item i {
+            color: var(--accent-secondary);
+            margin-top: 0.2rem;
+        }
+
+        [data-theme=light] .veris-action-card,
+        [data-theme=light] .veris-note {
+            background: #ffffff !important;
+        }
+
+        [data-theme=light] .veris-action-card h2,
+        [data-theme=light] .veris-action-card p,
+        [data-theme=light] .veris-note p,
+        [data-theme=light] .veris-fit-item,
+        [data-theme=light] .subtitle {
+            color: #0f172a !important;
+        }
+
+        @media (max-width: 640px) {
+            .veris-page {
+                padding: 1.25rem 1rem 4rem;
+            }
+
+            .veris-action-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <a href="./"
+                    style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="/assets/logo_v2.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="./" data-i18n="nav.home">/Home</a></li>
+                <li><a href="services.html" class="active" data-i18n="nav.services">/Services</a></li>
+                <li><a href="arsenal.html" data-i18n="nav.tools">/Arsenal</a></li>
+                <li><a href="./#model" data-i18n="nav.model">/9SEC_Model</a></li>
+                <li><a href="./#threat-intel" data-i18n="nav.threat_intel">/Threat_Intel</a></li>
+                <li><a href="contact.html" data-i18n="nav.contact">/Contact</a></li>
+            </ul>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">
+                    DARK
+                </button>
+                <div class="lang-selector">
+                    <button id="current-lang" class="lang-btn">EN</button>
+                    <ul class="lang-menu">
+                        <li data-lang="tw">TW [繁體中文]</li>
+                        <li data-lang="en">EN [English]</li>
+                        <li data-lang="jp">JP [日本語]</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mobile-menu-btn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="veris-page">
+        <section class="veris-hero">
+            <a href="services.html" class="back-link">
+                <i class="fa-solid fa-chevron-left"></i> RETURN_TO_SERVICES
+            </a>
+            <p class="terminal-text">VERIS Central <span class="status-ok">[READY]</span></p>
+            <h1 class="glitch-title" data-text="VERIS ENDPOINT TRIAGE">VERIS ENDPOINT TRIAGE</h1>
+            <p class="subtitle">Agentless Windows triage that turns endpoint facts into validated evidence packages,
+                a single full report path, trust scoring, and reproducible IR outputs.</p>
+            <div class="veris-badges">
+                <span class="veris-badge">ONE_SHOT_SCANNER</span>
+                <span class="veris-badge">NO_RESIDENT_AGENT</span>
+                <span class="veris-badge">EVIDENCE_FIRST</span>
+                <span class="veris-badge">CENTRAL_ANALYSIS</span>
+            </div>
+        </section>
+
+        <section class="veris-flow-grid" aria-label="VERIS workflows">
+            <article class="veris-action-card">
+                <h2><i class="fa-solid fa-download"></i> New Endpoint Scan</h2>
+                <p>Create a dedicated scanner when the endpoint has not been collected yet. Central signs a short-lived
+                    token, the launcher writes it locally, and the one-shot scanner will not run without it.
+                </p>
+                <ol class="veris-steps">
+                    <li><span>01</span> Generate a dedicated scanner request.</li>
+                    <li><span>02</span> Download and run it on the Windows endpoint with the signed token.</li>
+                    <li><span>03</span> Review the Central job and full report.</li>
+                </ol>
+                <a href="https://gov.nine-security.com/api/veris/requests/new" class="btn primary-btn" target="_blank"
+                    rel="noopener noreferrer">
+                    <i class="fa-solid fa-download"></i> GENERATE_SCANNER
+                </a>
+            </article>
+
+            <article class="veris-action-card secondary">
+                <h2><i class="fa-solid fa-file-arrow-up"></i> Analyze Existing Package</h2>
+                <p>Use this path when a scanner zip or evidence package already exists. Central validates the signed
+                    package contract before rule processing, correlation, and full report generation.</p>
+                <ol class="veris-steps">
+                    <li><span>01</span> Select the scanner zip or evidence.json.</li>
+                    <li><span>02</span> Assign a case identifier.</li>
+                    <li><span>03</span> Open the generated report or result JSON.</li>
+                </ol>
+                <a href="https://gov.nine-security.com/api/veris/upload" class="btn secondary-btn" target="_blank"
+                    rel="noopener noreferrer">
+                    <i class="fa-solid fa-file-arrow-up"></i> UPLOAD_EVIDENCE
+                </a>
+            </article>
+        </section>
+
+        <section class="veris-note-grid" aria-label="VERIS operating guarantees">
+            <div class="veris-note">
+                <h3>WHAT IT COLLECTS</h3>
+                <p>Process context, user-mode memory heuristics, persistence, network snapshots, artefact indicators,
+                    integrity signals, and scan diagnostics.</p>
+            </div>
+            <div class="veris-note">
+                <h3>WHAT IT DOES NOT DO</h3>
+                <p>No real-time blocking, endpoint isolation, kernel collection, resident monitoring, or full disk
+                    forensic imaging.</p>
+            </div>
+            <div class="veris-note">
+                <h3>FULL REPORT</h3>
+                <p>Central reports surface rule matches, evidence trust, gap detection, attack-chain candidates, and
+                    investigation pivots in one path.</p>
+            </div>
+        </section>
+
+        <section class="veris-fit">
+            <div class="section-header">
+                <h2><span class="hash">#</span> BEST_FIT</h2>
+                <div class="line"></div>
+            </div>
+            <div class="veris-fit-list">
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>SOC alert triage when an endpoint needs fast, reproducible evidence packaging.</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Temporary investigation where a resident agent is not approved or not practical.</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>IR handoff where analysts need facts, validation status, and reportable reasoning.</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="copyright">
+                <p>&copy; 2026 Nine-Security. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
