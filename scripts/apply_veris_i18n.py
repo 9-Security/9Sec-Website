@@ -1,0 +1,298 @@
+#!/usr/bin/env python3
+"""Inject veris_page into M and expose g. Run from repo: python3 core/frontend/scripts/apply_veris_i18n.py"""
+import json
+from pathlib import Path
+
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+
+REPLACERS = [
+    '},model:{intro1:"> Beyond Protection. 9 Dimensions of Verifiable Truth."',
+    '},model:{intro1:"> 超越防護：九個維度的資安可驗證真相。"',
+    '},model:{intro1:"> 単なる防御を超えて：検証可能な真実を追求する9つの次元。"',
+]
+LANGS = ("en", "tw", "jp")
+
+
+def build_dict(lang: str) -> dict:
+    if lang == "en":
+        return {
+            "doc_title": "VERIS Endpoint Triage | Nine-Security",
+            "terminal": "VERIS Central <span class='status-ok'>[READY]</span>",
+            "hero_title": "VERIS ENDPOINT TRIAGE",
+            "hero_sub": "Agentless Windows triage that turns endpoint facts into validated evidence packages, a single full report path, trust scoring, and reproducible IR outputs.",
+            "badge_1": "ONE_SHOT_SCANNER",
+            "badge_2": "NO_RESIDENT_AGENT",
+            "badge_3": "EVIDENCE_FIRST",
+            "badge_4": "CENTRAL_ANALYSIS",
+            "new_title": "New Endpoint Scan",
+            "new_desc": "Create a dedicated scanner when the endpoint has not been collected yet. Central signs a short-lived token, the launcher writes it locally, and the one-shot scanner will not run without it.",
+            "step_new_1": "Generate a dedicated scanner request.",
+            "step_new_2": "Download and run it on the Windows endpoint with the signed token.",
+            "step_new_3": "Review the Central job and full report.",
+            "lab_case": "Case ID",
+            "lab_name": "Name",
+            "lab_contact": "Contact",
+            "lab_window": "Observation Window",
+            "lab_note": "Note",
+            "ph_case": "case-2026-001",
+            "ph_name": "Analyst name",
+            "ph_contact": "email or phone",
+            "ph_note": "Optional case note",
+            "opt_off": "Off",
+            "opt_60": "60 seconds",
+            "opt_180": "180 seconds",
+            "opt_300": "300 seconds",
+            "hint_scanner": "Request creation, launcher packaging, and download are handled in the background through the internal VERIS API. The signed launcher token is fixed to 72 hours and expires automatically if unused for 3 days.",
+            "btn_generate": "GENERATE_SCANNER",
+            "up_title": "Analyze Existing Package",
+            "up_desc": "Use this path when a scanner zip or evidence package already exists. Central validates the signed package contract before rule processing, correlation, and full report generation.",
+            "step_up_1": "Select the scanner zip or evidence.json.",
+            "step_up_2": "Assign a case identifier.",
+            "step_up_3": "Open the generated report or result JSON.",
+            "lab_u_case": "Case ID",
+            "lab_package": "Evidence Package",
+            "hint_upload": "The upload stays on this page. The internal VERIS API validates, analyzes, and returns status in the background.",
+            "btn_upload": "UPLOAD_EVIDENCE",
+            "n_collect_h": "WHAT IT COLLECTS",
+            "n_collect_p": "Process context, user-mode memory heuristics, persistence, network snapshots, artefact indicators, integrity signals, and scan diagnostics.",
+            "n_not_h": "WHAT IT DOES NOT DO",
+            "n_not_p": "No real-time blocking, endpoint isolation, kernel collection, resident monitoring, or full disk forensic imaging.",
+            "n_report_h": "FULL REPORT",
+            "n_report_p": "Central reports surface rule matches, evidence trust, gap detection, attack-chain candidates, and investigation pivots in one path.",
+            "fit_title": "BEST_FIT",
+            "fit_1": "SOC alert triage when an endpoint needs fast, reproducible evidence packaging.",
+            "fit_2": "Temporary investigation where a resident agent is not approved or not practical.",
+            "fit_3": "IR handoff where analysts need facts, validation status, and reportable reasoning.",
+            "flow_aria": "VERIS workflows",
+            "op_aria": "VERIS operating guarantees",
+            "msg_creating_scanner": "Creating dedicated scanner request...",
+            "msg_creating_scanner_p": "Packaging launcher and preparing a signed 72-hour token.",
+            "msg_scanner_ok": "Dedicated scanner is ready.",
+            "msg_scanner_ok_p": "Request {id} was created and the launcher download has started.",
+            "btn_download_again": "DOWNLOAD_AGAIN",
+            "err_download": "Download failed (HTTP {status})",
+            "err_scanner_req": "Unable to create scanner request.",
+            "err_resolve_req": "Unable to resolve request identifier from response.",
+            "msg_uploading": "Uploading evidence package...",
+            "msg_uploading_p": "Central validation and analysis will start automatically.",
+            "msg_evidence_ok": "Evidence accepted.",
+            "msg_evidence_ok_p": "Job {id} is running. The page will refresh status automatically.",
+            "err_upload": "Upload failed.",
+            "err_evidence_up": "Evidence upload failed",
+            "err_resolve_job": "Unable to resolve job identifier from response.",
+            "err_req_create": "Request creation failed",
+            "err_job_poll": "Job polling failed (HTTP {status})",
+            "msg_analysis_done": "Analysis completed.",
+            "msg_analysis_wait": "Analysis is still running.",
+            "msg_analysis_wait_p": "The evidence package was accepted and queued. Stay on this page and try again in a moment.",
+            "err_download_f": "Download failed.",
+            "sum_host": "Host",
+            "sum_evidence": "Evidence Count",
+            "sum_rules": "Matched Rules",
+            "sum_trust": "Trust Grade",
+            "sum_delta": "Score Delta",
+        }
+    if lang == "tw":
+        return {
+            "doc_title": "VERIS 端點初篩 | Nine-Security",
+            "terminal": "VERIS Central <span class='status-ok'>[就緒]</span>",
+            "hero_title": "VERIS 端點初篩",
+            "hero_sub": "無代理程式的 Windows 端點初篩，將端點事實轉成可驗證的證據包、單一路徑的完整報告、信任評分，以及可重現的應變輸出。",
+            "badge_1": "單次掃描",
+            "badge_2": "不需常駐代理",
+            "badge_3": "證據優先",
+            "badge_4": "中央分析",
+            "new_title": "新端點掃描",
+            "new_desc": "當端點尚無採樣時建立專用掃描器。Central 簽署短效權杖、啟動器寫入本機，且一次性掃描器沒有權杖即不執行。",
+            "step_new_1": "建立專用掃描器申請。",
+            "step_new_2": "在 Windows 端點下載並以簽章權杖執行。",
+            "step_new_3": "在 Central 檢視工作與完整報告。",
+            "lab_case": "案件編號",
+            "lab_name": "姓名",
+            "lab_contact": "聯絡方式",
+            "lab_window": "觀察時間窗",
+            "lab_note": "備註",
+            "ph_case": "case-2026-001",
+            "ph_name": "分析員姓名",
+            "ph_contact": "電子郵件或電話",
+            "ph_note": "選填：案件備註",
+            "opt_off": "關閉",
+            "opt_60": "60 秒",
+            "opt_180": "180 秒",
+            "opt_300": "300 秒",
+            "hint_scanner": "申請建立、啟動器封裝與下載在背景由內部 VERIS API 處理。簽章啟動器權杖固定 72 小時；若 3 日未使用將自動到期。",
+            "btn_generate": "產生掃描器",
+            "up_title": "分析既有封裝",
+            "up_desc": "當掃描器 zip 或證據封裝已存在時使用此路徑。Central 在規則處理、關聯與完整報告前，會驗證已簽章的封裝合約。",
+            "step_up_1": "選擇掃描器 zip 或 evidence.json。",
+            "step_up_2": "指定案件識別碼。",
+            "step_up_3": "開啟產生的報告或 result JSON。",
+            "lab_u_case": "案件編號",
+            "lab_package": "證據封裝",
+            "hint_upload": "上傳保留在本頁。內部 VERIS API 在背景驗證、分析並回傳狀態。",
+            "btn_upload": "上傳證據",
+            "n_collect_h": "蒐集範圍",
+            "n_collect_p": "程序脈絡、使用者層記憶體啟發式、持續性、網路快照、工藝指標、完整性訊號與掃描診斷。",
+            "n_not_h": "不提供的項目",
+            "n_not_p": "非即時阻擋、端點隔離、核心蒐集、常駐監控，或全碟鑑識映像。",
+            "n_report_h": "完整報告",
+            "n_report_p": "Central 報告在單一路徑呈現規則命中、證據信任、缺口偵測、攻擊鏈候選與調查轉向。",
+            "fit_title": "適用情境",
+            "fit_1": "SOC 警報初篩，需要可重現的證據封裝。",
+            "fit_2": "無法或不宜部署常駐代理的臨時調查。",
+            "fit_3": "應變交班，分析師需要事實、驗證狀態與可呈報的推理。",
+            "flow_aria": "VERIS 作業流程",
+            "op_aria": "VERIS 作業要項",
+            "msg_creating_scanner": "正在建立專用掃描器申請...",
+            "msg_creating_scanner_p": "封裝啟動器並準備 72 小時簽章權杖。",
+            "msg_scanner_ok": "專用掃描器已就緒。",
+            "msg_scanner_ok_p": "申請 {id} 已建立，啟動器下載已開始。",
+            "btn_download_again": "再次下載",
+            "err_download": "下載失敗 (HTTP {status})",
+            "err_scanner_req": "無法建立掃描器申請。",
+            "err_resolve_req": "無法從回應解析申請識別碼。",
+            "msg_uploading": "正在上傳證據封裝...",
+            "msg_uploading_p": "Central 驗證與分析將自動開始。",
+            "msg_evidence_ok": "已接受證據。",
+            "msg_evidence_ok_p": "工作 {id} 執行中。請停留本頁，狀態會自動更新。",
+            "err_upload": "上傳失敗。",
+            "err_evidence_up": "證據上傳失敗",
+            "err_resolve_job": "無法從回應解析工作識別碼。",
+            "err_req_create": "申請建立失敗",
+            "err_job_poll": "工作輪詢失敗 (HTTP {status})",
+            "msg_analysis_done": "分析完成。",
+            "msg_analysis_wait": "分析仍在執行。",
+            "msg_analysis_wait_p": "證據封裝已接受並排入佇列。請停留本頁稍候再試。",
+            "err_download_f": "下載失敗。",
+            "sum_host": "主機",
+            "sum_evidence": "證據筆數",
+            "sum_rules": "命中規則",
+            "sum_trust": "信任等級",
+            "sum_delta": "分數變化",
+        }
+    return {
+        "doc_title": "VERIS エンドポイント・トリアージ | Nine-Security",
+        "terminal": "VERIS Central <span class='status-ok'>[READY]</span>",
+        "hero_title": "VERIS エンドポイント・トリアージ",
+        "hero_sub": "エージェントレスの Windows 初動対応。エンドポイントの事実を検証済み証拠パッケージ、単一の完全レポート経路、信頼スコアリング、再現可能なIR出力へ。",
+        "badge_1": "ワンショット・スキャナ",
+        "badge_2": "常駐エージェント不要",
+        "badge_3": "証拠ファースト",
+        "badge_4": "中央分析",
+        "new_title": "新規エンドポイントスキャン",
+        "new_desc": "未採取の端点向けに専用スキャナを作成。Central が短命トークンに署名し、ランチャーがローカルに記録。ワンショット・スキャナはトークンなしでは実行しません。",
+        "step_new_1": "専用スキャナ依頼を生成。",
+        "step_new_2": "Windows 端末で署名付きトークンを用いてダウンロード・実行。",
+        "step_new_3": "Central のジョブとフルレポートを確認。",
+        "lab_case": "案件 ID",
+        "lab_name": "氏名",
+        "lab_contact": "連絡先",
+        "lab_window": "観測ウィンドウ",
+        "lab_note": "注記",
+        "ph_case": "case-2026-001",
+        "ph_name": "分析者名",
+        "ph_contact": "メールまたは電話",
+        "ph_note": "任意：案件メモ",
+        "opt_off": "オフ",
+        "opt_60": "60 秒",
+        "opt_180": "180 秒",
+        "opt_300": "300 秒",
+        "hint_scanner": "依頼作成、ランチャー同梱、ダウンロードは内部 VERIS API がバックグラウンドで処理。署名付きランチャー・トークンは 72 時間で、3 日未使用は自動失効。",
+        "btn_generate": "スキャナを生成",
+        "up_title": "既存パッケージの分析",
+        "up_desc": "スキャナ zip や証拠パッケージが既にある場合。ルール処理・相関・フルレポート前に、Central が署名付き契約を検証。",
+        "step_up_1": "スキャナ zip または evidence.json を選択。",
+        "step_up_2": "案件識別子を割り当て。",
+        "step_up_3": "生成レポートまたは result JSON を開く。",
+        "lab_u_case": "案件 ID",
+        "lab_package": "証拠パッケージ",
+        "hint_upload": "アップロードはこのページに留まります。内部 VERIS API が検証・分析し、バックグラウンドでステータスを返します。",
+        "btn_upload": "証拠をアップロード",
+        "n_collect_h": "取得範囲",
+        "n_collect_p": "プロセス文脈、ユーザーモードのヒューリスティクス、持続性、ネットワークスナップショット、成果物指標、整合性シグナル、スキャン診断。",
+        "n_not_h": "行わないこと",
+        "n_not_p": "リアルタイム遮断、端末隔離、カーネル収集、常駐監視、全ディスク・フォレンジックイメージは行いません。",
+        "n_report_h": "フルレポート",
+        "n_report_p": "Central レポートは、ルール一致、証拠信頼度、ギャップ検出、攻撃連鎖候補、調査の軸を一つの経路で提示。",
+        "fit_title": "最適な用途",
+        "fit_1": "SOC のアラート初動。迅速かつ再現可能な証拠パッケージが必要な場合。",
+        "fit_2": "常駐エージェントが未承認または非現実的な短期調査。",
+        "fit_3": "IR 引き渡し。分析者が事実・検証状態・報告可能な妥当性を必要とする場合。",
+        "flow_aria": "VERIS ワークフロー",
+        "op_aria": "VERIS 運用の考え方",
+        "msg_creating_scanner": "専用スキャナ依頼を作成しています...",
+        "msg_creating_scanner_p": "ランチャーを同梱し、72 時間の署名トークンを準備中。",
+        "msg_scanner_ok": "専用スキャナの準備ができました。",
+        "msg_scanner_ok_p": "依頼 {id} を作成し、ランチャーのダウンロードを開始しました。",
+        "btn_download_again": "再ダウンロード",
+        "err_download": "ダウンロード失敗 (HTTP {status})",
+        "err_scanner_req": "スキャナ依頼を作成できません。",
+        "err_resolve_req": "レスポンスから依頼 ID を解決できません。",
+        "msg_uploading": "証拠パッケージをアップロード中...",
+        "msg_uploading_p": "Central による検証と分析を自動で開始します。",
+        "msg_evidence_ok": "証拠を受理しました。",
+        "msg_evidence_ok_p": "ジョブ {id} 実行中。このページのままステータスが更新されます。",
+        "err_upload": "アップロード失敗。",
+        "err_evidence_up": "証拠アップロード失敗",
+        "err_resolve_job": "レスポンスからジョブ ID を解決できません。",
+        "err_req_create": "依頼作成失敗",
+        "err_job_poll": "ジョブのポーリング失敗 (HTTP {status})",
+        "msg_analysis_done": "分析が完了しました。",
+        "msg_analysis_wait": "分析はまだ実行中です。",
+        "msg_analysis_wait_p": "証拠パッケージを受理し、キューに入れました。このページのまましばらく待って再試行してください。",
+        "err_download_f": "ダウンロードに失敗しました。",
+        "sum_host": "ホスト",
+        "sum_evidence": "証拠件数",
+        "sum_rules": "一致ルール",
+        "sum_trust": "信頼グレード",
+        "sum_delta": "スコア変化",
+    }
+
+
+def main():
+    blobs = {L: json.dumps(build_dict(L), ensure_ascii=False) for L in LANGS}
+    for path in sorted(ASSETS.glob("*.js")):
+        t = path.read_text(encoding="utf-8")
+        if "veris_page" in t and "fit_1" in t:
+            print("skip (done):", path.name)
+            continue
+        if not all(s in t for s in REPLACERS):
+            continue
+        new_t = t
+        for s, L in zip(REPLACERS, LANGS):
+            # s is `},model:{intro1:...` -> `},veris_page:JSON,model:{intro1:...`
+            ins = f"}},veris_page:{blobs[L]}{s[1:]}"
+            new_t = new_t.replace(s, ins, 1)
+        if new_t == t:
+            print("no-op", path.name)
+            continue
+        if new_t.count("},veris_page:") > 3:
+            print("ERROR: too many inserts", path.name)
+            return
+        path.write_text(new_t, encoding="utf-8")
+        print("patched", path.name)
+
+    i18n_old = "window.__NINESEC_APPLY_LANG=k;"
+    i18n_new = "window.__NINESEC_APPLY_LANG=k,window.__NINESEC_I18N=g;"
+    for name in (
+        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC.js",
+        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js",
+        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-CSmd-R4W-CSmd-R4W-CSmd-R4W-CSmd-R4W-CSmd-R4W.js",
+        "styles-BxbEqz2_-Bw8gVkgQ-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr.js",
+        "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2.js",
+        "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4.js",
+    ):
+        path = ASSETS / name
+        t = path.read_text(encoding="utf-8")
+        if i18n_new in t:
+            continue
+        if i18n_old not in t:
+            print("warn: no window hook in", name)
+            continue
+        t = t.replace(i18n_old, i18n_new, 1)
+        path.write_text(t, encoding="utf-8")
+        print("i18n export", name)
+
+
+if __name__ == "__main__":
+    main()
