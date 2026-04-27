@@ -338,6 +338,65 @@
             overflow: auto;
         }
 
+        .veris-wait-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 8, 20, 0.86);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            z-index: 9999;
+        }
+
+        .veris-wait-overlay[hidden] {
+            display: none;
+        }
+
+        .veris-wait-modal {
+            width: min(680px, 96vw);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            border-radius: 8px;
+            background: #050914;
+            padding: 1.3rem;
+        }
+
+        .veris-wait-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .veris-wait-header h3 {
+            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+        }
+
+        .veris-wait-body p {
+            margin: 0 0 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .veris-wait-kv {
+            margin: 0.7rem 0 0.9rem;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .veris-wait-kv div {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.9rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+            padding-bottom: 0.35rem;
+        }
+
         [data-theme=light] .veris-action-card,
         [data-theme=light] .veris-note {
             background: #ffffff !important;
@@ -436,16 +495,8 @@
                 <form id="scannerRequestForm" class="veris-form">
                     <div class="veris-form-grid">
                         <div class="veris-field">
-                            <label for="scanner-case-id" data-i18n="veris_page.lab_case">Case ID</label>
-                            <input id="scanner-case-id" name="case_id" type="text" data-i18n-placeholder="veris_page.ph_case" placeholder="case-2026-001">
-                        </div>
-                        <div class="veris-field">
-                            <label for="scanner-requester-name" data-i18n="veris_page.lab_name">Name</label>
-                            <input id="scanner-requester-name" name="requester_name" type="text" data-i18n-placeholder="veris_page.ph_name" placeholder="Analyst name" required>
-                        </div>
-                        <div class="veris-field">
-                            <label for="scanner-contact" data-i18n="veris_page.lab_contact">Contact</label>
-                            <input id="scanner-contact" name="contact" type="text" data-i18n-placeholder="veris_page.ph_contact" placeholder="email or phone">
+                            <label for="scanner-email">Email</label>
+                            <input id="scanner-email" name="email" type="email" placeholder="analyst@example.com" required autocomplete="email">
                         </div>
                         <div class="veris-field">
                             <label for="scanner-window" data-i18n="veris_page.lab_window">Observation Window</label>
@@ -456,10 +507,6 @@
                                 <option value="300" data-i18n="veris_page.opt_300">300 seconds</option>
                             </select>
                         </div>
-                        <div class="veris-field full">
-                            <label for="scanner-note" data-i18n="veris_page.lab_note">Note</label>
-                            <input id="scanner-note" name="note" type="text" data-i18n-placeholder="veris_page.ph_note" placeholder="Optional case note">
-                        </div>
                     </div>
                     <p class="veris-form-hint" data-i18n="veris_page.hint_scanner">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API. The signed launcher token is fixed to 72 hours and expires automatically if unused for 3 days.</p>
                     <button class="btn primary-btn" id="generateScannerBtn" type="submit">
@@ -467,6 +514,27 @@
                     </button>
                 </form>
                 <div id="scannerRequestStatus" class="veris-feedback" hidden></div>
+                <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
+                    <div class="veris-wait-modal">
+                        <div class="veris-wait-header">
+                            <h3>掃描等待視窗</h3>
+                            <button type="button" class="btn ghost-btn" id="closeScannerWaitBtn">關閉</button>
+                        </div>
+                        <div class="veris-wait-body">
+                            <p>掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。</p>
+                            <div class="veris-wait-kv">
+                                <div><span>案件編號</span><strong id="waitCaseId">-</strong></div>
+                                <div><span>Request ID</span><strong id="waitRequestId">-</strong></div>
+                                <div><span>Email</span><strong id="waitEmail">-</strong></div>
+                                <div><span>剩餘時間</span><strong id="waitRemaining">10:00</strong></div>
+                            </div>
+                            <div id="waitResultStatus" class="veris-feedback pending">
+                                <strong>等待分析結果中...</strong>
+                                <p>系統會在收到掃描結果後，自動顯示分析摘要。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </article>
 
             <article class="veris-action-card secondary">
@@ -551,9 +619,19 @@
             const scannerForm = document.getElementById('scannerRequestForm');
             const scannerStatus = document.getElementById('scannerRequestStatus');
             const scannerButton = document.getElementById('generateScannerBtn');
+            const scannerWaitOverlay = document.getElementById('scannerWaitOverlay');
+            const closeScannerWaitBtn = document.getElementById('closeScannerWaitBtn');
+            const waitCaseId = document.getElementById('waitCaseId');
+            const waitRequestId = document.getElementById('waitRequestId');
+            const waitEmail = document.getElementById('waitEmail');
+            const waitRemaining = document.getElementById('waitRemaining');
+            const waitResultStatus = document.getElementById('waitResultStatus');
             const uploadForm = document.getElementById('uploadEvidenceForm');
             const uploadStatus = document.getElementById('uploadEvidenceStatus');
             const uploadButton = document.getElementById('uploadEvidenceBtn');
+            const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
+            const WAIT_TICK_MS = 1000;
+            let waitClosedManually = false;
 
             function v(key, fallback) {
                 return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
@@ -633,6 +711,54 @@
                 )).join('');
             }
 
+            function generateCaseId() {
+                const randomToken = Math.random().toString(36).slice(2, 8).toUpperCase();
+                return `case-${new Date().getFullYear()}-${randomToken}`;
+            }
+
+            function showWaitOverlay({ caseId, requestId, email }) {
+                waitClosedManually = false;
+                waitCaseId.textContent = caseId;
+                waitRequestId.textContent = requestId || '-';
+                waitEmail.textContent = email || '-';
+                waitRemaining.textContent = '10:00';
+                setFeedback(waitResultStatus, 'pending',
+                    '<strong>等待分析結果中...</strong><p>系統會在收到掃描結果後，自動顯示分析摘要。</p>'
+                );
+                scannerWaitOverlay.hidden = false;
+            }
+
+            function closeWaitOverlay() {
+                scannerWaitOverlay.hidden = true;
+            }
+
+            function formatTimeLeft(ms) {
+                const totalSec = Math.max(0, Math.ceil(ms / 1000));
+                const min = Math.floor(totalSec / 60);
+                const sec = totalSec % 60;
+                return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+            }
+
+            async function pollScannerResult(requestUrl, startedAt) {
+                const urls = [
+                    `${requestUrl}/result.json`,
+                    `${requestUrl}/analysis/result.json`,
+                    `${requestUrl}/job/result.json`
+                ];
+
+                while (Date.now() - startedAt < WAIT_TIMEOUT_MS && !waitClosedManually) {
+                    for (const url of urls) {
+                        const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+                        if (response.status === 404) continue;
+                        if (!response.ok) continue;
+                        const payload = await response.json();
+                        return payload;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 3500));
+                }
+                return null;
+            }
+
             async function pollJob(jobUrl, statusElement) {
                 const resultUrl = `${jobUrl}/result.json`;
                 for (let attempt = 0; attempt < 30; attempt += 1) {
@@ -667,7 +793,17 @@
                 setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_creating_scanner', 'Creating dedicated scanner request...')}</strong><p>${v('veris_page.msg_creating_scanner_p', 'Packaging launcher and preparing a signed 72-hour token.')}</p>`);
 
                 try {
-                    const params = new URLSearchParams(new FormData(scannerForm));
+                    const formData = new FormData(scannerForm);
+                    const email = String(formData.get('email') || '').trim();
+                    if (!email) {
+                        throw new Error('Email is required.');
+                    }
+                    const randomCaseId = generateCaseId();
+                    const params = new URLSearchParams();
+                    params.set('case_id', randomCaseId);
+                    params.set('contact', email);
+                    params.set('requester_name', email);
+                    params.set('observation_window_sec', String(formData.get('observation_window_sec') || '0'));
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
                         body: params,
@@ -686,6 +822,7 @@
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
+                        `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
                         `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
                         `</div>`
@@ -695,6 +832,38 @@
                             setFeedback(scannerStatus, 'error', `<strong>${v('veris_page.err_download_f', 'Download failed.')}</strong><p>${escapeHtml(error.message)}</p>`);
                         });
                     });
+
+                    showWaitOverlay({ caseId: randomCaseId, requestId, email });
+                    const startedAt = Date.now();
+                    const timer = setInterval(() => {
+                        const remainingMs = WAIT_TIMEOUT_MS - (Date.now() - startedAt);
+                        waitRemaining.textContent = formatTimeLeft(remainingMs);
+                    }, WAIT_TICK_MS);
+
+                    const result = await pollScannerResult(requestUrl, startedAt);
+                    clearInterval(timer);
+
+                    if (waitClosedManually) {
+                        setFeedback(scannerStatus, 'pending',
+                            '<strong>等待視窗已關閉。</strong><p>若客戶稍後才執行掃描器，請改用下方「Analyze Existing Package」自行上傳結果。</p>'
+                        );
+                        return;
+                    }
+
+                    if (!result) {
+                        closeWaitOverlay();
+                        setFeedback(scannerStatus, 'pending',
+                            '<strong>等待逾時（10 分鐘）。</strong><p>尚未收到自動回傳結果。若客戶稍後才執行掃描器，請改用下方「Analyze Existing Package」自行上傳。</p>'
+                        );
+                        return;
+                    }
+
+                    const summary = result.summary || {};
+                    setFeedback(waitResultStatus, 'success',
+                        '<strong>分析結果已取得。</strong>' +
+                        `<div class="veris-summary">${buildSummary(summary)}</div>` +
+                        ((result.report_text || result.report) ? `<pre class="veris-report">${escapeHtml(result.report_text || result.report)}</pre>` : '')
+                    );
                 } catch (error) {
                     setFeedback(scannerStatus, 'error',
                         `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
@@ -702,6 +871,14 @@
                 } finally {
                     scannerButton.disabled = false;
                 }
+            });
+
+            closeScannerWaitBtn?.addEventListener('click', () => {
+                waitClosedManually = true;
+                closeWaitOverlay();
+                setFeedback(scannerStatus, 'pending',
+                    '<strong>等待視窗已由使用者關閉。</strong><p>若掃描器稍後才執行，請改用下方「Analyze Existing Package」自行上傳。</p>'
+                );
             });
 
             uploadForm?.addEventListener('submit', async (event) => {
