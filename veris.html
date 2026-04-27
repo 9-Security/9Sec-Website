@@ -740,19 +740,20 @@
             }
 
             async function pollScannerResult(requestUrl, startedAt) {
-                const urls = [
-                    `${requestUrl}/result.json`,
-                    `${requestUrl}/analysis/result.json`,
-                    `${requestUrl}/job/result.json`
-                ];
-
                 while (Date.now() - startedAt < WAIT_TIMEOUT_MS && !waitClosedManually) {
-                    for (const url of urls) {
-                        const response = await fetch(url, { method: 'GET', cache: 'no-store' });
-                        if (response.status === 404) continue;
-                        if (!response.ok) continue;
-                        const payload = await response.json();
-                        return payload;
+                    const requestResponse = await fetch(requestUrl, { method: 'GET', cache: 'no-store' });
+                    if (requestResponse.ok) {
+                        const requestHtml = await requestResponse.text();
+                        const jobMatch = requestHtml.match(/\/jobs\/([a-zA-Z0-9]+)(?:['"<\s])/);
+                        const latestJobId = jobMatch ? jobMatch[1] : '';
+                        if (latestJobId) {
+                            const resultUrl = `${GOV_API_BASE}/jobs/${latestJobId}/result.json`;
+                            const resultResponse = await fetch(resultUrl, { method: 'GET', cache: 'no-store' });
+                            if (resultResponse.ok) {
+                                const payload = await resultResponse.json();
+                                return payload;
+                            }
+                        }
                     }
                     await new Promise((resolve) => setTimeout(resolve, 3500));
                 }
