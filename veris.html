@@ -615,7 +615,7 @@
     </footer>
     <script>
         (() => {
-            const GOV_API_BASE = 'https://gov.nine-security.com/api/veris';
+            const GOV_API_BASE = `${window.location.origin}/api/veris`;
             const scannerForm = document.getElementById('scannerRequestForm');
             const scannerStatus = document.getElementById('scannerRequestStatus');
             const scannerButton = document.getElementById('generateScannerBtn');
