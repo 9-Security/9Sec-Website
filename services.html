@@ -278,6 +278,13 @@
         </div>
     </footer>
 
+    <script type="module">
+        const reapply = () => window.__NINESEC_APPLY_LANG?.(localStorage.getItem("9sec_lang") || "en");
+        await import("/assets/main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js");
+        reapply();
+        window.addEventListener("9sec:langChange", reapply);
+    </script>
+
 </body>
 
 </html>
