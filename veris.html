@@ -458,20 +458,12 @@
                                 <option value="300">300 seconds</option>
                             </select>
                         </div>
-                        <div class="veris-field">
-                            <label for="scanner-ttl">Token TTL</label>
-                            <select id="scanner-ttl" name="token_ttl_hours">
-                                <option value="24">24 hours</option>
-                                <option value="72">72 hours</option>
-                                <option value="168">7 days</option>
-                            </select>
-                        </div>
                         <div class="veris-field full">
                             <label for="scanner-note">Note</label>
                             <input id="scanner-note" name="note" type="text" placeholder="Optional case note">
                         </div>
                     </div>
-                    <p class="veris-form-hint">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API.</p>
+                    <p class="veris-form-hint">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API. The signed launcher token is fixed to 72 hours and expires automatically if unused for 3 days.</p>
                     <button class="btn primary-btn" id="generateScannerBtn" type="submit">
                         <i class="fa-solid fa-download"></i> GENERATE_SCANNER
                     </button>
@@ -668,7 +660,7 @@
             scannerForm?.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 scannerButton.disabled = true;
-                setFeedback(scannerStatus, 'pending', '<strong>Creating dedicated scanner request...</strong><p>Packaging launcher and preparing signed token.</p>');
+                setFeedback(scannerStatus, 'pending', '<strong>Creating dedicated scanner request...</strong><p>Packaging launcher and preparing a signed 72-hour token.</p>');
 
                 try {
                     const params = new URLSearchParams(new FormData(scannerForm));
