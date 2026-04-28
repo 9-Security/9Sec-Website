@@ -725,6 +725,9 @@
             function summarizeResultPayload(payload) {
                 const p = payload && typeof payload === 'object' ? payload : {};
                 const s = (p.summary && typeof p.summary === 'object') ? p.summary : {};
+                const esc = (p.escalation_decision && typeof p.escalation_decision === 'object')
+                    ? p.escalation_decision
+                    : {};
                 const recs = Array.isArray(p.recommendations) ? p.recommendations : [];
                 let recommended_next_step = '';
                 if (recs.length && recs[0] && typeof recs[0].detail !== 'undefined') {
@@ -732,21 +735,40 @@
                 } else if (recs.length && typeof recs[0] === 'string') {
                     recommended_next_step = recs[0];
                 }
+                const nextProf = typeof esc.recommended_next_profile !== 'undefined'
+                    ? esc.recommended_next_profile
+                    : s.recommended_next_profile;
+                const disp = typeof s.host_disposition !== 'undefined' && s.host_disposition
+                    ? s.host_disposition
+                    : (typeof p.disposition === 'string' ? p.disposition : '');
                 return Object.assign({}, s, {
                     log_trust_score: s.log_trust_score,
                     gap_count: s.gap_count,
                     recommended_next_step: recommended_next_step,
                     trust_reasons: s.trust_reasons,
-                    primary_process_name: s.primary_process_name
+                    primary_process_name: s.primary_process_name,
+                    collection_profile: s.collection_profile ?? p.collection_profile ?? '',
+                    suspicion_score: s.suspicion_score,
+                    collection_sufficiency_score: s.collection_sufficiency_score,
+                    host_disposition: disp,
+                    recollection_recommended: esc.recollection_recommended === true,
+                    deep_forensics_recommended: esc.deep_forensics_recommended === true,
+                    recommended_next_profile: nextProf ?? '',
+                    escalation_rerun_reason: esc.why_rerun_needed ?? '',
+                    escalation_insufficient_reason: esc.why_evidence_insufficient ?? ''
                 });
             }
 
             function buildSummary(summary) {
                 const rows = [
+                    [v('veris_page.sum_profile', 'Profile'), summary.collection_profile || '-'],
                     [v('veris_page.sum_host', 'Host'), summary.host ?? '-'],
                     [v('veris_page.sum_evidence', 'Evidence Count'), summary.evidence_count ?? '-'],
                     [v('veris_page.sum_rules', 'Matched Rules'), summary.matched_rules_count ?? '-'],
                     [v('veris_page.sum_trust', 'Trust Grade'), summary.evidence_trust_grade ?? '-'],
+                    [v('veris_page.metric_suspicion', 'Suspicion'), summary.suspicion_score ?? '-'],
+                    [v('veris_page.metric_sufficiency', 'Sufficiency'), summary.collection_sufficiency_score ?? '-'],
+                    [v('veris_page.sum_disposition', 'Disposition'), summary.host_disposition ?? '-'],
                     [v('veris_page.log_trust_short', 'Log trust'), summary.log_trust_score ?? '-'],
                     [v('veris_page.metric_chains_short', 'Attack chains'), summary.attack_chain_candidates_count ?? '-'],
                     [v('veris_page.metric_gap_short', 'Gaps'), summary.gap_count ?? '-'],
@@ -761,8 +783,17 @@
                 const topRec = summary.recommended_next_step || (
                     summary.trust_reasons && summary.trust_reasons[0] ? String(summary.trust_reasons[0]) : ''
                 );
+                const recProf = summary.recommended_next_profile
+                    ? `<p><strong>${v('veris_page.next_scan_profile', 'Next scan profile')}:</strong> ${escapeHtml(String(summary.recommended_next_profile))}</p>`
+                    : '';
+                const recColl = summary.recollection_recommended === true
+                    ? `<p><strong>${v('veris_page.recollect_needed', 'Re-collection')}:</strong> ${v('veris_page.recollect_yes', 'recommended')}</p>`
+                    : '';
                 const recLine = topRec ? `<p class="veris-next"><strong>${v('veris_page.next_step', 'Next step')}:</strong> ${escapeHtml(String(topRec))}</p>` : '';
-                return `<div class="veris-summary">${lines}${piv}${recLine}</div>`;
+                const escWhy = summary.escalation_rerun_reason
+                    ? `<p class="veris-why"><small>${escapeHtml(String(summary.escalation_rerun_reason))}</small></p>`
+                    : '';
+                return `<div class="veris-summary">${lines}${piv}${recProf}${recColl}${recLine}${escWhy}</div>`;
             }
 
             function generateCaseId() {
