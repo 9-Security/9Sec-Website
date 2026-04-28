@@ -499,6 +499,14 @@
                             <input id="scanner-email" name="email" type="email" placeholder="analyst@example.com" required autocomplete="email">
                         </div>
                         <div class="veris-field">
+                            <label for="scanner-profile" data-i18n="veris_page.lab_profile">Collection Profile</label>
+                            <select id="scanner-profile" name="collection_profile">
+                                <option value="fast" data-i18n="veris_page.profile_fast">fast</option>
+                                <option value="observe" data-i18n="veris_page.profile_observe">observe</option>
+                                <option value="escalated" data-i18n="veris_page.profile_escalated">escalated</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
                             <label for="scanner-window" data-i18n="veris_page.lab_window">Observation Window</label>
                             <select id="scanner-window" name="observation_window_sec">
                                 <option value="0" data-i18n="veris_page.opt_off">Off</option>
@@ -942,6 +950,7 @@
                     params.set('contact', email);
                     params.set('requester_name', email);
                     params.set('observation_window_sec', String(formData.get('observation_window_sec') || '0'));
+                    params.set('collection_profile', String(formData.get('collection_profile') || 'fast'));
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
                         headers: {
@@ -976,6 +985,7 @@
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
+                        `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(formData.get('collection_profile') || 'fast'))}</code></p>` +
                         `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
                         `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
