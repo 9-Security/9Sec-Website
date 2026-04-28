@@ -964,12 +964,16 @@
                     let requestNorm = '';
                     let requestId = '';
                     let downloadUrl = '';
+                    let launcherSigned = null;
+                    let signingStatus = '';
                     const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
                     if ((response.ok || response.status === 201) && rqCt.includes('application/json')) {
                         const jr = await response.json();
                         requestId = String(jr.request_id || '');
                         requestNorm = normalizeVerisResourceUrl(jr.request_url || `${GOV_API_BASE}/requests/${requestId}`);
                         downloadUrl = normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`);
+                        launcherSigned = (typeof jr.launcher_signed === 'boolean') ? jr.launcher_signed : null;
+                        signingStatus = String(jr.signing_status || '');
                     } else {
                         await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
                         requestNorm = normalizeVerisResourceUrl(response.url || '');
@@ -986,6 +990,7 @@
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
                         `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(formData.get('collection_profile') || 'fast'))}</code></p>` +
+                        (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
                         `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
                         `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
