@@ -733,13 +733,59 @@
                 }
             }
 
-            function startDirectBinaryDownload(url) {
-                const link = document.createElement('a');
-                link.href = String(url || '');
-                link.rel = 'noopener';
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
+            function ensureLauncherDownloadFrame() {
+                let frame = document.getElementById('veris-launcher-download-frame');
+                if (frame) return frame;
+                frame = document.createElement('iframe');
+                frame.id = 'veris-launcher-download-frame';
+                frame.name = 'veris-launcher-download-frame';
+                frame.hidden = true;
+                frame.style.display = 'none';
+                document.body.appendChild(frame);
+                return frame;
+            }
+
+            function resolveLauncherDownloadUrl(downloadUrl, requestUrl, requestId) {
+                const asString = (v) => String(v || '').trim();
+                const normalize = (v) => normalizeVerisResourceUrl(asString(v));
+                const requestBase = normalize(requestUrl);
+                let candidate = normalize(downloadUrl);
+
+                if (!candidate && requestBase) {
+                    candidate = `${requestBase.replace(/\/+$/, '')}/download`;
+                }
+                if (!candidate && requestId) {
+                    candidate = `${GOV_API_BASE}/requests/${encodeURIComponent(String(requestId))}/download`;
+                }
+                if (!candidate) return '';
+
+                try {
+                    const parsed = new URL(candidate, window.location.origin);
+                    const normalizedPath = parsed.pathname.replace(/\/+$/, '');
+                    const reqSuffix = requestId ? `/requests/${String(requestId)}` : '';
+                    const needsDownloadSuffix =
+                        normalizedPath.endsWith(reqSuffix) ||
+                        /\/api\/veris\/requests\/[^/]+$/i.test(normalizedPath);
+                    if (needsDownloadSuffix && !/\/download$/i.test(normalizedPath)) {
+                        parsed.pathname = `${normalizedPath}/download`;
+                    }
+                    return parsed.toString();
+                } catch (_) {
+                    return candidate;
+                }
+            }
+
+            function startDirectBinaryDownload(downloadUrl, requestUrl, requestId) {
+                const finalUrl = resolveLauncherDownloadUrl(downloadUrl, requestUrl, requestId);
+                if (!finalUrl) {
+                    throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
+                }
+                const frame = ensureLauncherDownloadFrame();
+                frame.removeAttribute('src');
+                window.setTimeout(() => {
+                    frame.src = finalUrl;
+                }, 0);
+                return finalUrl;
             }
 
             function summarizeResultPayload(payload) {
@@ -1020,7 +1066,7 @@
                         throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
                     }
                     stashRequest(requestId);
-                    startDirectBinaryDownload(downloadUrl);
+                    downloadUrl = startDirectBinaryDownload(downloadUrl, requestNorm, requestId);
                     const againLabel = v('veris_page.btn_download_again', 'DOWNLOAD_AGAIN');
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
@@ -1036,7 +1082,7 @@
                         `</div>`
                     );
                     document.getElementById('downloadAgainBtn')?.addEventListener('click', () => {
-                        startDirectBinaryDownload(downloadUrl);
+                        downloadUrl = startDirectBinaryDownload(downloadUrl, requestNorm, requestId);
                     });
 
                     showWaitOverlay({ caseId: randomCaseId, requestId, email });
