@@ -612,6 +612,8 @@
     <script>
         (() => {
             const GOV_API_BASE = `${window.location.origin}/api/veris`;
+            const STORAGE_KEY_REQ = 'veris_last_request_id';
+            const STORAGE_KEY_JOB = 'veris_last_job_id';
             const scannerForm = document.getElementById('scannerRequestForm');
             const scannerStatus = document.getElementById('scannerRequestStatus');
             const scannerButton = document.getElementById('generateScannerBtn');
@@ -659,12 +661,48 @@
                 return match ? match[1] : '';
             }
 
+            /** Map Central-internal absolute URLs or relative paths onto this site's /api/veris base (proxy-safe). */
+            function normalizeVerisResourceUrl(candidate) {
+                const s = String(candidate || '').trim();
+                if (!s) return '';
+                const jm = s.match(/\/jobs\/([^/?#]+)/);
+                if (jm) return `${GOV_API_BASE}/jobs/${jm[1]}`;
+                const rm = s.match(/\/requests\/([^/?#]+)/);
+                if (rm) return `${GOV_API_BASE}/requests/${rm[1]}`;
+                if (s.startsWith(`${window.location.origin}/api/veris`) || (s.startsWith('/api/veris'))) return s.startsWith('/') ? `${window.location.origin}${s.replace(/\/+$/, '')}` : s.replace(/\/+$/, '');
+                return s;
+            }
+
+            function stashRequest(id) {
+                try { if (id) sessionStorage.setItem(STORAGE_KEY_REQ, id); } catch (_) { /* ignore */ }
+            }
+            function stashJob(id) {
+                try { if (id) sessionStorage.setItem(STORAGE_KEY_JOB, id); } catch (_) { /* ignore */ }
+            }
+
             async function fetchTextOrThrow(response, fallbackMessage) {
                 const text = await response.text();
                 if (!response.ok) {
                     throw new Error(`${fallbackMessage} (HTTP ${response.status})`);
                 }
                 return text;
+            }
+
+            async function fetchJsonStrict(url, errLabel) {
+                const res = await fetch(url, {
+                    headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+                });
+                if (!res.ok) throw new Error(`${errLabel} (HTTP ${res.status})`);
+                return res.json();
+            }
+
+            async function fetchReportMarkdown(jobBaseUrl) {
+                const base = String(jobBaseUrl || '').replace(/\/+$/, '');
+                const res = await fetch(`${base}/report.md`, {
+                    headers: { 'Accept': 'text/markdown' }
+                });
+                if (!res.ok) return '';
+                return await res.text();
             }
 
             async function downloadBlob(url, filename) {
@@ -684,27 +722,47 @@
                 URL.revokeObjectURL(objectUrl);
             }
 
-            async function fetchReportText(jobUrl) {
-                const response = await fetch(`${jobUrl}/report`, { method: 'GET' });
-                if (!response.ok) return '';
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const pre = doc.querySelector('pre');
-                return pre ? pre.textContent || '' : '';
+            function summarizeResultPayload(payload) {
+                const p = payload && typeof payload === 'object' ? payload : {};
+                const s = (p.summary && typeof p.summary === 'object') ? p.summary : {};
+                const recs = Array.isArray(p.recommendations) ? p.recommendations : [];
+                let recommended_next_step = '';
+                if (recs.length && recs[0] && typeof recs[0].detail !== 'undefined') {
+                    recommended_next_step = String(recs[0].detail);
+                } else if (recs.length && typeof recs[0] === 'string') {
+                    recommended_next_step = recs[0];
+                }
+                return Object.assign({}, s, {
+                    log_trust_score: s.log_trust_score,
+                    gap_count: s.gap_count,
+                    recommended_next_step: recommended_next_step,
+                    trust_reasons: s.trust_reasons,
+                    primary_process_name: s.primary_process_name
+                });
             }
 
             function buildSummary(summary) {
-                const items = [
-                    [v('veris_page.sum_host', 'Host'), summary.host || '-'],
+                const rows = [
+                    [v('veris_page.sum_host', 'Host'), summary.host ?? '-'],
                     [v('veris_page.sum_evidence', 'Evidence Count'), summary.evidence_count ?? '-'],
                     [v('veris_page.sum_rules', 'Matched Rules'), summary.matched_rules_count ?? '-'],
-                    [v('veris_page.sum_trust', 'Trust Grade'), summary.evidence_trust_grade || '-'],
+                    [v('veris_page.sum_trust', 'Trust Grade'), summary.evidence_trust_grade ?? '-'],
+                    [v('veris_page.log_trust_short', 'Log trust'), summary.log_trust_score ?? '-'],
+                    [v('veris_page.metric_chains_short', 'Attack chains'), summary.attack_chain_candidates_count ?? '-'],
+                    [v('veris_page.metric_gap_short', 'Gaps'), summary.gap_count ?? '-'],
                     [v('veris_page.sum_delta', 'Score Delta'), summary.total_score_delta ?? '-']
                 ];
-                return items.map(([label, value]) => (
-                    `<div><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`
+                const lines = rows.map(([label, val]) => (
+                    `<div><span>${escapeHtml(label)}</span><span>${escapeHtml(String(val))}</span></div>`
                 )).join('');
+                const piv = summary.primary_process_name
+                    ? `<div><span>${v('veris_page.primary_pivot', 'Primary process')}</span><span>${escapeHtml(String(summary.primary_process_name))}</span></div>`
+                    : '';
+                const topRec = summary.recommended_next_step || (
+                    summary.trust_reasons && summary.trust_reasons[0] ? String(summary.trust_reasons[0]) : ''
+                );
+                const recLine = topRec ? `<p class="veris-next"><strong>${v('veris_page.next_step', 'Next step')}:</strong> ${escapeHtml(String(topRec))}</p>` : '';
+                return `<div class="veris-summary">${lines}${piv}${recLine}</div>`;
             }
 
             function generateCaseId() {
@@ -719,7 +777,7 @@
                 waitEmail.textContent = email || '-';
                 waitRemaining.textContent = '10:00';
                 setFeedback(waitResultStatus, 'pending',
-                    '<strong>等待分析結果中...</strong><p>系統會在收到掃描結果後，自動顯示分析摘要。</p>'
+                    `<strong>${v('veris_page.state_overlay_wait', 'Awaiting scanner result')}</strong><p>${v('veris_page.overlay_wait_p', 'When the launcher finishes, Central will ingest via status.json — no HTML scraping.')}</p>`
                 );
                 scannerWaitOverlay.hidden = false;
             }
@@ -735,47 +793,99 @@
                 return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
             }
 
-            async function pollScannerResult(requestUrl, startedAt) {
+            async function pollScannerResult(requestNormalizedUrl, requestId, startedAt) {
+                const pollBase = String(requestNormalizedUrl || '').replace(/\/+$/, '');
+                const statusUrl = `${pollBase}/status.json`;
+                stashRequest(requestId);
                 while (Date.now() - startedAt < WAIT_TIMEOUT_MS && !waitClosedManually) {
-                    const requestResponse = await fetch(requestUrl, { method: 'GET', cache: 'no-store' });
-                    if (requestResponse.ok) {
-                        const requestHtml = await requestResponse.text();
-                        const jobMatch = requestHtml.match(/\/jobs\/([a-zA-Z0-9]+)(?:['"<\s])/);
-                        const latestJobId = jobMatch ? jobMatch[1] : '';
-                        if (latestJobId) {
-                            const resultUrl = `${GOV_API_BASE}/jobs/${latestJobId}/result.json`;
-                            const resultResponse = await fetch(resultUrl, { method: 'GET', cache: 'no-store' });
-                            if (resultResponse.ok) {
-                                const payload = await resultResponse.json();
+                    try {
+                        const st = await fetchJsonStrict(statusUrl, 'request status');
+                        stashJob(st.latest_job_id || '');
+                        setFeedback(waitResultStatus, 'pending',
+                            `<strong>${v('veris_page.state_waiting_exec', 'Waiting for scanner upload or correlation.')}</strong>` +
+                            `<p>${v('veris_page.state_waiting_exec_p', 'status.json feeds this page; execution stays agentless.')}</p>`
+                        );
+
+                        const jid = st.latest_job_id;
+                        if (jid) {
+                            const jobBase = `${GOV_API_BASE}/jobs/${jid}`;
+                            await new Promise((r) => setTimeout(r, 900));
+                            try {
+                                const payload = await fetchJsonStrict(`${jobBase}/result.json`, 'analysis result');
+                                const summed = summarizeResultPayload(payload);
+
+                                waitResultStatus.hidden = false;
+                                setFeedback(waitResultStatus, 'success',
+                                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                                    buildSummary(summed));
+
+                                setFeedback(scannerStatus, 'success',
+                                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                                    `<p>${v('veris_page.result_json_hint', 'Structured result')} <a href="${jobBase}/result.json">${jobBase}/result.json</a></p>` +
+                                    `<p>${v('veris_page.report_md_hint', 'Markdown report')} <a href="${jobBase}/report.md">${jobBase}/report.md</a></p>`);
+
+                                fetchReportMarkdown(jobBase).then((md) => {
+                                    if (!md || !waitResultStatus) return;
+                                    waitResultStatus.innerHTML +=
+                                        `<pre class="veris-report">${escapeHtml(md)}</pre>`;
+                                });
+                                try {
+                                    sessionStorage.removeItem(STORAGE_KEY_REQ);
+                                    sessionStorage.removeItem(STORAGE_KEY_JOB);
+                                } catch (_) {}
                                 return payload;
+                            } catch (_) {
+                                /* upload done but analyzer still running */
                             }
                         }
+                    } catch (_) {
+                        /* transient or Central warming up */
                     }
-                    await new Promise((resolve) => setTimeout(resolve, 3500));
+                    await new Promise((resolve) => setTimeout(resolve, 3200));
                 }
                 return null;
             }
 
-            async function pollJob(jobUrl, statusElement) {
-                const resultUrl = `${jobUrl}/result.json`;
-                for (let attempt = 0; attempt < 30; attempt += 1) {
-                    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1200 : 3000));
-                    const response = await fetch(resultUrl, { method: 'GET', cache: 'no-store' });
-                    if (response.status === 404) {
-                        continue;
+            async function pollJob(jobUrlCanon, statusElement) {
+                const pollBase = String(jobUrlCanon || '').replace(/\/+$/, '');
+                const deadline = Date.now() + WAIT_TIMEOUT_MS;
+                let backoff = 1200;
+
+                while (Date.now() < deadline) {
+                    await new Promise((r) => setTimeout(r, backoff));
+                    backoff = 2600;
+
+                    let jst = null;
+                    try {
+                        jst = await fetchJsonStrict(`${pollBase}/status.json`, 'job status');
+                    } catch (_) {
+                        jst = null;
                     }
-                    if (!response.ok) {
-                        const msg = v('veris_page.err_job_poll', 'Job polling failed (HTTP {status})').replace('{status}', String(response.status));
-                        throw new Error(msg);
+
+                    if (jst && (jst.status === 'failed' || (jst.diagnostic_code === 'failed'))) {
+                        const errTxt = jst.error ? String(jst.error) : v('veris_page.msg_analysis_failed', 'Analysis failed.');
+                        throw new Error(errTxt);
                     }
-                    const payload = await response.json();
-                    const reportText = await fetchReportText(jobUrl);
-                    setFeedback(statusElement, 'success',
-                        `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                        `<div class="veris-summary">${buildSummary(payload.summary || {})}</div>` +
-                        (reportText ? `<pre class="veris-report">${escapeHtml(reportText)}</pre>` : '')
-                    );
-                    return;
+
+                    try {
+                        const payload = await fetchJsonStrict(`${pollBase}/result.json`, 'result JSON');
+                        const summed = summarizeResultPayload(payload);
+                        const md = await fetchReportMarkdown(pollBase).catch(() => '');
+                        stashJob('');
+                        stashRequest('');
+                        setFeedback(statusElement, 'success',
+                            `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                            `${buildSummary(summed)}` +
+                            (md ? `<pre class="veris-report">${escapeHtml(md)}</pre>` : '')
+                        );
+                        try {
+                            sessionStorage.removeItem(STORAGE_KEY_JOB);
+                            sessionStorage.removeItem(STORAGE_KEY_REQ);
+                        } catch (_) {}
+                        return;
+                    } catch (_) {
+                        /* waiting for analyzer */
+                    }
                 }
 
                 setFeedback(statusElement, 'pending',
@@ -803,17 +913,33 @@
                     params.set('observation_window_sec', String(formData.get('observation_window_sec') || '0'));
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
-                        body: params,
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: params.toString(),
                         redirect: 'follow'
                     });
-                    await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
-                    const requestUrl = response.url;
-                    const requestId = parseRequestId(requestUrl);
-                    if (!requestId) {
+
+                    let requestNorm = '';
+                    let requestId = '';
+                    let downloadUrl = '';
+                    const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
+                    if ((response.ok || response.status === 201) && rqCt.includes('application/json')) {
+                        const jr = await response.json();
+                        requestId = String(jr.request_id || '');
+                        requestNorm = normalizeVerisResourceUrl(jr.request_url || `${GOV_API_BASE}/requests/${requestId}`);
+                        downloadUrl = normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`);
+                    } else {
+                        await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
+                        requestNorm = normalizeVerisResourceUrl(response.url || '');
+                        requestId = parseRequestId(requestNorm);
+                        downloadUrl = `${requestNorm.replace(/\/+$/, '')}/download`;
+                    }
+                    if (!requestId || !downloadUrl) {
                         throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
                     }
-
-                    const downloadUrl = `${requestUrl}/download`;
+                    stashRequest(requestId);
                     await downloadBlob(downloadUrl, `NineSTriage_${requestId}.exe`);
                     const againLabel = v('veris_page.btn_download_again', 'DOWNLOAD_AGAIN');
                     setFeedback(scannerStatus, 'success',
@@ -837,12 +963,12 @@
                         waitRemaining.textContent = formatTimeLeft(remainingMs);
                     }, WAIT_TICK_MS);
 
-                    const result = await pollScannerResult(requestUrl, startedAt);
+                    const result = await pollScannerResult(requestNorm, requestId, startedAt);
                     clearInterval(timer);
 
                     if (waitClosedManually) {
                         setFeedback(scannerStatus, 'pending',
-                            '<strong>等待視窗已關閉。</strong><p>若客戶稍後才執行掃描器，請改用下方「Analyze Existing Package」自行上傳結果。</p>'
+                            `<strong>${v('veris_page.wait_closed', 'Wait dialog closed.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
                         );
                         return;
                     }
@@ -850,17 +976,12 @@
                     if (!result) {
                         closeWaitOverlay();
                         setFeedback(scannerStatus, 'pending',
-                            '<strong>等待逾時（10 分鐘）。</strong><p>尚未收到自動回傳結果。若客戶稍後才執行掃描器，請改用下方「Analyze Existing Package」自行上傳。</p>'
+                            `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong><p>${v('veris_page.wait_timeout_p', 'No automated result yet. If the launcher runs later, upload the package below.')}</p>`
                         );
                         return;
                     }
 
-                    const summary = result.summary || {};
-                    setFeedback(waitResultStatus, 'success',
-                        '<strong>分析結果已取得。</strong>' +
-                        `<div class="veris-summary">${buildSummary(summary)}</div>` +
-                        ((result.report_text || result.report) ? `<pre class="veris-report">${escapeHtml(result.report_text || result.report)}</pre>` : '')
-                    );
+                    closeWaitOverlay();
                 } catch (error) {
                     setFeedback(scannerStatus, 'error',
                         `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
@@ -874,7 +995,7 @@
                 waitClosedManually = true;
                 closeWaitOverlay();
                 setFeedback(scannerStatus, 'pending',
-                    '<strong>等待視窗已由使用者關閉。</strong><p>若掃描器稍後才執行，請改用下方「Analyze Existing Package」自行上傳。</p>'
+                    `<strong>${v('veris_page.wait_closed_manual', 'You closed the wait dialog.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
                 );
             });
 
@@ -887,16 +1008,31 @@
                     const formData = new FormData(uploadForm);
                     const response = await fetch(`${GOV_API_BASE}/upload`, {
                         method: 'POST',
+                        headers: { 'Accept': 'application/json' },
                         body: formData,
                         redirect: 'follow'
                     });
-                    await fetchTextOrThrow(response, v('veris_page.err_evidence_up', 'Evidence upload failed'));
-                    const jobUrl = response.url;
-                    const jobId = parseJobId(jobUrl);
-                    if (!jobId) {
+
+                    const upCt = String(response.headers.get('content-type') || '').toLowerCase();
+                    let jobUrl = '';
+                    let jobId = '';
+                    if (upCt.includes('application/json')) {
+                        const ju = await response.json();
+                        if (!response.ok) {
+                            throw new Error(ju.error || ju.detail || v('veris_page.err_evidence_up', 'Evidence upload failed') + ` (HTTP ${response.status})`);
+                        }
+                        jobId = String(ju.job_id || '');
+                        jobUrl = normalizeVerisResourceUrl(ju.job_url || '');
+                    } else {
+                        await fetchTextOrThrow(response, v('veris_page.err_evidence_up', 'Evidence upload failed'));
+                        jobUrl = normalizeVerisResourceUrl(response.url || '');
+                        jobId = parseJobId(jobUrl);
+                    }
+                    if (!jobUrl || !jobId) {
                         throw new Error(v('veris_page.err_resolve_job', 'Unable to resolve job identifier from response.'));
                     }
 
+                    stashJob(jobId);
                     setFeedback(uploadStatus, 'pending',
                         `<strong>${v('veris_page.msg_evidence_ok', 'Evidence accepted.')}</strong><p>${v('veris_page.msg_evidence_ok_p', 'Job {id} is running. The page will refresh status automatically.').replace('{id}', `<code>${escapeHtml(jobId)}</code>`)}</p>`
                     );
