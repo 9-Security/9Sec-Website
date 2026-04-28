@@ -733,21 +733,13 @@
                 }
             }
 
-            async function downloadBlob(url, filename) {
-                const response = await fetch(url, { method: 'GET' });
-                if (!response.ok) {
-                    const msg = v('veris_page.err_download', 'Download failed (HTTP {status})').replace('{status}', String(response.status));
-                    throw new Error(msg);
-                }
-                const blob = await response.blob();
-                const objectUrl = URL.createObjectURL(blob);
+            function startDirectBinaryDownload(url) {
                 const link = document.createElement('a');
-                link.href = objectUrl;
-                link.download = filename;
+                link.href = String(url || '');
+                link.rel = 'noopener';
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
-                URL.revokeObjectURL(objectUrl);
             }
 
             function summarizeResultPayload(payload) {
@@ -1006,6 +998,8 @@
                     let downloadUrl = '';
                     let launcherSigned = null;
                     let signingStatus = '';
+                    let launcherSizeBytes = 0;
+                    let launcherSha256 = '';
                     const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
                     if ((response.ok || response.status === 201) && rqCt.includes('application/json')) {
                         const jr = await response.json();
@@ -1014,6 +1008,8 @@
                         downloadUrl = normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`);
                         launcherSigned = (typeof jr.launcher_signed === 'boolean') ? jr.launcher_signed : null;
                         signingStatus = String(jr.signing_status || '');
+                        launcherSizeBytes = Number(jr.launcher_size_bytes || 0);
+                        launcherSha256 = String(jr.launcher_sha256 || '');
                     } else {
                         await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
                         requestNorm = normalizeVerisResourceUrl(response.url || '');
@@ -1024,7 +1020,7 @@
                         throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
                     }
                     stashRequest(requestId);
-                    await downloadBlob(downloadUrl, `NineSTriage_${requestId}.exe`);
+                    startDirectBinaryDownload(downloadUrl);
                     const againLabel = v('veris_page.btn_download_again', 'DOWNLOAD_AGAIN');
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
@@ -1032,15 +1028,15 @@
                         `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(selectedPreset?.profile || 'fast'))}</code></p>` +
                         `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(selectedPreset?.observation_window_sec || 60))}s</code></p>` +
                         (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
+                        (launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(launcherSizeBytes))}</code></p>` : '') +
+                        (launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(launcherSha256)}</code></p>` : '') +
                         `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
                         `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
                         `</div>`
                     );
                     document.getElementById('downloadAgainBtn')?.addEventListener('click', () => {
-                        downloadBlob(downloadUrl, `NineSTriage_${requestId}.exe`).catch((error) => {
-                            setFeedback(scannerStatus, 'error', `<strong>${v('veris_page.err_download_f', 'Download failed.')}</strong><p>${escapeHtml(error.message)}</p>`);
-                        });
+                        startDirectBinaryDownload(downloadUrl);
                     });
 
                     showWaitOverlay({ caseId: randomCaseId, requestId, email });
