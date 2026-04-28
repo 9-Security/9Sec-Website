@@ -499,20 +499,10 @@
                             <input id="scanner-email" name="email" type="email" placeholder="analyst@example.com" required autocomplete="email">
                         </div>
                         <div class="veris-field">
-                            <label for="scanner-profile" data-i18n="veris_page.lab_profile">Collection Profile</label>
-                            <select id="scanner-profile" name="collection_profile">
-                                <option value="fast" data-i18n="veris_page.profile_fast">fast</option>
-                                <option value="observe" data-i18n="veris_page.profile_observe">observe</option>
-                                <option value="escalated" data-i18n="veris_page.profile_escalated">escalated</option>
-                            </select>
-                        </div>
-                        <div class="veris-field">
-                            <label for="scanner-window" data-i18n="veris_page.lab_window">Observation Window</label>
-                            <select id="scanner-window" name="observation_window_sec">
-                                <option value="0" data-i18n="veris_page.opt_off">Off</option>
-                                <option value="60" data-i18n="veris_page.opt_60">60 seconds</option>
-                                <option value="180" data-i18n="veris_page.opt_180">180 seconds</option>
-                                <option value="300" data-i18n="veris_page.opt_300">300 seconds</option>
+                            <label for="scanner-preset" data-i18n="veris_page.lab_preset">Collection Preset</label>
+                            <select id="scanner-preset" name="collection_preset">
+                                <option value="fast_60">Fast (60s)</option>
+                                <option value="observe_180">Observe (180s)</option>
                             </select>
                         </div>
                     </div>
@@ -625,6 +615,7 @@
             const scannerForm = document.getElementById('scannerRequestForm');
             const scannerStatus = document.getElementById('scannerRequestStatus');
             const scannerButton = document.getElementById('generateScannerBtn');
+            const scannerPreset = document.getElementById('scanner-preset');
             const scannerWaitOverlay = document.getElementById('scannerWaitOverlay');
             const closeScannerWaitBtn = document.getElementById('closeScannerWaitBtn');
             const waitCaseId = document.getElementById('waitCaseId');
@@ -638,6 +629,10 @@
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
             const WAIT_TICK_MS = 1000;
             let waitClosedManually = false;
+            let verisPresets = [
+                { id: 'fast_60', label: 'Fast (60s)', profile: 'fast', observation_window_sec: 60 },
+                { id: 'observe_180', label: 'Observe (180s)', profile: 'observe', observation_window_sec: 180 }
+            ];
 
             function v(key, fallback) {
                 return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
@@ -713,6 +708,31 @@
                 return await res.text();
             }
 
+            async function loadCapabilities() {
+                try {
+                    const caps = await fetchJsonStrict(`${GOV_API_BASE}/capabilities.json`, 'capabilities');
+                    const list = Array.isArray(caps?.presets) ? caps.presets : [];
+                    const normalized = list
+                        .filter((p) => p && typeof p.profile === 'string' && Number.isFinite(Number(p.observation_window_sec)))
+                        .map((p) => ({
+                            id: String(p.id || `${p.profile}_${p.observation_window_sec}`),
+                            label: String(p.label || `${p.profile} (${p.observation_window_sec}s)`),
+                            profile: String(p.profile),
+                            observation_window_sec: Number(p.observation_window_sec)
+                        }));
+                    if (normalized.length) {
+                        verisPresets = normalized;
+                    }
+                } catch (_) {
+                    /* deterministic fallback stays enabled */
+                }
+                if (scannerPreset) {
+                    scannerPreset.innerHTML = verisPresets
+                        .map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.label)}</option>`)
+                        .join('');
+                }
+            }
+
             async function downloadBlob(url, filename) {
                 const response = await fetch(url, { method: 'GET' });
                 if (!response.ok) {
@@ -763,13 +783,25 @@
                     deep_forensics_recommended: esc.deep_forensics_recommended === true,
                     recommended_next_profile: nextProf ?? '',
                     escalation_rerun_reason: esc.why_rerun_needed ?? '',
-                    escalation_insufficient_reason: esc.why_evidence_insufficient ?? ''
+                    escalation_insufficient_reason: esc.why_evidence_insufficient ?? '',
+                    requested_collection_profile: p.requested_collection_profile ?? s.requested_collection_profile ?? '',
+                    effective_collection_profile: p.effective_collection_profile ?? s.effective_collection_profile ?? '',
+                    requested_observation_window_sec: p.requested_observation_window_sec ?? s.requested_observation_window_sec ?? '',
+                    effective_observation_window_sec: p.effective_observation_window_sec ?? s.effective_observation_window_sec ?? '',
+                    entitlement_mode: p.entitlement_mode ?? s.entitlement_mode ?? '',
+                    allowed_next_profile: esc.allowed_next_profile ?? '',
+                    entitlement_blocked: esc.entitlement_blocked === true,
+                    service_follow_up_required: esc.service_follow_up_required === true
                 });
             }
 
             function buildSummary(summary) {
                 const rows = [
                     [v('veris_page.sum_profile', 'Profile'), summary.collection_profile || '-'],
+                    [v('veris_page.sum_requested_profile', 'Requested profile'), summary.requested_collection_profile || '-'],
+                    [v('veris_page.sum_effective_profile', 'Effective profile'), summary.effective_collection_profile || '-'],
+                    [v('veris_page.sum_requested_window', 'Requested window'), summary.requested_observation_window_sec || '-'],
+                    [v('veris_page.sum_effective_window', 'Effective window'), summary.effective_observation_window_sec || '-'],
                     [v('veris_page.sum_host', 'Host'), summary.host ?? '-'],
                     [v('veris_page.sum_evidence', 'Evidence Count'), summary.evidence_count ?? '-'],
                     [v('veris_page.sum_rules', 'Matched Rules'), summary.matched_rules_count ?? '-'],
@@ -794,14 +826,20 @@
                 const recProf = summary.recommended_next_profile
                     ? `<p><strong>${v('veris_page.next_scan_profile', 'Next scan profile')}:</strong> ${escapeHtml(String(summary.recommended_next_profile))}</p>`
                     : '';
+                const allowedProf = summary.allowed_next_profile
+                    ? `<p><strong>${v('veris_page.allowed_next_profile', 'Allowed next profile')}:</strong> ${escapeHtml(String(summary.allowed_next_profile))}</p>`
+                    : '';
                 const recColl = summary.recollection_recommended === true
                     ? `<p><strong>${v('veris_page.recollect_needed', 'Re-collection')}:</strong> ${v('veris_page.recollect_yes', 'recommended')}</p>`
+                    : '';
+                const serviceGate = summary.entitlement_blocked || summary.service_follow_up_required
+                    ? `<p><strong>${v('veris_page.service_gate', 'Service-gated escalation')}:</strong> ${v('veris_page.service_gate_msg', 'Escalated follow-up requires service entitlement. Public preset ceiling remains Observe (180s).')}</p>`
                     : '';
                 const recLine = topRec ? `<p class="veris-next"><strong>${v('veris_page.next_step', 'Next step')}:</strong> ${escapeHtml(String(topRec))}</p>` : '';
                 const escWhy = summary.escalation_rerun_reason
                     ? `<p class="veris-why"><small>${escapeHtml(String(summary.escalation_rerun_reason))}</small></p>`
                     : '';
-                return `<div class="veris-summary">${lines}${piv}${recProf}${recColl}${recLine}${escWhy}</div>`;
+                return `<div class="veris-summary">${lines}${piv}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
             }
 
             function generateCaseId() {
@@ -949,8 +987,10 @@
                     params.set('case_id', randomCaseId);
                     params.set('contact', email);
                     params.set('requester_name', email);
-                    params.set('observation_window_sec', String(formData.get('observation_window_sec') || '0'));
-                    params.set('collection_profile', String(formData.get('collection_profile') || 'fast'));
+                    const selectedPresetId = String(formData.get('collection_preset') || 'fast_60');
+                    const selectedPreset = verisPresets.find((p) => p.id === selectedPresetId) || verisPresets[0];
+                    params.set('observation_window_sec', String(selectedPreset?.observation_window_sec ?? 60));
+                    params.set('collection_profile', String(selectedPreset?.profile || 'fast'));
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
                         headers: {
@@ -989,7 +1029,8 @@
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
-                        `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(formData.get('collection_profile') || 'fast'))}</code></p>` +
+                        `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(selectedPreset?.profile || 'fast'))}</code></p>` +
+                        `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(selectedPreset?.observation_window_sec || 60))}s</code></p>` +
                         (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
                         `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
@@ -1091,6 +1132,7 @@
                     uploadButton.disabled = false;
                 }
             });
+            loadCapabilities();
         })();
     </script>
     <script type="module">
