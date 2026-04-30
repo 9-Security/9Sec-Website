@@ -343,10 +343,11 @@
             inset: 0;
             background: rgba(4, 8, 20, 0.86);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             padding: 1.2rem;
             z-index: 9999;
+            overflow-y: auto;
         }
 
         .veris-wait-overlay[hidden] {
@@ -355,12 +356,14 @@
 
         .veris-wait-modal {
             width: min(680px, 96vw);
+            max-height: calc(100dvh - 2.4rem);
             border: 1px solid rgba(0, 229, 255, 0.35);
             border-radius: 8px;
             background: #050914;
             padding: 1.3rem;
             /* Keep typography readable: page theme vars are meant for Page bg, not this dark HUD. */
             color: #e8eef9;
+            overflow-y: auto;
         }
 
         .veris-wait-header {
