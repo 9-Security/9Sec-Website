@@ -1451,10 +1451,10 @@
                     }
 
                     finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
+                    /* Same overlay as launcher path: full summary + Markdown live in the popup only. */
                     setFeedback(uploadStatus, 'success',
                         `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                        `<p>${v('veris_page.upload_report_in_modal_p', '完整報告已顯示於上方視窗。關閉視窗［×］後，可再上傳其他證據封裝。')}</p>` +
-                        `<p><a href="${outcome.jobBase}/result.json">${escapeHtml(`${outcome.jobBase}/result.json`)}</a> · <a href="${outcome.jobBase}/report.md">${escapeHtml(`${outcome.jobBase}/report.md`)}</a></p>`
+                        `<p>${v('veris_page.upload_report_in_modal_only', '完整報告僅於上方彈窗顯示（與自動回傳流程相同）。請於彈窗內檢視；關閉［×］後可再上傳其他封裝。')}</p>`
                     );
                 } catch (error) {
                     closeWaitOverlay();
