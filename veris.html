@@ -1075,6 +1075,7 @@
             function prepareManualUploadOverlay(fileLabel) {
                 waitClosedManually = false;
                 overlayContext = 'manual';
+                if (uploadStatus) uploadStatus.hidden = true;
                 if (waitModalTitle) {
                     waitModalTitle.textContent = v('veris_page.upload_wait_title', '證據封裝分析');
                 }
@@ -1094,13 +1095,33 @@
                 scannerWaitOverlay.hidden = false;
             }
 
-            /** @param {'success' | 'fail'} mode */
-            function showTerminalWaitChrome(mode) {
+            /** Evidence rejected at /upload (HTTP 4xx etc.): same modal as analyze flow, nothing in #uploadEvidenceStatus. */
+            function showManualUploadApiErrorOverlay(detailHtmlEscaped) {
+                overlayContext = 'manual';
+                waitClosedManually = false;
+                if (waitKvSection) waitKvSection.hidden = true;
+                if (waitModalIntro) waitModalIntro.hidden = true;
+                if (waitModalTitle) {
+                    waitModalTitle.textContent = v('veris_page.upload_failed_title', '證據上傳失敗');
+                }
+                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
+                if (closeScannerResultX) closeScannerResultX.hidden = false;
+                setFeedback(waitResultStatus, 'error',
+                    `<strong>${v('veris_page.err_upload', 'Upload failed.')}</strong><p>${detailHtmlEscaped}</p>` +
+                    `<p><small>${v('veris_page.upload_error_dismiss_hint', '請關閉視窗［×］後可重新選擇檔案並再試。')}</small></p>`
+                );
+                scannerWaitOverlay.hidden = false;
+            }
+
+            /** @param {'success' | 'fail'} mode @param {string} [customTitle] */
+            function showTerminalWaitChrome(mode, customTitle) {
                 if (!waitModalTitle || !waitModalIntro) return;
                 waitModalIntro.hidden = true;
-                waitModalTitle.textContent = mode === 'fail'
-                    ? v('veris_page.wait_title_fail', '分析發生問題')
-                    : v('veris_page.wait_title_report', '分析結果報告');
+                waitModalTitle.textContent = (typeof customTitle === 'string' && customTitle.trim())
+                    ? customTitle
+                    : (mode === 'fail'
+                        ? v('veris_page.wait_title_fail', '分析發生問題')
+                        : v('veris_page.wait_title_report', '分析結果報告'));
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
                 if (closeScannerResultX) closeScannerResultX.hidden = false;
             }
@@ -1436,32 +1457,25 @@
                     }
 
                     if (outcome.kind === 'stopped') {
-                        closeWaitOverlay();
-                        setFeedback(uploadStatus, 'pending',
-                            `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong><p>${v('veris_page.upload_timeout_p', '分析尚未取得結果，請稍後再試或使用 Request ID／Job URL 追查。')}</p>`
+                        if (uploadStatus) uploadStatus.hidden = true;
+                        showTerminalWaitChrome('fail', v('veris_page.wait_timeout_overlay_title', '等候逾時'));
+                        setFeedback(waitResultStatus, 'error',
+                            `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong>` +
+                            `<p>${v('veris_page.upload_timeout_p', '分析尚未取得結果，請稍後再試或使用 Job URL 追查。')}</p>`
                         );
                         return;
                     }
 
                     if (outcome.kind === 'fail') {
-                        setFeedback(uploadStatus, 'error',
-                            `<strong>${v('veris_page.analysis_failed_title', 'Analysis failed.')}</strong><p>${v('veris_page.upload_fail_see_modal', '詳細原因請見上方視窗；關閉後可重新上傳。')}</p>`
-                        );
+                        if (uploadStatus) uploadStatus.hidden = true;
                         return;
                     }
 
                     finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
-                    /* Same overlay as launcher path: full summary + Markdown live in the popup only. */
-                    setFeedback(uploadStatus, 'success',
-                        `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                        `<p>${v('veris_page.upload_report_in_modal_only', '完整報告僅於上方彈窗顯示（與自動回傳流程相同）。請於彈窗內檢視；關閉［×］後可再上傳其他封裝。')}</p>`
-                    );
+                    if (uploadStatus) uploadStatus.hidden = true;
                 } catch (error) {
-                    closeWaitOverlay();
-                    unlockUploadForm();
-                    setFeedback(uploadStatus, 'error',
-                        `<strong>${v('veris_page.err_upload', 'Upload failed.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
-                    );
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(escapeHtml(error.message || 'Unknown error'));
                 }
             });
             loadCapabilities();
