@@ -380,25 +380,29 @@
             gap: 0.35rem;
         }
 
-        .veris-wait-dismiss-x {
+        .veris-wait-dismiss-x,
+        .veris-wait-icon-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 2rem;
             height: 2rem;
-            border: none;
+            border: 1px solid rgba(148, 163, 184, 0.35);
             border-radius: 4px;
-            background: transparent;
+            background: rgba(15, 23, 42, 0.28);
             color: rgba(248, 250, 252, 0.85);
-            font-size: 1.65rem;
+            font-size: 0.95rem;
+            font-weight: 700;
             line-height: 1;
             cursor: pointer;
             padding: 0;
-            font-family: var(--font-sans);
+            font-family: var(--font-mono);
         }
 
-        .veris-wait-dismiss-x:hover {
-            background: rgba(248, 250, 252, 0.12);
+        .veris-wait-dismiss-x:hover,
+        .veris-wait-icon-btn:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: rgba(96, 165, 250, 0.55);
             color: #f8fafc;
         }
 
@@ -477,12 +481,17 @@
             color: #0f172a !important;
         }
 
-        [data-theme=light] .veris-wait-dismiss-x {
+        [data-theme=light] .veris-wait-dismiss-x,
+        [data-theme=light] .veris-wait-icon-btn {
             color: #475569 !important;
+            border-color: rgba(71, 85, 105, 0.28);
+            background: rgba(241, 245, 249, 0.95);
         }
 
-        [data-theme=light] .veris-wait-dismiss-x:hover {
+        [data-theme=light] .veris-wait-dismiss-x:hover,
+        [data-theme=light] .veris-wait-icon-btn:hover {
             background: rgba(15, 23, 42, 0.08);
+            border-color: rgba(59, 130, 246, 0.45);
             color: #0f172a !important;
         }
 
@@ -663,7 +672,7 @@
                         <div class="veris-wait-header">
                             <h3 id="waitModalTitle">掃描等待視窗</h3>
                             <div class="veris-wait-actions">
-                                <button type="button" class="btn ghost-btn" id="closeScannerWaitBtn">關閉</button>
+                                <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn">關閉</button>
                                 <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉並停止等待" aria-label="Close and stop waiting">[x]</button>
                             </div>
                         </div>
