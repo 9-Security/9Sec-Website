@@ -664,7 +664,7 @@
                             <h3 id="waitModalTitle">掃描等待視窗</h3>
                             <div class="veris-wait-actions">
                                 <button type="button" class="btn ghost-btn" id="closeScannerWaitBtn">關閉</button>
-                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉" aria-label="Close">×</button>
+                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉並停止等待" aria-label="Close and stop waiting">[x]</button>
                             </div>
                         </div>
                         <div class="veris-wait-body">
@@ -785,6 +785,7 @@
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
             const WAIT_TICK_MS = 1000;
             let waitClosedManually = false;
+            let waitTerminalState = false;
             /** Job finished badly; overlay stays open until user dismisses. */
             const OVERLAY_JOB_FAILED = Object.freeze({ __kind: 'veris_overlay_job_failed' });
             /** @type {'idle' | 'scanner' | 'manual'} */
@@ -1063,6 +1064,7 @@
 
             function showWaitOverlay({ caseId, requestId, email }) {
                 waitClosedManually = false;
+                waitTerminalState = false;
                 overlayContext = 'scanner';
                 restoreWaitChromeDefaults();
                 waitCaseId.textContent = caseId;
@@ -1077,6 +1079,7 @@
 
             function restoreWaitChromeDefaults() {
                 if (!waitModalTitle || !waitModalIntro) return;
+                waitTerminalState = false;
                 waitModalTitle.textContent = WAIT_TITLE_SCANNER_TW;
                 waitModalIntro.hidden = false;
                 waitModalIntro.textContent = WAIT_INTRO_SCANNER_TW;
@@ -1084,8 +1087,16 @@
                     waitKvSection.hidden = false;
                     waitKvSection.style.removeProperty('display');
                 }
-                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = false;
-                if (closeScannerResultX) closeScannerResultX.hidden = true;
+                if (closeScannerWaitBtn) {
+                    closeScannerWaitBtn.hidden = false;
+                    closeScannerWaitBtn.textContent = '[-]';
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', '最小化等待視窗（背景持續接收）');
+                }
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', '停止等待並關閉視窗');
+                }
             }
 
             function lockUploadForm() {
@@ -1103,6 +1114,7 @@
 
             function prepareManualUploadOverlay(fileLabel) {
                 waitClosedManually = false;
+                waitTerminalState = false;
                 overlayContext = 'manual';
                 if (uploadStatus) uploadStatus.hidden = true;
                 if (waitModalTitle) {
@@ -1118,8 +1130,16 @@
                     waitKvSection.hidden = true;
                     waitKvSection.style.display = 'none';
                 }
-                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = false;
-                if (closeScannerResultX) closeScannerResultX.hidden = true;
+                if (closeScannerWaitBtn) {
+                    closeScannerWaitBtn.hidden = false;
+                    closeScannerWaitBtn.textContent = '[-]';
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', '最小化等待視窗（背景持續接收）');
+                }
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', '停止等待並關閉視窗');
+                }
                 setFeedback(waitResultStatus, 'pending',
                     `<strong>${v('veris_page.state_analyzing', 'Central is analyzing evidence...')}</strong>` +
                     `<p>${v('veris_page.manual_upload_overlay_p', '請勿關閉此頁；完成後將顯示與自動回傳相同的報告視窗。')}</p>`
@@ -1131,6 +1151,7 @@
             function showManualUploadApiErrorOverlay(detailHtmlEscaped, fileHintRaw) {
                 overlayContext = 'manual';
                 waitClosedManually = false;
+                waitTerminalState = true;
                 if (waitKvSection) {
                     waitKvSection.hidden = true;
                     waitKvSection.style.display = 'none';
@@ -1149,7 +1170,11 @@
                     waitModalTitle.textContent = v('veris_page.upload_failed_title', '證據上傳失敗');
                 }
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
-                if (closeScannerResultX) closeScannerResultX.hidden = false;
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.close_title', '關閉');
+                }
                 setFeedback(waitResultStatus, 'error',
                     `<strong>${v('veris_page.err_upload', 'Upload failed.')}</strong><p>${detailHtmlEscaped}</p>` +
                     `<p><small>${v('veris_page.upload_error_dismiss_hint', '請關閉視窗［×］後可重新選擇檔案並再試。')}</small></p>`
@@ -1160,6 +1185,7 @@
             /** @param {'success' | 'fail'} mode @param {string} [customTitle] */
             function showTerminalWaitChrome(mode, customTitle) {
                 if (!waitModalTitle || !waitModalIntro) return;
+                waitTerminalState = true;
                 waitModalIntro.hidden = true;
                 waitModalTitle.textContent = (typeof customTitle === 'string' && customTitle.trim())
                     ? customTitle
@@ -1167,7 +1193,12 @@
                         ? v('veris_page.wait_title_fail', '分析發生問題')
                         : v('veris_page.wait_title_report', '分析結果報告'));
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
-                if (closeScannerResultX) closeScannerResultX.hidden = false;
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.close_title', '關閉');
+                }
+                scannerWaitOverlay.hidden = false;
             }
 
             function closeWaitOverlay() {
@@ -1423,22 +1454,37 @@
             });
 
             closeScannerWaitBtn?.addEventListener('click', () => {
-                waitClosedManually = true;
                 const ctx = overlayContext;
-                closeWaitOverlay();
+                scannerWaitOverlay.hidden = true;
                 if (ctx === 'scanner') {
                     setFeedback(scannerStatus, 'pending',
-                        `<strong>${v('veris_page.wait_closed_manual', 'You closed the wait dialog.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
+                        `<strong>${v('veris_page.wait_minimized', 'Wait window minimized.')}</strong><p>${v('veris_page.wait_minimized_p', 'Background polling continues. The report window will reopen automatically when results arrive.')}</p>`
                     );
                 } else if (ctx === 'manual') {
-                    uploadStatus.hidden = false;
+                    if (uploadStatus) uploadStatus.hidden = false;
                     setFeedback(uploadStatus, 'pending',
-                        `<strong>${v('veris_page.upload_wait_cancelled', '已停止等待分析。')}</strong><p>${v('veris_page.upload_wait_cancelled_p', '若要分析證據封裝請重新選擇檔案並上傳。')}</p>`
+                        `<strong>${v('veris_page.wait_minimized', 'Wait window minimized.')}</strong><p>${v('veris_page.wait_minimized_p', 'Background polling continues. The report window will reopen automatically when results arrive.')}</p>`
                     );
                 }
             });
 
             closeScannerResultX?.addEventListener('click', () => {
+                if (!waitTerminalState && (overlayContext === 'scanner' || overlayContext === 'manual')) {
+                    waitClosedManually = true;
+                    const ctx = overlayContext;
+                    closeWaitOverlay();
+                    if (ctx === 'scanner') {
+                        setFeedback(scannerStatus, 'pending',
+                            `<strong>${v('veris_page.wait_closed_manual', 'You closed the wait dialog.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
+                        );
+                    } else if (ctx === 'manual') {
+                        if (uploadStatus) uploadStatus.hidden = false;
+                        setFeedback(uploadStatus, 'pending',
+                            `<strong>${v('veris_page.upload_wait_cancelled', '已停止等待分析。')}</strong><p>${v('veris_page.upload_wait_cancelled_p', '若要分析證據封裝請重新選擇檔案並上傳。')}</p>`
+                        );
+                    }
+                    return;
+                }
                 closeWaitOverlay();
             });
 
