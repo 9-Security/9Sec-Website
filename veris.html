@@ -371,6 +371,34 @@
             margin-bottom: 0.8rem;
         }
 
+        .veris-wait-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .veris-wait-dismiss-x {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: rgba(248, 250, 252, 0.85);
+            font-size: 1.65rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            font-family: var(--font-sans);
+        }
+
+        .veris-wait-dismiss-x:hover {
+            background: rgba(248, 250, 252, 0.12);
+            color: #f8fafc;
+        }
+
         .veris-wait-header h3 {
             margin: 0;
             font-family: var(--font-mono);
@@ -436,6 +464,15 @@
         }
 
         [data-theme=light] .veris-wait-header h3 {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-dismiss-x {
+            color: #475569 !important;
+        }
+
+        [data-theme=light] .veris-wait-dismiss-x:hover {
+            background: rgba(15, 23, 42, 0.08);
             color: #0f172a !important;
         }
 
@@ -614,11 +651,14 @@
                 <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
                     <div class="veris-wait-modal">
                         <div class="veris-wait-header">
-                            <h3>掃描等待視窗</h3>
-                            <button type="button" class="btn ghost-btn" id="closeScannerWaitBtn">關閉</button>
+                            <h3 id="waitModalTitle">掃描等待視窗</h3>
+                            <div class="veris-wait-actions">
+                                <button type="button" class="btn ghost-btn" id="closeScannerWaitBtn">關閉</button>
+                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉" aria-label="Close">×</button>
+                            </div>
                         </div>
                         <div class="veris-wait-body">
-                            <p>掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。</p>
+                            <p id="waitModalIntro">掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。</p>
                             <div class="veris-wait-kv">
                                 <div><span>案件編號</span><strong id="waitCaseId">-</strong></div>
                                 <div><span>Request ID</span><strong id="waitRequestId">-</strong></div>
@@ -717,6 +757,9 @@
             const scannerPreset = document.getElementById('scanner-preset');
             const scannerWaitOverlay = document.getElementById('scannerWaitOverlay');
             const closeScannerWaitBtn = document.getElementById('closeScannerWaitBtn');
+            const closeScannerResultX = document.getElementById('closeScannerResultX');
+            const waitModalTitle = document.getElementById('waitModalTitle');
+            const waitModalIntro = document.getElementById('waitModalIntro');
             const waitCaseId = document.getElementById('waitCaseId');
             const waitRequestId = document.getElementById('waitRequestId');
             const waitEmail = document.getElementById('waitEmail');
@@ -728,6 +771,8 @@
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
             const WAIT_TICK_MS = 1000;
             let waitClosedManually = false;
+            /** Job finished badly; overlay stays open until user dismisses. */
+            const OVERLAY_JOB_FAILED = Object.freeze({ __kind: 'veris_overlay_job_failed' });
             let verisPresets = [
                 { id: 'fast_60', label: 'Fast (60s)', profile: 'fast', observation_window_sec: 60 },
                 { id: 'observe_180', label: 'Observe (180s)', profile: 'observe', observation_window_sec: 180 }
@@ -986,6 +1031,7 @@
 
             function showWaitOverlay({ caseId, requestId, email }) {
                 waitClosedManually = false;
+                restoreWaitChromeDefaults();
                 waitCaseId.textContent = caseId;
                 waitRequestId.textContent = requestId || '-';
                 waitEmail.textContent = email || '-';
@@ -996,8 +1042,28 @@
                 scannerWaitOverlay.hidden = false;
             }
 
+            function restoreWaitChromeDefaults() {
+                if (!waitModalTitle || !waitModalIntro) return;
+                waitModalTitle.textContent = '掃描等待視窗';
+                waitModalIntro.hidden = false;
+                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = false;
+                if (closeScannerResultX) closeScannerResultX.hidden = true;
+            }
+
+            /** @param {'success' | 'fail'} mode */
+            function showTerminalWaitChrome(mode) {
+                if (!waitModalTitle || !waitModalIntro) return;
+                waitModalIntro.hidden = true;
+                waitModalTitle.textContent = mode === 'fail'
+                    ? v('veris_page.wait_title_fail', '分析發生問題')
+                    : v('veris_page.wait_title_report', '分析結果報告');
+                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
+                if (closeScannerResultX) closeScannerResultX.hidden = false;
+            }
+
             function closeWaitOverlay() {
                 scannerWaitOverlay.hidden = true;
+                restoreWaitChromeDefaults();
             }
 
             function formatTimeLeft(ms) {
@@ -1008,56 +1074,108 @@
             }
 
             async function pollScannerResult(requestNormalizedUrl, requestId, startedAt) {
+                const deadline = startedAt + WAIT_TIMEOUT_MS;
                 const pollBase = String(requestNormalizedUrl || '').replace(/\/+$/, '');
-                const statusUrl = `${pollBase}/status.json`;
+                const reqStatusUrl = `${pollBase}/status.json`;
                 stashRequest(requestId);
-                while (Date.now() - startedAt < WAIT_TIMEOUT_MS && !waitClosedManually) {
+
+                let jid = '';
+                while (Date.now() < deadline && !waitClosedManually) {
                     try {
-                        const st = await fetchJsonStrict(statusUrl, 'request status');
+                        const st = await fetchJsonStrict(reqStatusUrl, 'request status');
                         stashJob(st.latest_job_id || '');
+                        const cand = st.latest_job_id ? String(st.latest_job_id).trim() : '';
+                        if (cand) {
+                            jid = cand;
+                            break;
+                        }
                         setFeedback(waitResultStatus, 'pending',
                             `<strong>${v('veris_page.state_waiting_exec', 'Waiting for scanner upload or correlation.')}</strong>` +
                             `<p>${v('veris_page.state_waiting_exec_p', 'status.json feeds this page; execution stays agentless.')}</p>`
                         );
-
-                        const jid = st.latest_job_id;
-                        if (jid) {
-                            const jobBase = `${GOV_API_BASE}/jobs/${jid}`;
-                            await new Promise((r) => setTimeout(r, 900));
-                            try {
-                                const payload = await fetchJsonStrict(`${jobBase}/result.json`, 'analysis result');
-                                const summed = summarizeResultPayload(payload);
-
-                                waitResultStatus.hidden = false;
-                                setFeedback(waitResultStatus, 'success',
-                                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                                    buildSummary(summed));
-
-                                setFeedback(scannerStatus, 'success',
-                                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                                    `<p>${v('veris_page.result_json_hint', 'Structured result')} <a href="${jobBase}/result.json">${jobBase}/result.json</a></p>` +
-                                    `<p>${v('veris_page.report_md_hint', 'Markdown report')} <a href="${jobBase}/report.md">${jobBase}/report.md</a></p>`);
-
-                                fetchReportMarkdown(jobBase).then((md) => {
-                                    if (!md || !waitResultStatus) return;
-                                    waitResultStatus.innerHTML +=
-                                        `<pre class="veris-report">${escapeHtml(md)}</pre>`;
-                                });
-                                try {
-                                    sessionStorage.removeItem(STORAGE_KEY_REQ);
-                                    sessionStorage.removeItem(STORAGE_KEY_JOB);
-                                } catch (_) {}
-                                return payload;
-                            } catch (_) {
-                                /* upload done but analyzer still running */
-                            }
-                        }
                     } catch (_) {
-                        /* transient or Central warming up */
+                        /* transient */
                     }
-                    await new Promise((resolve) => setTimeout(resolve, 3200));
+                    await new Promise((resolve) => setTimeout(resolve, 2200));
                 }
-                return null;
+
+                if (!jid || waitClosedManually)
+                    return null;
+
+                stashJob(jid);
+                const jobBase = `${GOV_API_BASE}/jobs/${encodeURIComponent(jid)}`;
+
+                while (Date.now() < deadline && !waitClosedManually) {
+                    let jst = null;
+                    try {
+                        jst = await fetchJsonStrict(`${jobBase}/status.json`, 'job status');
+                    } catch (_) {
+                        jst = null;
+                    }
+
+                    if (jst) {
+                        const st = String(jst.status ?? '');
+                        if (st === 'failed') {
+                            const errHtml = jst.error ? escapeHtml(String(jst.error)) : escapeHtml(String(jst.diagnostic_code ?? 'failed'));
+                            showTerminalWaitChrome('fail');
+                            setFeedback(waitResultStatus, 'error',
+                                `<strong>${v('veris_page.analysis_failed_title', 'Analysis failed.')}</strong>` +
+                                `<p>${errHtml}</p>` +
+                                `<p><a href="${jobBase}/result.json">${jobBase}/result.json</a></p>`
+                            );
+                            return OVERLAY_JOB_FAILED;
+                        }
+
+                        if (st === 'completed')
+                            break;
+
+                        setFeedback(waitResultStatus, 'pending',
+                            `<strong>${v('veris_page.state_analyzing', 'Central is analyzing evidence...')}</strong>` +
+                            `<p>${v('veris_page.state_analyzing_p', 'This window refreshes automatically while rules and correlation finish.')}</p>`
+                        );
+                    }
+
+                    await new Promise((resolve) => setTimeout(resolve, 900));
+                }
+
+                if (Date.now() >= deadline || waitClosedManually)
+                    return null;
+
+                let payload = null;
+                for (let attempt = 0; attempt < 12 && Date.now() < deadline && !waitClosedManually; attempt++) {
+                    try {
+                        payload = await fetchJsonStrict(`${jobBase}/result.json`, 'analysis result');
+                        break;
+                    } catch (_) {
+                        await new Promise((r) => setTimeout(r, 600));
+                    }
+                }
+
+                if (!payload || waitClosedManually)
+                    return null;
+                const summed = summarizeResultPayload(payload);
+
+                showTerminalWaitChrome('success');
+                setFeedback(waitResultStatus, 'success',
+                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                    buildSummary(summed));
+
+                setFeedback(scannerStatus, 'success',
+                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                    `<p>${v('veris_page.result_json_hint', 'Structured result')} <a href="${jobBase}/result.json">${jobBase}/result.json</a></p>` +
+                    `<p>${v('veris_page.report_md_hint', 'Markdown report')} <a href="${jobBase}/report.md">${jobBase}/report.md</a></p>`
+                );
+
+                fetchReportMarkdown(jobBase).then((md) => {
+                    if (!md || !waitResultStatus) return;
+                    waitResultStatus.innerHTML +=
+                        `<pre class="veris-report">${escapeHtml(md)}</pre>`;
+                });
+                try {
+                    sessionStorage.removeItem(STORAGE_KEY_REQ);
+                    sessionStorage.removeItem(STORAGE_KEY_JOB);
+                } catch (_) { /* ignore */ }
+                return payload;
             }
 
             async function pollJob(jobUrlCanon, statusElement) {
@@ -1195,6 +1313,7 @@
                     clearInterval(timer);
 
                     if (waitClosedManually) {
+                        /* Overlay already dismissed by 「關閉」.*/
                         setFeedback(scannerStatus, 'pending',
                             `<strong>${v('veris_page.wait_closed', 'Wait dialog closed.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
                         );
@@ -1209,7 +1328,11 @@
                         return;
                     }
 
-                    closeWaitOverlay();
+                    if (result === OVERLAY_JOB_FAILED) {
+                        return;
+                    }
+
+                    /* Analysis succeeded: overlay stays on the report until [×]. */
                 } catch (error) {
                     setFeedback(scannerStatus, 'error',
                         `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
@@ -1225,6 +1348,10 @@
                 setFeedback(scannerStatus, 'pending',
                     `<strong>${v('veris_page.wait_closed_manual', 'You closed the wait dialog.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
                 );
+            });
+
+            closeScannerResultX?.addEventListener('click', () => {
+                closeWaitOverlay();
             });
 
             uploadForm?.addEventListener('submit', async (event) => {
