@@ -343,6 +343,17 @@
             color: var(--accent-secondary);
         }
 
+        .veris-summary-verdict {
+            border-color: rgba(255, 184, 77, 0.24);
+            background: linear-gradient(135deg, rgba(52, 28, 4, 0.55), rgba(8, 18, 34, 0.5));
+        }
+
+        .veris-summary-verdict p {
+            margin: 0;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+
         .veris-summary-list {
             margin: 0;
             padding-left: 1rem;
@@ -1075,6 +1086,8 @@
                     trust_reasons: s.trust_reasons,
                     primary_process_name: s.primary_process_name,
                     primary_process_display: s.primary_process_display ?? s.primary_process_name ?? '',
+                    executive_verdict: s.executive_verdict && typeof s.executive_verdict === 'object' ? s.executive_verdict : {},
+                    executive_verdict_sentence: s.executive_verdict_sentence ?? '',
                     analysis_highlights: Array.isArray(s.analysis_highlights) ? s.analysis_highlights : [],
                     top_processes: Array.isArray(s.top_processes) ? s.top_processes : [],
                     primary_remote_addresses: Array.isArray(s.primary_remote_addresses) ? s.primary_remote_addresses : [],
@@ -1097,6 +1110,43 @@
                     entitlement_blocked: esc.entitlement_blocked === true,
                     service_follow_up_required: esc.service_follow_up_required === true
                 });
+            }
+
+            function formatExecutiveVerdict(summary) {
+                const verdict = summary && summary.executive_verdict && typeof summary.executive_verdict === 'object'
+                    ? summary.executive_verdict
+                    : {};
+                const sentence = String(summary && (summary.executive_verdict_sentence || verdict.sentence) || '').trim();
+                if (sentence) return sentence;
+                const code = String(verdict.code || '').trim();
+                if (!code) return '';
+                const labels = {
+                    risk_present: v('veris_page.exec_verdict_risk_present', 'Risk present'),
+                    needs_attention: v('veris_page.exec_verdict_needs_attention', 'Needs attention'),
+                    no_clear_risk: v('veris_page.exec_verdict_no_clear_risk', 'No clear risk')
+                };
+                const reasons = {
+                    multi_domain_chain_activity: v('veris_page.exec_reason_multi_domain_chain_activity', 'multi-domain process activity and correlated attack-chain candidates indicate material risk'),
+                    collection_gaps_limit_confidence: v('veris_page.exec_reason_collection_gaps_limit_confidence', 'collection gaps are limiting confidence more than confirmed hostile linkage'),
+                    common_app_memory_gap_pressure: v('veris_page.exec_reason_common_app_memory_gap_pressure', 'anomalies cluster around common-app memory behavior while persistence linkage remains incomplete'),
+                    bounded_anomaly_without_strong_chain: v('veris_page.exec_reason_bounded_anomaly_without_strong_chain', 'bounded anomalies are present, but the current linkage remains partially ambiguous'),
+                    low_signal_with_acceptable_coverage: v('veris_page.exec_reason_low_signal_with_acceptable_coverage', 'no strong multi-domain pivot or structural gap pressure stands out in this collection')
+                };
+                const actions = {
+                    maintain_baseline_and_compare_future_runs: v('veris_page.exec_action_maintain_baseline_and_compare_future_runs', 'keep baseline monitoring and compare against future runs'),
+                    recollect_with_follow_up_profile: v('veris_page.exec_action_recollect_with_follow_up_profile', 'rerun with the recommended follow-up profile to improve linkage'),
+                    rerun_observe_and_review_startup: v('veris_page.exec_action_rerun_observe_and_review_startup', 'rerun Observe and review startup artifacts tied to the primary pivot'),
+                    review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the primary pivot and adjacent persistence artifacts immediately'),
+                    monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'compare a follow-up timeline before escalating further')
+                };
+                const label = labels[code] || String(verdict.label || '').trim() || v('veris_page.exec_verdict_needs_attention', 'Needs attention');
+                const reasonCode = String(verdict.reason_code || '').trim();
+                const actionCode = String(verdict.action_code || '').trim();
+                const reason = reasons[reasonCode] || String(verdict.reason_text || '').trim();
+                const action = actions[actionCode] || String(verdict.action_text || '').trim();
+                if (reason && action) return `${label}: ${reason}; ${action}.`;
+                if (reason) return `${label}: ${reason}.`;
+                return label;
             }
 
             function buildSummary(summary) {
@@ -1125,6 +1175,7 @@
                 const piv = pivotLabel
                     ? `<div class="veris-summary-row"><span>${v('veris_page.primary_pivot', 'Primary process')}</span><span>${escapeHtml(String(pivotLabel))}</span></div>`
                     : '';
+                const executiveVerdict = formatExecutiveVerdict(summary);
                 const topRec = summary.recommended_next_step || (
                     summary.trust_reasons && summary.trust_reasons[0] ? String(summary.trust_reasons[0]) : ''
                 );
@@ -1157,6 +1208,9 @@
                 const recLine = topRec ? `<p class="veris-next"><strong>${v('veris_page.next_step', 'Next step')}:</strong> ${escapeHtml(String(topRec))}</p>` : '';
                 const escWhy = summary.escalation_rerun_reason
                     ? `<p class="veris-why"><small>${escapeHtml(String(summary.escalation_rerun_reason))}</small></p>`
+                    : '';
+                const verdictBlock = executiveVerdict
+                    ? `<div class="veris-summary-block veris-summary-verdict"><h4>${v('veris_page.sum_exec_verdict', 'Executive verdict')}</h4><p>${escapeHtml(executiveVerdict)}</p></div>`
                     : '';
                 const highlightBlock = highlights.length
                     ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_findings', 'Key findings')}</h4><ul class="veris-summary-list">${highlights.map((row) => `<li>${escapeHtml(row)}</li>`).join('')}</ul></div>`
@@ -1195,7 +1249,7 @@
                         return `<span class="veris-summary-chip">${escapeHtml(signal)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
                     }).join('')}</div></div>`
                     : '';
-                return `<div class="veris-summary">${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
+                return `<div class="veris-summary">${lines}${piv}${verdictBlock}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
             }
 
             function generateCaseId() {
