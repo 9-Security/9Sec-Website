@@ -1116,10 +1116,7 @@
                 const verdict = summary && summary.executive_verdict && typeof summary.executive_verdict === 'object'
                     ? summary.executive_verdict
                     : {};
-                const sentence = String(summary && (summary.executive_verdict_sentence || verdict.sentence) || '').trim();
-                if (sentence) return sentence;
                 const code = String(verdict.code || '').trim();
-                if (!code) return '';
                 const labels = {
                     risk_present: v('veris_page.exec_verdict_risk_present', 'Risk present'),
                     needs_attention: v('veris_page.exec_verdict_needs_attention', 'Needs attention'),
@@ -1139,14 +1136,18 @@
                     review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the primary pivot and adjacent persistence artifacts immediately'),
                     monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'compare a follow-up timeline before escalating further')
                 };
-                const label = labels[code] || String(verdict.label || '').trim() || v('veris_page.exec_verdict_needs_attention', 'Needs attention');
-                const reasonCode = String(verdict.reason_code || '').trim();
-                const actionCode = String(verdict.action_code || '').trim();
-                const reason = reasons[reasonCode] || String(verdict.reason_text || '').trim();
-                const action = actions[actionCode] || String(verdict.action_text || '').trim();
-                if (reason && action) return `${label}: ${reason}; ${action}.`;
-                if (reason) return `${label}: ${reason}.`;
-                return label;
+                if (code) {
+                    const label = labels[code] || String(verdict.label || '').trim() || v('veris_page.exec_verdict_needs_attention', 'Needs attention');
+                    const reasonCode = String(verdict.reason_code || '').trim();
+                    const actionCode = String(verdict.action_code || '').trim();
+                    const reason = reasons[reasonCode] || String(verdict.reason_text || '').trim();
+                    const action = actions[actionCode] || String(verdict.action_text || '').trim();
+                    if (reason && action) return `${label}: ${reason}; ${action}.`;
+                    if (reason) return `${label}: ${reason}.`;
+                    return label;
+                }
+                const sentence = String(summary && (summary.executive_verdict_sentence || verdict.sentence) || '').trim();
+                return sentence;
             }
 
             function buildSummary(summary) {
