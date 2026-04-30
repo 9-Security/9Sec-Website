@@ -354,6 +354,11 @@
             display: none;
         }
 
+        .veris-wait-actions button[hidden] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
         .veris-wait-modal {
             width: min(680px, 96vw);
             max-height: calc(100dvh - 2.4rem);
@@ -672,7 +677,7 @@
                         <div class="veris-wait-header">
                             <h3 id="waitModalTitle">掃描等待視窗</h3>
                             <div class="veris-wait-actions">
-                                <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn">關閉</button>
+                                <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="最小化等待視窗（背景持續接收）">[-]</button>
                                 <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉並停止等待" aria-label="Close and stop waiting">[x]</button>
                             </div>
                         </div>
@@ -1507,16 +1512,26 @@
                     );
                     return;
                 }
+
+                const selectedFile = uploadPackageInput?.files?.[0] || null;
+                if (!selectedFile) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v('veris_page.err_choose_file', 'Please choose an evidence package before upload.')),
+                        '',
+                    );
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('package', selectedFile, selectedFile.name || 'evidence.zip');
+
                 if (uploadStatus) uploadStatus.hidden = false;
                 lockUploadForm();
                 setFeedback(uploadStatus, 'pending', `<strong>${v('veris_page.msg_uploading', 'Uploading evidence package...')}</strong><p>${v('veris_page.msg_uploading_p', 'Central validation and analysis will start automatically.')}</p>`);
 
-                let fileLabel = '';
+                let fileLabel = String(selectedFile.name || '');
                 try {
-                    const formData = new FormData(uploadForm);
-                    const file = formData.get('package');
-                    fileLabel = (file && typeof file === 'object' && 'name' in file) ? String(file.name || '') : '';
-
                     const response = await fetch(`${GOV_API_BASE}/upload`, {
                         method: 'POST',
                         headers: { 'Accept': 'application/json' },
