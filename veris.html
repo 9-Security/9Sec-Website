@@ -420,6 +420,13 @@
             gap: 0.4rem;
         }
 
+        /* Arsenal / global resets sometimes break [hidden]; never show scanner-only KV on manual upload errors. */
+        #waitKvSection.veris-wait-kv[hidden] {
+            display: none !important;
+            margin: 0 !important;
+            visibility: hidden !important;
+        }
+
         .veris-wait-kv div {
             display: flex;
             justify-content: space-between;
@@ -1054,7 +1061,10 @@
                 waitModalTitle.textContent = WAIT_TITLE_SCANNER_TW;
                 waitModalIntro.hidden = false;
                 waitModalIntro.textContent = WAIT_INTRO_SCANNER_TW;
-                if (waitKvSection) waitKvSection.hidden = false;
+                if (waitKvSection) {
+                    waitKvSection.hidden = false;
+                    waitKvSection.style.removeProperty('display');
+                }
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = false;
                 if (closeScannerResultX) closeScannerResultX.hidden = true;
             }
@@ -1085,7 +1095,10 @@
                     waitModalIntro.innerHTML =
                         `<span>${v('veris_page.upload_wait_intro', '已收到封裝，Central 正在驗證與分析。')}</span> <code>${nameEsc}</code>`;
                 }
-                if (waitKvSection) waitKvSection.hidden = true;
+                if (waitKvSection) {
+                    waitKvSection.hidden = true;
+                    waitKvSection.style.display = 'none';
+                }
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = false;
                 if (closeScannerResultX) closeScannerResultX.hidden = true;
                 setFeedback(waitResultStatus, 'pending',
@@ -1095,12 +1108,24 @@
                 scannerWaitOverlay.hidden = false;
             }
 
-            /** Evidence rejected at /upload (HTTP 4xx etc.): same modal as analyze flow, nothing in #uploadEvidenceStatus. */
-            function showManualUploadApiErrorOverlay(detailHtmlEscaped) {
+            /** Evidence rejected at /upload (HTTP 4xx etc.): same modal; hide scanner KV (case / countdown). */
+            function showManualUploadApiErrorOverlay(detailHtmlEscaped, fileHintRaw) {
                 overlayContext = 'manual';
                 waitClosedManually = false;
-                if (waitKvSection) waitKvSection.hidden = true;
-                if (waitModalIntro) waitModalIntro.hidden = true;
+                if (waitKvSection) {
+                    waitKvSection.hidden = true;
+                    waitKvSection.style.display = 'none';
+                }
+                if (waitModalIntro) {
+                    const hint = String(fileHintRaw || '').trim();
+                    if (hint) {
+                        waitModalIntro.hidden = false;
+                        waitModalIntro.innerHTML =
+                            `<span>${v('veris_page.upload_failed_file_intro', '已選取的檔案：')}</span> <code>${escapeHtml(hint)}</code>`;
+                    } else {
+                        waitModalIntro.hidden = true;
+                    }
+                }
                 if (waitModalTitle) {
                     waitModalTitle.textContent = v('veris_page.upload_failed_title', '證據上傳失敗');
                 }
@@ -1475,7 +1500,10 @@
                     if (uploadStatus) uploadStatus.hidden = true;
                 } catch (error) {
                     if (uploadStatus) uploadStatus.hidden = true;
-                    showManualUploadApiErrorOverlay(escapeHtml(error.message || 'Unknown error'));
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(error.message || 'Unknown error'),
+                        fileLabel,
+                    );
                 }
             });
             loadCapabilities();
