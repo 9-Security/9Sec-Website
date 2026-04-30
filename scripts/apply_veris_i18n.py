@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """Inject veris_page into M and expose g. Run from repo: python3 core/frontend/scripts/apply_veris_i18n.py"""
 import json
+import os
+import re
 from pathlib import Path
 
-ASSETS = Path(__file__).resolve().parent.parent / "assets"
+_ASSET_CANDIDATES = [
+    Path("/mnt/d/cursor/nine-security.inc/core/frontend/assets"),
+    Path.cwd() / "core/frontend/assets",
+    Path(__file__).resolve().parent.parent / "assets",
+]
+ASSETS = next((p for p in _ASSET_CANDIDATES if p.is_dir() and os.access(p, os.W_OK)), _ASSET_CANDIDATES[-1])
 
 REPLACERS = [
     '},model:{intro1:"> Beyond Protection. 9 Dimensions of Verifiable Truth."',
@@ -422,7 +429,18 @@ def main():
     for path in sorted(ASSETS.glob("*.js")):
         t = path.read_text(encoding="utf-8")
         if "veris_page" in t and "fit_1" in t:
-            print("skip (done):", path.name)
+            new_t = t
+            updated = False
+            for lang in LANGS:
+                pattern = r"veris_page:\{.*?\},model:\{intro1:"
+                replacement = f"veris_page:{blobs[lang]},model:{{intro1:"
+                new_t, count = re.subn(pattern, replacement, new_t, count=1, flags=re.S)
+                updated = updated or count > 0
+            if updated and new_t != t:
+                path.write_text(new_t, encoding="utf-8")
+                print("updated:", path.name)
+            else:
+                print("skip (done):", path.name)
             continue
         if not all(s in t for s in REPLACERS):
             continue
