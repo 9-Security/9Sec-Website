@@ -315,12 +315,82 @@
             color: var(--text-primary);
         }
 
-        .veris-summary div {
+        .veris-summary .veris-summary-row {
             display: flex;
             justify-content: space-between;
             gap: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 0.45rem;
+        }
+
+        .veris-summary .veris-summary-row span:last-child {
+            text-align: right;
+        }
+
+        .veris-summary-block {
+            margin-top: 0.4rem;
+            padding: 0.8rem 0.95rem;
+            border: 1px solid rgba(0, 229, 255, 0.14);
+            border-radius: 6px;
+            background: rgba(8, 18, 34, 0.45);
+        }
+
+        .veris-summary-block h4 {
+            margin: 0 0 0.55rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent-secondary);
+        }
+
+        .veris-summary-list {
+            margin: 0;
+            padding-left: 1rem;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .veris-summary-list li {
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .veris-summary-list strong,
+        .veris-summary-list span,
+        .veris-summary-list small {
+            display: block;
+        }
+
+        .veris-summary-list small {
+            color: var(--text-secondary);
+        }
+
+        .veris-summary-chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .veris-summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            font-size: 0.79rem;
+            line-height: 1.2;
+        }
+
+        .veris-summary-chip small {
+            color: var(--text-secondary);
+        }
+
+        .veris-summary-muted {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
         }
 
         .veris-report {
@@ -1004,6 +1074,11 @@
                     recommended_next_step: recommended_next_step,
                     trust_reasons: s.trust_reasons,
                     primary_process_name: s.primary_process_name,
+                    primary_process_display: s.primary_process_display ?? s.primary_process_name ?? '',
+                    analysis_highlights: Array.isArray(s.analysis_highlights) ? s.analysis_highlights : [],
+                    top_processes: Array.isArray(s.top_processes) ? s.top_processes : [],
+                    primary_remote_addresses: Array.isArray(s.primary_remote_addresses) ? s.primary_remote_addresses : [],
+                    dominant_signals: Array.isArray(s.dominant_signals) ? s.dominant_signals : [],
                     collection_profile: s.collection_profile ?? p.collection_profile ?? '',
                     suspicion_score: s.suspicion_score,
                     collection_sufficiency_score: s.collection_sufficiency_score,
@@ -1044,14 +1119,29 @@
                     [v('veris_page.sum_delta', 'Score Delta'), summary.total_score_delta ?? '-']
                 ];
                 const lines = rows.map(([label, val]) => (
-                    `<div><span>${escapeHtml(label)}</span><span>${escapeHtml(String(val))}</span></div>`
+                    `<div class="veris-summary-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(String(val))}</span></div>`
                 )).join('');
-                const piv = summary.primary_process_name
-                    ? `<div><span>${v('veris_page.primary_pivot', 'Primary process')}</span><span>${escapeHtml(String(summary.primary_process_name))}</span></div>`
+                const pivotLabel = summary.primary_process_display || summary.primary_process_name || '';
+                const piv = pivotLabel
+                    ? `<div class="veris-summary-row"><span>${v('veris_page.primary_pivot', 'Primary process')}</span><span>${escapeHtml(String(pivotLabel))}</span></div>`
                     : '';
                 const topRec = summary.recommended_next_step || (
                     summary.trust_reasons && summary.trust_reasons[0] ? String(summary.trust_reasons[0]) : ''
                 );
+                const highlights = Array.isArray(summary.analysis_highlights)
+                    ? summary.analysis_highlights.map((row) => String(row || '').trim()).filter(Boolean).slice(0, 6)
+                    : [];
+                const topProcesses = Array.isArray(summary.top_processes)
+                    ? summary.top_processes.filter((row) => row && typeof row === 'object').slice(0, 4)
+                    : [];
+                const dominantSignals = Array.isArray(summary.dominant_signals)
+                    ? summary.dominant_signals.filter((row) => row && typeof row === 'object').slice(0, 5)
+                    : [];
+                const remoteRows = Array.isArray(summary.primary_remote_addresses)
+                    ? summary.primary_remote_addresses.filter((row) => row && typeof row === 'object')
+                    : [];
+                const externalRemotes = remoteRows.filter((row) => String(row.class || '') === 'external');
+                const remoteFocus = (externalRemotes.length ? externalRemotes : remoteRows).slice(0, 5);
                 const recProf = summary.recommended_next_profile
                     ? `<p><strong>${v('veris_page.next_scan_profile', 'Next scan profile')}:</strong> ${escapeHtml(String(summary.recommended_next_profile))}</p>`
                     : '';
@@ -1068,7 +1158,44 @@
                 const escWhy = summary.escalation_rerun_reason
                     ? `<p class="veris-why"><small>${escapeHtml(String(summary.escalation_rerun_reason))}</small></p>`
                     : '';
-                return `<div class="veris-summary">${lines}${piv}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
+                const highlightBlock = highlights.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_findings', 'Key findings')}</h4><ul class="veris-summary-list">${highlights.map((row) => `<li>${escapeHtml(row)}</li>`).join('')}</ul></div>`
+                    : '';
+                const pivotBlock = topProcesses.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_top_pivots', 'Top pivots')}</h4><ul class="veris-summary-list">${topProcesses.map((row) => {
+                        const name = String(row.name || 'unknown');
+                        const pid = typeof row.pid !== 'undefined' ? `pid ${escapeHtml(String(row.pid))}` : '';
+                        const score = typeof row.risk_score !== 'undefined' ? `score ${escapeHtml(String(row.risk_score))}` : '';
+                        const domains = typeof row.domain_count !== 'undefined' ? `${v('veris_page.metric_domains_short', 'domains')} ${escapeHtml(String(row.domain_count))}` : '';
+                        const topSignals = Array.isArray(row.top_signals)
+                            ? row.top_signals
+                                .map((sig) => sig && sig.signal ? `${String(sig.signal)}(${String(sig.count ?? '-')})` : '')
+                                .filter(Boolean)
+                                .slice(0, 4)
+                                .join(', ')
+                            : '';
+                        return `<li><strong>${escapeHtml(name)}${pid ? ` (${pid})` : ''}</strong><span>${[score, domains].filter(Boolean).join(' • ')}</span>${topSignals ? `<small>${escapeHtml(topSignals)}</small>` : ''}</li>`;
+                    }).join('')}</ul></div>`
+                    : '';
+                const remoteBlock = remoteFocus.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_remote_focus', 'Remote focus')}</h4><div class="veris-summary-chip-list">${remoteFocus.map((row) => {
+                        const label = String(row.address || '').trim();
+                        const count = typeof row.count !== 'undefined' ? String(row.count) : '';
+                        const kind = String(row.class || '').trim();
+                        const suffix = [kind, count].filter(Boolean).join(' • ');
+                        return `<span class="veris-summary-chip">${escapeHtml(label)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
+                    }).join('')}</div></div>`
+                    : '';
+                const signalBlock = dominantSignals.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_signal_hotspots', 'Signal hotspots')}</h4><div class="veris-summary-chip-list">${dominantSignals.map((row) => {
+                        const signal = String(row.signal || '').trim();
+                        const count = typeof row.count !== 'undefined' ? String(row.count) : '';
+                        const category = String(row.category || '').trim();
+                        const suffix = [category, count].filter(Boolean).join(' • ');
+                        return `<span class="veris-summary-chip">${escapeHtml(signal)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
+                    }).join('')}</div></div>`
+                    : '';
+                return `<div class="veris-summary">${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
             }
 
             function generateCaseId() {
