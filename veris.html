@@ -359,6 +359,8 @@
             border-radius: 8px;
             background: #050914;
             padding: 1.3rem;
+            /* Keep typography readable: page theme vars are meant for Page bg, not this dark HUD. */
+            color: #e8eef9;
         }
 
         .veris-wait-header {
@@ -373,11 +375,12 @@
             margin: 0;
             font-family: var(--font-mono);
             font-size: 1rem;
+            color: #f8fafc !important;
         }
 
         .veris-wait-body p {
             margin: 0 0 0.8rem;
-            color: var(--text-secondary);
+            color: #cbd5e1 !important;
             line-height: 1.5;
         }
 
@@ -395,6 +398,102 @@
             gap: 0.9rem;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
             padding-bottom: 0.35rem;
+        }
+
+        .veris-wait-kv span {
+            color: #94a3b8 !important;
+            font-weight: 500;
+        }
+
+        .veris-wait-kv strong {
+            color: #f1f5f9 !important;
+            font-weight: 600;
+        }
+
+        /* Status panel injected by JS inherits dark-HUD-safe text */
+        .veris-wait-modal .veris-feedback {
+            margin-top: 0.85rem;
+        }
+
+        .veris-wait-modal .veris-feedback strong {
+            color: #f1f5f9 !important;
+        }
+
+        .veris-wait-modal .veris-feedback p,
+        .veris-wait-modal .veris-feedback code {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme=light] .veris-wait-overlay {
+            background: rgba(15, 23, 42, 0.52);
+        }
+
+        [data-theme=light] .veris-wait-modal {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-color: rgba(0, 86, 179, 0.35);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme=light] .veris-wait-header h3 {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-body p {
+            color: #475569 !important;
+        }
+
+        [data-theme=light] .veris-wait-kv span {
+            color: #64748b !important;
+        }
+
+        [data-theme=light] .veris-wait-kv strong {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-kv div {
+            border-bottom-color: rgba(15, 23, 42, 0.18);
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.pending {
+            background: rgba(8, 145, 178, 0.1) !important;
+            border-color: rgba(8, 145, 178, 0.4) !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback strong {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback p,
+        [data-theme=light] .veris-wait-modal .veris-feedback code {
+            color: #334155 !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.success strong,
+        [data-theme=light] .veris-wait-modal .veris-feedback.success p {
+            color: #14532d !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.error strong,
+        [data-theme=light] .veris-wait-modal .veris-feedback.error p {
+            color: #991b1b !important;
+        }
+
+        /* Dark HUD: ensure success/error text stays light on tinted panels */
+        .veris-wait-modal .veris-feedback.success strong {
+            color: #bbf7d0 !important;
+        }
+
+        .veris-wait-modal .veris-feedback.success p {
+            color: #cbd5e1 !important;
+        }
+
+        .veris-wait-modal .veris-feedback.error strong {
+            color: #fecaca !important;
+        }
+
+        .veris-wait-modal .veris-feedback.error p {
+            color: #cbd5e1 !important;
         }
 
         [data-theme=light] .veris-action-card,
