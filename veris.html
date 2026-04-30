@@ -1179,23 +1179,14 @@
                 return { kind: 'ok', payload, jobBase: jb };
             }
 
-            /** @param {{ updateScannerCard?: boolean }} options */
-            function finalizeOverlayAnalysisSuccess(payload, jobBase, options) {
-                const opt = options || {};
+            /** Dedicated-scanner flow: keep #scannerRequestStatus as launcher-ready info only; full report stays in the overlay. */
+            function finalizeOverlayAnalysisSuccess(payload, jobBase) {
                 const summed = summarizeResultPayload(payload);
 
                 showTerminalWaitChrome('success');
                 setFeedback(waitResultStatus, 'success',
                     `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
                     buildSummary(summed));
-
-                if (opt.updateScannerCard) {
-                    setFeedback(scannerStatus, 'success',
-                        `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
-                        `<p>${v('veris_page.result_json_hint', 'Structured result')} <a href="${jobBase}/result.json">${jobBase}/result.json</a></p>` +
-                        `<p>${v('veris_page.report_md_hint', 'Markdown report')} <a href="${jobBase}/report.md">${jobBase}/report.md</a></p>`
-                    );
-                }
 
                 fetchReportMarkdown(jobBase).then((md) => {
                     if (!md || !waitResultStatus) return;
@@ -1246,7 +1237,7 @@
                 if (outcome.kind === 'stopped')
                     return null;
 
-                finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase, { updateScannerCard: true });
+                finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
                 return outcome.payload;
             }
 
@@ -1459,7 +1450,7 @@
                         return;
                     }
 
-                    finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase, { updateScannerCard: false });
+                    finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
                     setFeedback(uploadStatus, 'success',
                         `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
                         `<p>${v('veris_page.upload_report_in_modal_p', '完整報告已顯示於上方視窗。關閉視窗［×］後，可再上傳其他證據封裝。')}</p>` +
