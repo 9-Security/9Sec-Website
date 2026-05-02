@@ -490,6 +490,24 @@
             color: #fff;
         }
 
+        .veris-wait-download-glyph {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.65rem;
+            margin-right: 0.1rem;
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.82rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: rgba(147, 197, 253, 0.98);
+        }
+
+        .veris-wait-download-btn:hover .veris-wait-download-glyph {
+            color: #e0f2fe;
+        }
+
         .veris-wait-download-btn[hidden],
         .veris-wait-modal-top-actions button[hidden] {
             display: none !important;
@@ -800,7 +818,7 @@
                     <div class="veris-wait-modal">
                         <div class="veris-wait-modal-top-actions" data-i18n-aria="veris_page.wait_top_actions_aria" aria-label="Report actions" role="toolbar">
                             <button type="button" class="veris-wait-download-btn" id="downloadReportBtn" hidden aria-label="Download markdown report">
-                                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                <span class="veris-wait-download-glyph" aria-hidden="true">[↓]</span>
                                 <span id="downloadReportBtnLabel">Download report</span>
                             </button>
                             <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
