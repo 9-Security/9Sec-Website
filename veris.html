@@ -295,17 +295,6 @@
             font-size: 0.9rem;
         }
 
-        .veris-feedback-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 0.9rem;
-        }
-
-        .veris-feedback-actions .btn {
-            min-width: 0;
-        }
-
         .veris-summary {
             margin: 0.9rem 0 0;
             display: grid;
@@ -1695,7 +1684,6 @@
                     }
                     stashRequest(requestId);
                     downloadUrl = startDirectBinaryDownload(downloadUrl, requestNorm, requestId);
-                    const againLabel = v('veris_page.btn_download_again', 'DOWNLOAD_AGAIN');
                     setFeedback(scannerStatus, 'success',
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
@@ -1704,14 +1692,8 @@
                         (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
                         (launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(launcherSizeBytes))}</code></p>` : '') +
                         (launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(launcherSha256)}</code></p>` : '') +
-                        `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(randomCaseId)}</code></p>` +
-                        `<div class="veris-feedback-actions">` +
-                        `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
-                        `</div>`
+                        `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(randomCaseId)}</code></p>`
                     );
-                    document.getElementById('downloadAgainBtn')?.addEventListener('click', () => {
-                        downloadUrl = startDirectBinaryDownload(downloadUrl, requestNorm, requestId);
-                    });
 
                     showWaitOverlay({ caseId: randomCaseId, requestId, email });
                     const startedAt = Date.now();
