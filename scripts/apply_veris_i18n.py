@@ -166,6 +166,9 @@ def build_dict(lang: str) -> dict:
             "wait_minimize_title": "Minimize wait window (polling continues in background)",
             "wait_stop_title": "Close and stop waiting",
             "close_title": "Close",
+            "btn_download_report": "Download report",
+            "btn_download_report_aria": "Download markdown report",
+            "wait_top_actions_aria": "Report actions",
         }
     if lang == "tw":
         return {
@@ -312,6 +315,9 @@ def build_dict(lang: str) -> dict:
             "wait_minimize_title": "最小化等待視窗（背景持續接收）",
             "wait_stop_title": "停止等待並關閉視窗",
             "close_title": "關閉",
+            "btn_download_report": "下載報告",
+            "btn_download_report_aria": "下載 Markdown 報告",
+            "wait_top_actions_aria": "報告操作",
         }
     return {
         "doc_title": "VERIS エンドポイント・トリアージ | Nine-Security",
@@ -457,6 +463,9 @@ def build_dict(lang: str) -> dict:
         "wait_minimize_title": "待機ウィンドウを最小化（バックグラウンドでポーリング継続）",
         "wait_stop_title": "閉じて待機を終了",
         "close_title": "閉じる",
+        "btn_download_report": "レポートをダウンロード",
+        "btn_download_report_aria": "Markdown レポートをダウンロード",
+        "wait_top_actions_aria": "レポート操作",
     }
 
 

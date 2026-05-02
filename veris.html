@@ -441,15 +441,58 @@
         }
 
         .veris-wait-modal {
+            position: relative;
             width: min(680px, 96vw);
             max-height: calc(100dvh - 2.4rem);
             border: 1px solid rgba(0, 229, 255, 0.35);
             border-radius: 8px;
             background: #050914;
             padding: 1.3rem;
+            padding-top: 2.55rem;
             /* Keep typography readable: page theme vars are meant for Page bg, not this dark HUD. */
             color: #e8eef9;
             overflow-y: auto;
+        }
+
+        .veris-wait-modal-top-actions {
+            position: absolute;
+            top: 0.65rem;
+            right: 0.65rem;
+            z-index: 3;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .veris-wait-download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            min-height: 2rem;
+            padding: 0 0.55rem;
+            border: 1px solid rgba(96, 165, 250, 0.45);
+            border-radius: 4px;
+            background: rgba(30, 58, 138, 0.35);
+            color: rgba(248, 250, 252, 0.92);
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            white-space: nowrap;
+        }
+
+        .veris-wait-download-btn:hover {
+            background: rgba(37, 99, 235, 0.35);
+            border-color: rgba(147, 197, 253, 0.65);
+            color: #fff;
+        }
+
+        .veris-wait-download-btn[hidden],
+        .veris-wait-modal-top-actions button[hidden] {
+            display: none !important;
         }
 
         .veris-wait-header {
@@ -755,11 +798,17 @@
                 <div id="scannerRequestStatus" class="veris-feedback" hidden></div>
                 <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
                     <div class="veris-wait-modal">
+                        <div class="veris-wait-modal-top-actions" data-i18n-aria="veris_page.wait_top_actions_aria" aria-label="Report actions" role="toolbar">
+                            <button type="button" class="veris-wait-download-btn" id="downloadReportBtn" hidden aria-label="Download markdown report">
+                                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                <span id="downloadReportBtnLabel">Download report</span>
+                            </button>
+                            <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
+                        </div>
                         <div class="veris-wait-header">
                             <h3 id="waitModalTitle">Scanner wait</h3>
                             <div class="veris-wait-actions">
                                 <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="Minimize wait window (polling continues)">[-]</button>
-                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
                             </div>
                         </div>
                         <div class="veris-wait-body">
@@ -876,6 +925,10 @@
             const waitKvLabelCase = document.getElementById('waitKvLabelCase');
             const waitKvLabelReq = document.getElementById('waitKvLabelReq');
             const waitKvLabelEmail = document.getElementById('waitKvLabelEmail');
+            const downloadReportBtn = document.getElementById('downloadReportBtn');
+            const downloadReportBtnLabel = document.getElementById('downloadReportBtnLabel');
+            /** @type {string} Resolved GET URL for report.md (blob download). */
+            let lastReportMdUrl = '';
             /** @type {null | string} i18n key for terminal-state modal title (scanner flow) */
             let overlayTerminalTitleI18nKey = null;
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
@@ -900,12 +953,40 @@
                 'veris_page.wait_timeout_overlay_title': 'Wait timed out',
             };
 
+            function clearReportDownloadUrl() {
+                lastReportMdUrl = '';
+                if (downloadReportBtn) downloadReportBtn.hidden = true;
+            }
+
+            function setReportDownloadUrl(jobBaseUrl) {
+                const base = String(jobBaseUrl || '').replace(/\/+$/, '');
+                if (!base) return;
+                lastReportMdUrl = `${base}/report.md`;
+                if (downloadReportBtn) downloadReportBtn.hidden = false;
+            }
+
             function refreshWaitOverlayI18n() {
+                const topBar = document.querySelector('.veris-wait-modal-top-actions');
+                if (topBar) {
+                    topBar.setAttribute('aria-label', v('veris_page.wait_top_actions_aria', 'Report actions'));
+                }
+                if (downloadReportBtnLabel) {
+                    downloadReportBtnLabel.textContent = v('veris_page.btn_download_report', 'Download report');
+                }
+                if (downloadReportBtn) {
+                    downloadReportBtn.setAttribute(
+                        'aria-label',
+                        v('veris_page.btn_download_report_aria', 'Download markdown report')
+                    );
+                }
                 if (waitKvLabelCase) waitKvLabelCase.textContent = v('veris_page.lab_case', 'Case ID');
                 if (waitKvLabelReq) waitKvLabelReq.textContent = v('veris_page.wait_kv_request_id', 'Request ID');
                 if (waitKvLabelEmail) waitKvLabelEmail.textContent = v('veris_page.wait_kv_email', 'Email');
                 if (!waitModalTitle || !waitModalIntro) return;
                 if (overlayContext === 'manual') {
+                    if (!waitTerminalState && waitModalTitle) {
+                        waitModalTitle.textContent = v('veris_page.upload_wait_title', 'Evidence package analysis');
+                    }
                     return;
                 }
                 if (overlayContext === 'scanner') {
@@ -1340,6 +1421,7 @@
 
             function restoreWaitChromeDefaults() {
                 if (!waitModalTitle || !waitModalIntro) return;
+                clearReportDownloadUrl();
                 waitTerminalState = false;
                 overlayTerminalTitleI18nKey = null;
                 waitModalIntro.hidden = false;
@@ -1377,6 +1459,7 @@
                 waitClosedManually = false;
                 waitTerminalState = false;
                 overlayContext = 'manual';
+                clearReportDownloadUrl();
                 if (uploadStatus) uploadStatus.hidden = true;
                 if (waitModalTitle) {
                     waitModalTitle.textContent = v('veris_page.upload_wait_title', '證據封裝分析');
@@ -1413,6 +1496,7 @@
                 overlayContext = 'manual';
                 waitClosedManually = false;
                 waitTerminalState = true;
+                clearReportDownloadUrl();
                 if (waitKvSection) {
                     waitKvSection.hidden = true;
                     waitKvSection.style.display = 'none';
@@ -1451,6 +1535,9 @@
                 if (!waitModalTitle || !waitModalIntro) return;
                 waitTerminalState = true;
                 waitModalIntro.hidden = true;
+                if (mode === 'fail') {
+                    clearReportDownloadUrl();
+                }
                 const key = optionalTitleKey || (mode === 'fail' ? 'veris_page.wait_title_fail' : 'veris_page.wait_title_report');
                 overlayTerminalTitleI18nKey = key;
                 waitModalTitle.textContent = v(key, TERMINAL_TITLE_FALLBACK[key] || '');
@@ -1535,6 +1622,8 @@
                 const summed = summarizeResultPayload(payload);
 
                 showTerminalWaitChrome('success');
+                setReportDownloadUrl(jobBase);
+                refreshWaitOverlayI18n();
                 setFeedback(waitResultStatus, 'success',
                     `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
                     buildSummary(summed));
@@ -1717,6 +1806,27 @@
                         `<strong>${v('veris_page.wait_minimized', 'Wait window minimized.')}</strong><p>${v('veris_page.wait_minimized_p', 'Background polling continues. The report window will reopen automatically when results arrive.')}</p>`
                     );
                 }
+            });
+
+            downloadReportBtn?.addEventListener('click', async (ev) => {
+                ev.preventDefault();
+                if (!lastReportMdUrl) return;
+                try {
+                    const r = await fetch(lastReportMdUrl, {
+                        headers: { Accept: 'text/markdown', 'Cache-Control': 'no-cache' },
+                    });
+                    if (!r.ok) return;
+                    const blob = await r.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = objectUrl;
+                    a.download = 'veris-final-report.md';
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(objectUrl);
+                } catch (_) { /* ignore */ }
             });
 
             closeScannerResultX?.addEventListener('click', () => {
