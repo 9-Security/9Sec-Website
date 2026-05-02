@@ -768,7 +768,6 @@
                                 <div><span>案件編號</span><strong id="waitCaseId">-</strong></div>
                                 <div><span>Request ID</span><strong id="waitRequestId">-</strong></div>
                                 <div><span>Email</span><strong id="waitEmail">-</strong></div>
-                                <div><span>剩餘時間</span><strong id="waitRemaining">10:00</strong></div>
                             </div>
                             <div id="waitResultStatus" class="veris-feedback pending">
                                 <strong>等待分析結果中...</strong>
@@ -868,7 +867,6 @@
             const waitCaseId = document.getElementById('waitCaseId');
             const waitRequestId = document.getElementById('waitRequestId');
             const waitEmail = document.getElementById('waitEmail');
-            const waitRemaining = document.getElementById('waitRemaining');
             const waitResultStatus = document.getElementById('waitResultStatus');
             const uploadForm = document.getElementById('uploadEvidenceForm');
             const uploadStatus = document.getElementById('uploadEvidenceStatus');
@@ -878,7 +876,6 @@
             const WAIT_INTRO_SCANNER_TW = '掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。';
             const WAIT_TITLE_SCANNER_TW = '掃描等待視窗';
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
-            const WAIT_TICK_MS = 1000;
             let waitClosedManually = false;
             let waitTerminalState = false;
             /** Job finished badly; overlay stays open until user dismisses. */
@@ -1300,7 +1297,6 @@
                 waitCaseId.textContent = caseId;
                 waitRequestId.textContent = requestId || '-';
                 waitEmail.textContent = email || '-';
-                waitRemaining.textContent = '10:00';
                 setFeedback(waitResultStatus, 'pending',
                     `<strong>${v('veris_page.state_overlay_wait', 'Awaiting scanner result')}</strong><p>${v('veris_page.overlay_wait_p', 'When the launcher finishes, Central will ingest via status.json — no HTML scraping.')}</p>`
                 );
@@ -1421,7 +1417,7 @@
                     ? customTitle
                     : (mode === 'fail'
                         ? v('veris_page.wait_title_fail', '分析發生問題')
-                        : v('veris_page.wait_title_report', '分析結果報告'));
+                        : v('veris_page.wait_title_report', 'Analysis result report'));
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
                 if (closeScannerResultX) {
                     closeScannerResultX.hidden = false;
@@ -1437,13 +1433,6 @@
                 restoreWaitChromeDefaults();
                 overlayContext = 'idle';
                 if (wasManual) unlockUploadForm();
-            }
-
-            function formatTimeLeft(ms) {
-                const totalSec = Math.max(0, Math.ceil(ms / 1000));
-                const min = Math.floor(totalSec / 60);
-                const sec = totalSec % 60;
-                return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
             }
 
             /**
@@ -1646,13 +1635,8 @@
 
                     showWaitOverlay({ caseId: randomCaseId, requestId, email });
                     const startedAt = Date.now();
-                    const timer = setInterval(() => {
-                        const remainingMs = WAIT_TIMEOUT_MS - (Date.now() - startedAt);
-                        waitRemaining.textContent = formatTimeLeft(remainingMs);
-                    }, WAIT_TICK_MS);
 
                     const result = await pollScannerResult(requestNorm, requestId, startedAt);
-                    clearInterval(timer);
 
                     if (waitClosedManually) {
                         /* Overlay already dismissed by 「關閉」.*/
