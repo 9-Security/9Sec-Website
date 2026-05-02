@@ -424,6 +424,33 @@ def build_dict(lang: str) -> dict:
     }
 
 
+_VERIS_PAGE_TAIL = re.compile(r"veris_page:\{.*?\},model:\{intro1:", re.DOTALL)
+
+
+def replace_veris_page_in_locale_section(text: str, lang: str, blob: str) -> tuple[str, bool]:
+    """
+    Replace only the veris_page blob inside M.<lang>, not the first veris_page in the file.
+    The previous triple global replace overwrote en with jp while leaving tw/jp untouched.
+    """
+    if lang == "en":
+        start = text.find("en:{")
+        end = text.find("},tw:{", start)
+    elif lang == "tw":
+        start = text.find("tw:{")
+        end = text.find("},jp:{", start)
+    else:
+        start = text.find("jp:{")
+        end = text.find("}}};function", start)
+    if start < 0 or end < 0:
+        return text, False
+    section = text[start:end]
+    replacement = f"veris_page:{blob},model:{{intro1:"
+    new_section, n = _VERIS_PAGE_TAIL.subn(replacement, section, count=1)
+    if n != 1:
+        return text, False
+    return text[:start] + new_section + text[end:], True
+
+
 def main():
     blobs = {L: json.dumps(build_dict(L), ensure_ascii=False) for L in LANGS}
     for path in sorted(ASSETS.glob("*.js")):
@@ -432,10 +459,8 @@ def main():
             new_t = t
             updated = False
             for lang in LANGS:
-                pattern = r"veris_page:\{.*?\},model:\{intro1:"
-                replacement = f"veris_page:{blobs[lang]},model:{{intro1:"
-                new_t, count = re.subn(pattern, replacement, new_t, count=1, flags=re.S)
-                updated = updated or count > 0
+                new_t, did = replace_veris_page_in_locale_section(new_t, lang, blobs[lang])
+                updated = updated or did
             if updated and new_t != t:
                 path.write_text(new_t, encoding="utf-8")
                 print("updated:", path.name)
