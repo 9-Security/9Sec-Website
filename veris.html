@@ -404,21 +404,6 @@
             font-size: 0.8rem;
         }
 
-        .veris-report {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.28);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            line-height: 1.55;
-            max-height: 420px;
-            overflow: auto;
-        }
-
         .veris-wait-overlay {
             position: fixed;
             inset: 0;
@@ -1036,40 +1021,6 @@
                 }[char]));
             }
 
-            /**
-             * Drop one ATX section whose heading title matches `titleTest` (heading text after # marks).
-             * Section ends at the next heading of the same or outer level (# count ≤ start level).
-             */
-            function stripMarkdownSectionByTitle(md, titleTest) {
-                const lines = String(md ?? '').split(/\r?\n/);
-                const out = [];
-                let i = 0;
-                while (i < lines.length) {
-                    const hm = lines[i].match(/^(#{1,6})\s+(.*)$/);
-                    if (hm && titleTest(hm[2].trim())) {
-                        const level = hm[1].length;
-                        i++;
-                        while (i < lines.length) {
-                            const hx = lines[i].match(/^(#{1,6})\s/);
-                            if (hx && hx[1].length <= level) break;
-                            i++;
-                        }
-                        continue;
-                    }
-                    out.push(lines[i]);
-                    i++;
-                }
-                return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
-            }
-
-            function stripReportRegionSection(md) {
-                return stripMarkdownSectionByTitle(md, (title) =>
-                    /^區域\b/.test(title) ||
-                    /^区域\b/.test(title) ||
-                    /^領域\b/.test(title) ||
-                    /^Regions?\b/i.test(title));
-            }
-
             function setFeedback(element, type, html) {
                 element.hidden = false;
                 element.className = `veris-feedback ${type}`;
@@ -1135,15 +1086,6 @@
                 });
                 if (!res.ok) throw new Error(`${errLabel} (HTTP ${res.status})`);
                 return res.json();
-            }
-
-            async function fetchReportMarkdown(jobBaseUrl) {
-                const base = String(jobBaseUrl || '').replace(/\/+$/, '');
-                const res = await fetch(`${base}/report.md`, {
-                    headers: { 'Accept': 'text/markdown' }
-                });
-                if (!res.ok) return '';
-                return await res.text();
             }
 
             async function loadCapabilities() {
@@ -1647,12 +1589,6 @@
                     `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
                     buildSummary(summed));
 
-                fetchReportMarkdown(jobBase).then((md) => {
-                    if (!md || !waitResultStatus) return;
-                    const cleaned = stripReportRegionSection(md);
-                    waitResultStatus.innerHTML +=
-                        `<pre class="veris-report">${escapeHtml(cleaned)}</pre>`;
-                });
                 try {
                     sessionStorage.removeItem(STORAGE_KEY_REQ);
                     sessionStorage.removeItem(STORAGE_KEY_JOB);
