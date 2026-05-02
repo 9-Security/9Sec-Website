@@ -154,6 +154,18 @@ def build_dict(lang: str) -> dict:
             "service_gate_msg": "Escalated follow-up requires service entitlement. Public preset ceiling remains Observe (180s).",
             "recollect_needed": "Re-collection",
             "recollect_yes": "recommended",
+            "wait_title_scanner": "Scanner wait",
+            "wait_intro_scanner": "Scanner request created. Waiting for the client to run and return logs. This window closes automatically after 10 minutes if no result arrives.",
+            "wait_overlay_pending_title": "Waiting for analysis...",
+            "wait_overlay_pending_p": "A summary will appear automatically when results arrive.",
+            "wait_kv_request_id": "Request ID",
+            "wait_kv_email": "Email",
+            "wait_title_report": "Analysis result report",
+            "wait_title_fail": "Analysis issue",
+            "wait_timeout_overlay_title": "Wait timed out",
+            "wait_minimize_title": "Minimize wait window (polling continues in background)",
+            "wait_stop_title": "Close and stop waiting",
+            "close_title": "Close",
         }
     if lang == "tw":
         return {
@@ -288,6 +300,18 @@ def build_dict(lang: str) -> dict:
             "service_gate_msg": "建議 escalated 追蒐，但此層級需服務授權；公開方案上限為 Observe (180s)。",
             "recollect_needed": "再蒐集",
             "recollect_yes": "建議進行",
+            "wait_title_scanner": "掃描等待視窗",
+            "wait_intro_scanner": "掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。",
+            "wait_overlay_pending_title": "等待分析結果中…",
+            "wait_overlay_pending_p": "系統會在收到掃描結果後，自動顯示分析摘要。",
+            "wait_kv_request_id": "Request ID",
+            "wait_kv_email": "Email",
+            "wait_title_report": "分析結果報告",
+            "wait_title_fail": "分析發生問題",
+            "wait_timeout_overlay_title": "等候逾時",
+            "wait_minimize_title": "最小化等待視窗（背景持續接收）",
+            "wait_stop_title": "停止等待並關閉視窗",
+            "close_title": "關閉",
         }
     return {
         "doc_title": "VERIS エンドポイント・トリアージ | Nine-Security",
@@ -421,6 +445,18 @@ def build_dict(lang: str) -> dict:
         "service_gate_msg": "escalated の再収集はサービス権限が必要です。公開プリセット上限は Observe (180s) です。",
         "recollect_needed": "再収集",
         "recollect_yes": "推奨",
+        "wait_title_scanner": "スキャナー待機",
+        "wait_intro_scanner": "スキャナー依頼を作成しました。クライアントの実行とログ返送を待っています。10 分間結果がない場合、このウィンドウは自動的に閉じます。",
+        "wait_overlay_pending_title": "分析結果を待機中…",
+        "wait_overlay_pending_p": "結果が届くと、ここに分析サマリーが自動表示されます。",
+        "wait_kv_request_id": "Request ID",
+        "wait_kv_email": "Email",
+        "wait_title_report": "分析結果レポート",
+        "wait_title_fail": "分析エラー",
+        "wait_timeout_overlay_title": "タイムアウト",
+        "wait_minimize_title": "待機ウィンドウを最小化（バックグラウンドでポーリング継続）",
+        "wait_stop_title": "閉じて待機を終了",
+        "close_title": "閉じる",
     }
 
 

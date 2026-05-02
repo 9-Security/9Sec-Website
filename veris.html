@@ -756,22 +756,22 @@
                 <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
                     <div class="veris-wait-modal">
                         <div class="veris-wait-header">
-                            <h3 id="waitModalTitle">掃描等待視窗</h3>
+                            <h3 id="waitModalTitle">Scanner wait</h3>
                             <div class="veris-wait-actions">
-                                <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="最小化等待視窗（背景持續接收）">[-]</button>
-                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="關閉並停止等待" aria-label="Close and stop waiting">[x]</button>
+                                <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="Minimize wait window (polling continues)">[-]</button>
+                                <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
                             </div>
                         </div>
                         <div class="veris-wait-body">
-                            <p id="waitModalIntro">掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。</p>
+                            <p id="waitModalIntro">Scanner request created. Waiting for the client to run and return logs.</p>
                             <div id="waitKvSection" class="veris-wait-kv">
-                                <div><span>案件編號</span><strong id="waitCaseId">-</strong></div>
-                                <div><span>Request ID</span><strong id="waitRequestId">-</strong></div>
-                                <div><span>Email</span><strong id="waitEmail">-</strong></div>
+                                <div><span id="waitKvLabelCase">Case ID</span><strong id="waitCaseId">-</strong></div>
+                                <div><span id="waitKvLabelReq">Request ID</span><strong id="waitRequestId">-</strong></div>
+                                <div><span id="waitKvLabelEmail">Email</span><strong id="waitEmail">-</strong></div>
                             </div>
                             <div id="waitResultStatus" class="veris-feedback pending">
-                                <strong>等待分析結果中...</strong>
-                                <p>系統會在收到掃描結果後，自動顯示分析摘要。</p>
+                                <strong>Waiting for analysis...</strong>
+                                <p>A summary will appear automatically when results arrive.</p>
                             </div>
                         </div>
                     </div>
@@ -873,8 +873,11 @@
             const uploadButton = document.getElementById('uploadEvidenceBtn');
             const uploadPackageInput = document.getElementById('upload-package');
             const waitKvSection = document.getElementById('waitKvSection');
-            const WAIT_INTRO_SCANNER_TW = '掃描器已建立，等待客戶端執行並回傳 LOG。若超過 10 分鐘未收到結果，視窗將自動關閉。';
-            const WAIT_TITLE_SCANNER_TW = '掃描等待視窗';
+            const waitKvLabelCase = document.getElementById('waitKvLabelCase');
+            const waitKvLabelReq = document.getElementById('waitKvLabelReq');
+            const waitKvLabelEmail = document.getElementById('waitKvLabelEmail');
+            /** @type {null | string} i18n key for terminal-state modal title (scanner flow) */
+            let overlayTerminalTitleI18nKey = null;
             const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
             let waitClosedManually = false;
             let waitTerminalState = false;
@@ -890,6 +893,38 @@
             function v(key, fallback) {
                 return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
             }
+
+            const TERMINAL_TITLE_FALLBACK = {
+                'veris_page.wait_title_fail': 'Analysis issue',
+                'veris_page.wait_title_report': 'Analysis result report',
+                'veris_page.wait_timeout_overlay_title': 'Wait timed out',
+            };
+
+            function refreshWaitOverlayI18n() {
+                if (waitKvLabelCase) waitKvLabelCase.textContent = v('veris_page.lab_case', 'Case ID');
+                if (waitKvLabelReq) waitKvLabelReq.textContent = v('veris_page.wait_kv_request_id', 'Request ID');
+                if (waitKvLabelEmail) waitKvLabelEmail.textContent = v('veris_page.wait_kv_email', 'Email');
+                if (!waitModalTitle || !waitModalIntro) return;
+                if (overlayContext === 'manual') {
+                    return;
+                }
+                if (overlayContext === 'scanner') {
+                    if (waitTerminalState && overlayTerminalTitleI18nKey) {
+                        waitModalTitle.textContent = v(
+                            overlayTerminalTitleI18nKey,
+                            TERMINAL_TITLE_FALLBACK[overlayTerminalTitleI18nKey] || ''
+                        );
+                    } else if (!waitTerminalState) {
+                        waitModalTitle.textContent = v('veris_page.wait_title_scanner', 'Scanner wait');
+                        waitModalIntro.textContent = v(
+                            'veris_page.wait_intro_scanner',
+                            'Scanner request created. Waiting for the client to run and return logs. This window closes automatically after 10 minutes if no result arrives.'
+                        );
+                    }
+                }
+            }
+
+            window.__VERIS_REFRESH_OVERLAY_I18N = refreshWaitOverlayI18n;
 
             function escapeHtml(value) {
                 return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -1306,9 +1341,8 @@
             function restoreWaitChromeDefaults() {
                 if (!waitModalTitle || !waitModalIntro) return;
                 waitTerminalState = false;
-                waitModalTitle.textContent = WAIT_TITLE_SCANNER_TW;
+                overlayTerminalTitleI18nKey = null;
                 waitModalIntro.hidden = false;
-                waitModalIntro.textContent = WAIT_INTRO_SCANNER_TW;
                 if (waitKvSection) {
                     waitKvSection.hidden = false;
                     waitKvSection.style.removeProperty('display');
@@ -1316,13 +1350,14 @@
                 if (closeScannerWaitBtn) {
                     closeScannerWaitBtn.hidden = false;
                     closeScannerWaitBtn.textContent = '[-]';
-                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', '最小化等待視窗（背景持續接收）');
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', 'Minimize wait window (polling continues in background)');
                 }
                 if (closeScannerResultX) {
                     closeScannerResultX.hidden = false;
                     closeScannerResultX.textContent = '[x]';
-                    closeScannerResultX.title = v('veris_page.wait_stop_title', '停止等待並關閉視窗');
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', 'Close and stop waiting');
                 }
+                refreshWaitOverlayI18n();
             }
 
             function lockUploadForm() {
@@ -1359,12 +1394,12 @@
                 if (closeScannerWaitBtn) {
                     closeScannerWaitBtn.hidden = false;
                     closeScannerWaitBtn.textContent = '[-]';
-                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', '最小化等待視窗（背景持續接收）');
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', 'Minimize wait window (polling continues in background)');
                 }
                 if (closeScannerResultX) {
                     closeScannerResultX.hidden = false;
                     closeScannerResultX.textContent = '[x]';
-                    closeScannerResultX.title = v('veris_page.wait_stop_title', '停止等待並關閉視窗');
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', 'Close and stop waiting');
                 }
                 setFeedback(waitResultStatus, 'pending',
                     `<strong>${v('veris_page.state_analyzing', 'Central is analyzing evidence...')}</strong>` +
@@ -1399,7 +1434,7 @@
                 if (closeScannerResultX) {
                     closeScannerResultX.hidden = false;
                     closeScannerResultX.textContent = '[x]';
-                    closeScannerResultX.title = v('veris_page.close_title', '關閉');
+                    closeScannerResultX.title = v('veris_page.close_title', 'Close');
                 }
                 setFeedback(waitResultStatus, 'error',
                     `<strong>${v('veris_page.err_upload', 'Upload failed.')}</strong><p>${detailHtmlEscaped}</p>` +
@@ -1408,21 +1443,22 @@
                 scannerWaitOverlay.hidden = false;
             }
 
-            /** @param {'success' | 'fail'} mode @param {string} [customTitle] */
-            function showTerminalWaitChrome(mode, customTitle) {
+            /**
+             * @param {'success' | 'fail'} mode
+             * @param {string} [optionalTitleKey] Full i18n key under veris_page (e.g. veris_page.wait_timeout_overlay_title).
+             */
+            function showTerminalWaitChrome(mode, optionalTitleKey) {
                 if (!waitModalTitle || !waitModalIntro) return;
                 waitTerminalState = true;
                 waitModalIntro.hidden = true;
-                waitModalTitle.textContent = (typeof customTitle === 'string' && customTitle.trim())
-                    ? customTitle
-                    : (mode === 'fail'
-                        ? v('veris_page.wait_title_fail', '分析發生問題')
-                        : v('veris_page.wait_title_report', 'Analysis result report'));
+                const key = optionalTitleKey || (mode === 'fail' ? 'veris_page.wait_title_fail' : 'veris_page.wait_title_report');
+                overlayTerminalTitleI18nKey = key;
+                waitModalTitle.textContent = v(key, TERMINAL_TITLE_FALLBACK[key] || '');
                 if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
                 if (closeScannerResultX) {
                     closeScannerResultX.hidden = false;
                     closeScannerResultX.textContent = '[x]';
-                    closeScannerResultX.title = v('veris_page.close_title', '關閉');
+                    closeScannerResultX.title = v('veris_page.close_title', 'Close');
                 }
                 scannerWaitOverlay.hidden = false;
             }
@@ -1624,7 +1660,7 @@
                         (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
                         (launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(launcherSizeBytes))}</code></p>` : '') +
                         (launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(launcherSha256)}</code></p>` : '') +
-                        `<p>案件編號：<code>${escapeHtml(randomCaseId)}</code></p>` +
+                        `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(randomCaseId)}</code></p>` +
                         `<div class="veris-feedback-actions">` +
                         `<button type="button" class="btn primary-btn" id="downloadAgainBtn"><i class="fa-solid fa-download"></i> ${escapeHtml(againLabel)}</button>` +
                         `</div>`
@@ -1773,7 +1809,7 @@
 
                     if (outcome.kind === 'stopped') {
                         if (uploadStatus) uploadStatus.hidden = true;
-                        showTerminalWaitChrome('fail', v('veris_page.wait_timeout_overlay_title', '等候逾時'));
+                        showTerminalWaitChrome('fail', 'veris_page.wait_timeout_overlay_title');
                         setFeedback(waitResultStatus, 'error',
                             `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong>` +
                             `<p>${v('veris_page.upload_timeout_p', '分析尚未取得結果，請稍後再試或使用 Job URL 追查。')}</p>`
@@ -1817,6 +1853,7 @@
                     el.setAttribute("aria-label", g(key, fb));
                 });
             }
+            window.__VERIS_REFRESH_OVERLAY_I18N?.();
         };
         await import("/assets/main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js");
         reapply();
