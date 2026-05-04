@@ -371,7 +371,6 @@
             if (openUrl.indexOf(GOV_PREFIX + "/download/") !== -1 && openUrl.indexOf("token=") !== -1) {
               startGovernanceDownload(openUrl).catch(function (error) {
                 console.error("[Governance] Secure collector download failed:", error);
-                originalOpen(rewriteUrl(url), target, features);
               });
               return null;
             }
