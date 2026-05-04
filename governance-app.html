@@ -322,8 +322,58 @@
       }
 
       var originalOpen = window.open ? window.open.bind(window) : null;
+      function parseFilename(disposition) {
+        if (!disposition) return "9sec-governance-collector.zip";
+        var utfMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+        if (utfMatch && utfMatch[1]) return decodeURIComponent(utfMatch[1]);
+        var asciiMatch = disposition.match(/filename=\"?([^\";]+)\"?/i);
+        return asciiMatch && asciiMatch[1] ? asciiMatch[1] : "9sec-governance-collector.zip";
+      }
+      async function startGovernanceDownload(url) {
+        var rewritten = rewriteUrl(url);
+        var parsed = new URL(rewritten, window.location.origin);
+        var token = parsed.searchParams.get("token");
+        if (!token || parsed.pathname.indexOf(GOV_PREFIX + "/download/") === -1) {
+          return false;
+        }
+
+        parsed.searchParams.delete("token");
+        var response = await originalFetch(parsed.toString(), {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
+        if (!response.ok) {
+          throw new Error("Collector download failed with status " + response.status);
+        }
+
+        var blob = await response.blob();
+        var objectUrl = URL.createObjectURL(blob);
+        var anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = parseFilename(response.headers.get("content-disposition"));
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
+        return true;
+      }
       if (originalOpen) {
         window.open = function (url, target, features) {
+          try {
+            var openUrl = typeof url === "string" ? url : String(url || "");
+            if (openUrl.indexOf(GOV_PREFIX + "/download/") !== -1 && openUrl.indexOf("token=") !== -1) {
+              startGovernanceDownload(openUrl).catch(function (error) {
+                console.error("[Governance] Secure collector download failed:", error);
+                originalOpen(rewriteUrl(url), target, features);
+              });
+              return null;
+            }
+          } catch (error) {
+            console.error("[Governance] Download interception failed:", error);
+          }
           return originalOpen(rewriteUrl(url), target, features);
         };
       }
