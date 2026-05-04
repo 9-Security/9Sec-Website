@@ -316,7 +316,439 @@
             margin-right: 0.35em;
             fill: currentColor;
         }
+
+        .clone-summary-banner {
+            margin: 1rem 0 1.5rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid rgba(255, 204, 0, 0.35);
+            background: rgba(255, 204, 0, 0.08);
+            color: #ffe38a;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .website-clone-panel {
+            margin-top: 1rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .clone-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .clone-panel-title {
+            color: #9fd4ff;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+        }
+
+        .clone-panel-score {
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+        }
+
+        .clone-badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .clone-status-near_clone .clone-badge {
+            background: rgba(255, 77, 77, 0.18);
+            color: #ff9f9f;
+            border: 1px solid rgba(255, 77, 77, 0.35);
+        }
+
+        .clone-status-strong_similarity .clone-badge {
+            background: rgba(255, 170, 0, 0.18);
+            color: #ffd87a;
+            border: 1px solid rgba(255, 170, 0, 0.35);
+        }
+
+        .clone-status-partial_similarity .clone-badge,
+        .clone-status-low_similarity .clone-badge,
+        .clone-status-comparison_skipped .clone-badge,
+        .clone-status-candidate_site_unreachable .clone-badge,
+        .clone-status-official_site_unreachable .clone-badge {
+            background: rgba(120, 150, 180, 0.14);
+            color: #c8d9e8;
+            border: 1px solid rgba(120, 150, 180, 0.28);
+        }
+
+        .clone-status-redirects_to_official .clone-badge {
+            background: rgba(0, 255, 157, 0.14);
+            color: #98ffd9;
+            border: 1px solid rgba(0, 255, 157, 0.32);
+        }
+
+        .clone-panel-summary {
+            color: #b7c4d3;
+            font-size: 0.84rem;
+            line-height: 1.6;
+        }
+
+        .clone-panel-subsection {
+            margin-top: 0.7rem;
+            padding-top: 0.7rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        .clone-panel-subtitle {
+            color: #9fd4ff;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.4rem;
+        }
+
+        .clone-asset-flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.7rem;
+        }
+
+        .clone-asset-flag {
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.03em;
+            border: 1px solid rgba(137, 200, 255, 0.25);
+            color: #b9dcff;
+            background: rgba(137, 200, 255, 0.08);
+        }
+
+        .clone-asset-flag.match {
+            color: #ffcf7f;
+            border-color: rgba(255, 170, 0, 0.35);
+            background: rgba(255, 170, 0, 0.12);
+        }
+
+        .clone-panel-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            margin-top: 0.7rem;
+        }
+
+        .clone-panel-links a {
+            color: #89c8ff;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-decoration: none;
+        }
+
+        .clone-panel-links a:hover {
+            color: #c8e6ff;
+            text-decoration: underline;
+        }
     </style>
+  <script>
+    (() => {
+        const CLONE_TEXT = {
+            en: {
+                title: 'WEBSITE CLONE CHECK',
+                official_site: 'OFFICIAL_SITE',
+                candidate_site: 'CANDIDATE_SITE',
+                not_available: 'N/A',
+                no_summary: 'No homepage comparison summary available.',
+                summary_prefix: '[WEB CLONE]',
+                banner_similarity: '{n} live domain(s) show strong homepage similarity to the official site.',
+                banner_redirect: '{n} candidate domain(s) redirect back into the official web property.',
+                near_clone: 'NEAR CLONE',
+                strong_similarity: 'STRONG MATCH',
+                partial_similarity: 'PARTIAL MATCH',
+                low_similarity: 'LOW MATCH',
+                redirects_to_official: 'REDIRECTS OFFICIAL',
+                candidate_site_unreachable: 'NO WEBPAGE',
+                official_site_unreachable: 'OFFICIAL UNREACHABLE',
+                comparison_skipped: 'CHECK SKIPPED',
+                visual_pending: 'VISUAL PENDING',
+                visual_skipped: 'VISUAL SKIPPED',
+                visual_near_clone: 'VISUAL CLONE',
+                visual_strong_similarity: 'VISUAL STRONG',
+                visual_partial_similarity: 'VISUAL PARTIAL',
+                visual_low_similarity: 'VISUAL LOW',
+                visual_compare_unavailable: 'VISUAL UNAVAILABLE',
+                visual_compare_failed: 'VISUAL FAILED',
+                official_visual_unavailable: 'OFFICIAL SHOT FAIL',
+                candidate_visual_unavailable: 'CANDIDATE SHOT FAIL',
+                favicon_match: 'FAVICON HASH',
+                logo_match: 'LOGO HASH',
+                exact_match: 'EXACT MATCH',
+                no_match: 'NO MATCH',
+                banner_asset_reuse: '{n} live domain(s) reused an exact favicon or logo hash from the official site.',
+                visual_title: 'VIEWPORT VISUAL CHECK',
+                visual_score: 'VISUAL SCORE',
+                visual_none: 'No screenshot similarity summary available.',
+                banner_visual_reuse: '{n} live domain(s) showed strong screenshot-level similarity to the official site.'
+            },
+            tw: {
+                title: '官網克隆比對',
+                official_site: '官方網站',
+                candidate_site: '可疑網站',
+                not_available: '無',
+                no_summary: '目前沒有可用的首頁比對摘要。',
+                summary_prefix: '[官網比對]',
+                banner_similarity: '共有 {n} 個存活網域的首頁內容與官方網站高度相似。',
+                banner_redirect: '共有 {n} 個候選網域會重新導向回官方網站。',
+                near_clone: '高度克隆',
+                strong_similarity: '高度相似',
+                partial_similarity: '部分相似',
+                low_similarity: '低相似',
+                redirects_to_official: '導回官網',
+                candidate_site_unreachable: '無法抓取頁面',
+                official_site_unreachable: '官網不可達',
+                comparison_skipped: '已略過比對',
+                visual_pending: '視覺待比對',
+                visual_skipped: '已略過視覺比對',
+                visual_near_clone: '視覺高度克隆',
+                visual_strong_similarity: '視覺高度相似',
+                visual_partial_similarity: '視覺部分相似',
+                visual_low_similarity: '視覺低相似',
+                visual_compare_unavailable: '視覺比對不可用',
+                visual_compare_failed: '視覺比對失敗',
+                official_visual_unavailable: '官網截圖失敗',
+                candidate_visual_unavailable: '候選站截圖失敗',
+                favicon_match: 'FAVICON 指紋',
+                logo_match: 'LOGO 指紋',
+                exact_match: '完全相同',
+                no_match: '未命中',
+                banner_asset_reuse: '共有 {n} 個存活網域重用了官方網站完全相同的 favicon 或 logo 指紋。',
+                visual_title: '頁面畫面比對',
+                visual_score: '畫面分數',
+                visual_none: '目前沒有可用的截圖相似度摘要。',
+                banner_visual_reuse: '共有 {n} 個存活網域在頁面截圖層面與官方網站高度相似。'
+            },
+            jp: {
+                title: '公式サイト複製チェック',
+                official_site: '公式サイト',
+                candidate_site: '候補サイト',
+                not_available: 'N/A',
+                no_summary: 'ホームページ比較の要約はまだありません。',
+                summary_prefix: '[クローン検知]',
+                banner_similarity: '{n} 件の稼働ドメインで公式サイトとの強い類似が確認されました。',
+                banner_redirect: '{n} 件の候補ドメインが公式サイトへリダイレクトしています。',
+                near_clone: 'ほぼクローン',
+                strong_similarity: '高い一致',
+                partial_similarity: '部分一致',
+                low_similarity: '低一致',
+                redirects_to_official: '公式へ転送',
+                candidate_site_unreachable: 'ページ取得不可',
+                official_site_unreachable: '公式不可達',
+                comparison_skipped: '比較スキップ',
+                visual_pending: '視覚比較待ち',
+                visual_skipped: '視覚比較スキップ',
+                visual_near_clone: '視覚ほぼクローン',
+                visual_strong_similarity: '視覚高一致',
+                visual_partial_similarity: '視覚部分一致',
+                visual_low_similarity: '視覚低一致',
+                visual_compare_unavailable: '視覚比較不可',
+                visual_compare_failed: '視覚比較失敗',
+                official_visual_unavailable: '公式キャプチャ失敗',
+                candidate_visual_unavailable: '候補キャプチャ失敗',
+                favicon_match: 'FAVICON HASH',
+                logo_match: 'LOGO HASH',
+                exact_match: '完全一致',
+                no_match: '不一致',
+                banner_asset_reuse: '{n} 件の稼働ドメインで公式サイトと同一の favicon または logo ハッシュが再利用されています。',
+                visual_title: 'ビューポート視覚チェック',
+                visual_score: '視覚スコア',
+                visual_none: 'スクリーンショット比較の要約はありません。',
+                banner_visual_reuse: '{n} 件の稼働ドメインで公式サイトとのスクリーンショット類似度が高く検出されました。'
+            }
+        };
+
+        function getLang() {
+            const value = localStorage.getItem('9sec_lang') || 'en';
+            return CLONE_TEXT[value] ? value : 'en';
+        }
+
+        function t(key) {
+            const lang = getLang();
+            return (CLONE_TEXT[lang] && CLONE_TEXT[lang][key]) || CLONE_TEXT.en[key] || key;
+        }
+
+        function escapeHtml(value) {
+            const node = document.createElement('div');
+            node.textContent = String(value ?? '');
+            return node.innerHTML;
+        }
+
+        function safeUrl(value) {
+            try {
+                if (!value) return '';
+                const parsed = new URL(String(value));
+                return /^https?:$/.test(parsed.protocol) ? parsed.toString() : '';
+            } catch {
+                return '';
+            }
+        }
+
+        function statusLabel(status) {
+            return t(status) || status;
+        }
+
+        function renderClonePanels(result) {
+            const hitsList = document.getElementById('hitsList');
+            if (!hitsList) return;
+
+            const hits = Array.isArray(result && result.hits) ? result.hits : [];
+            const cards = Array.from(hitsList.querySelectorAll('.hit-card'));
+            if (!cards.length || !hits.length) return;
+
+            let strongMatches = 0;
+            let officialRedirects = 0;
+            let visualAssetReuses = 0;
+            let visualNearClones = 0;
+
+            cards.forEach((card) => {
+                const existing = card.querySelector('.website-clone-panel');
+                if (existing) existing.remove();
+            });
+
+            cards.forEach((card, index) => {
+                const hit = hits[index];
+                if (!hit || hit.status !== 'active' || !hit.site_clone_status) return;
+
+                const cloneStatus = String(hit.site_clone_status);
+                if (cloneStatus === 'near_clone' || cloneStatus === 'strong_similarity') strongMatches += 1;
+                if (cloneStatus === 'redirects_to_official') officialRedirects += 1;
+                if (hit.logo_hash_match || hit.favicon_hash_match) visualAssetReuses += 1;
+                if (hit.page_visual_clone_status === 'visual_near_clone' || hit.page_visual_clone_status === 'visual_strong_similarity') visualNearClones += 1;
+
+                const hasScore = hit.site_similarity_score !== null
+                    && hit.site_similarity_score !== undefined
+                    && Number.isFinite(Number(hit.site_similarity_score));
+                const score = hasScore
+                    ? `${Math.round(Number(hit.site_similarity_score))}%`
+                    : t('not_available');
+                const summary = hit.site_similarity_summary
+                    ? escapeHtml(hit.site_similarity_summary)
+                    : escapeHtml(t('no_summary'));
+                const officialUrl = safeUrl(hit.official_site_url);
+                const candidateUrl = safeUrl(hit.candidate_site_url);
+                const assetFlags = [];
+                assetFlags.push(`<span class="clone-asset-flag ${hit.logo_hash_match ? 'match' : ''}">${escapeHtml(t('logo_match'))}: ${escapeHtml(hit.logo_hash_match ? t('exact_match') : t('no_match'))}</span>`);
+                assetFlags.push(`<span class="clone-asset-flag ${hit.favicon_hash_match ? 'match' : ''}">${escapeHtml(t('favicon_match'))}: ${escapeHtml(hit.favicon_hash_match ? t('exact_match') : t('no_match'))}</span>`);
+                const visualScore = hit.page_visual_similarity_score !== null
+                    && hit.page_visual_similarity_score !== undefined
+                    && Number.isFinite(Number(hit.page_visual_similarity_score))
+                    ? `${Math.round(Number(hit.page_visual_similarity_score))}%`
+                    : t('not_available');
+                const visualSummary = hit.page_visual_similarity_summary
+                    ? escapeHtml(hit.page_visual_similarity_summary)
+                    : escapeHtml(t('visual_none'));
+                const visualStatus = hit.page_visual_clone_status ? escapeHtml(statusLabel(String(hit.page_visual_clone_status))) : escapeHtml(t('visual_skipped'));
+
+                const panel = document.createElement('div');
+                panel.className = `website-clone-panel clone-status-${cloneStatus}`;
+
+                let links = '';
+                if (officialUrl) {
+                    links += `<a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('official_site'))}</a>`;
+                }
+                if (candidateUrl) {
+                    links += `<a href="${escapeHtml(candidateUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('candidate_site'))}</a>`;
+                }
+
+                panel.innerHTML = `
+                    <div class="clone-panel-header">
+                        <div class="clone-panel-title">${escapeHtml(t('title'))}</div>
+                        <div class="clone-panel-score">${escapeHtml(score)} <span class="clone-badge">${escapeHtml(statusLabel(cloneStatus))}</span></div>
+                    </div>
+                    <div class="clone-panel-summary">${summary}</div>
+                    <div class="clone-asset-flags">${assetFlags.join('')}</div>
+                    <div class="clone-panel-subsection">
+                        <div class="clone-panel-subtitle">${escapeHtml(t('visual_title'))}</div>
+                        <div class="clone-panel-summary">${escapeHtml(t('visual_score'))}: ${escapeHtml(visualScore)} <span class="clone-badge">${visualStatus}</span></div>
+                        <div class="clone-panel-summary">${visualSummary}</div>
+                    </div>
+                    ${links ? `<div class="clone-panel-links">${links}</div>` : ''}
+                `;
+
+                card.appendChild(panel);
+            });
+
+            const statusBar = document.getElementById('statusBar');
+            if (!statusBar) return;
+
+            const existingBanner = document.getElementById('cloneSummaryBanner');
+            if (existingBanner) existingBanner.remove();
+
+            if (!strongMatches && !officialRedirects) return;
+
+            const banner = document.createElement('div');
+            banner.id = 'cloneSummaryBanner';
+            banner.className = 'clone-summary-banner';
+            const messages = [];
+            if (strongMatches) messages.push(t('banner_similarity').replace('{n}', String(strongMatches)));
+            if (officialRedirects) messages.push(t('banner_redirect').replace('{n}', String(officialRedirects)));
+            if (visualAssetReuses) messages.push(t('banner_asset_reuse').replace('{n}', String(visualAssetReuses)));
+            if (visualNearClones) messages.push(t('banner_visual_reuse').replace('{n}', String(visualNearClones)));
+            banner.textContent = `${t('summary_prefix')} ${messages.join(' ')}`;
+            statusBar.insertAdjacentElement('afterend', banner);
+        }
+
+        const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+        if (originalFetch) {
+            window.fetch = async (...args) => {
+                const response = await originalFetch(...args);
+                try {
+                    const requestUrl = typeof args[0] === 'string'
+                        ? args[0]
+                        : (args[0] && args[0].url) ? args[0].url : '';
+                    if (requestUrl.includes('/api/domain/instant-scan')) {
+                        const cloned = response.clone();
+                        const type = cloned.headers.get('content-type') || '';
+                        if (type.includes('application/json')) {
+                            cloned.json().then((data) => {
+                                window.__brandScannerLastResult = data;
+                                window.dispatchEvent(new CustomEvent('9sec:brandScanResult', { detail: data }));
+                            }).catch(() => {});
+                        }
+                    }
+                } catch (_) { }
+                return response;
+            };
+        }
+
+        function scheduleRender(detail) {
+            setTimeout(() => renderClonePanels(detail), 60);
+            setTimeout(() => renderClonePanels(detail), 250);
+        }
+
+        window.addEventListener('9sec:brandScanResult', (event) => scheduleRender(event.detail));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hitsList = document.getElementById('hitsList');
+            if (!hitsList) return;
+
+            const observer = new MutationObserver(() => {
+                if (window.__brandScannerLastResult) renderClonePanels(window.__brandScannerLastResult);
+            });
+            observer.observe(hitsList, { childList: true });
+
+            window.addEventListener('9sec:langChange', () => {
+                if (window.__brandScannerLastResult) renderClonePanels(window.__brandScannerLastResult);
+            });
+        });
+    })();
+  </script>
   <link rel="modulepreload" crossorigin href="data:text/javascript;base64,KGZ1bmN0aW9uKCl7Y29uc3QgdD1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJsaW5rIikucmVsTGlzdDtpZih0JiZ0LnN1cHBvcnRzJiZ0LnN1cHBvcnRzKCJtb2R1bGVwcmVsb2FkIikpcmV0dXJuO2Zvcihjb25zdCBlIG9mIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2xpbmtbcmVsPSJtb2R1bGVwcmVsb2FkIl0nKSlpKGUpO25ldyBNdXRhdGlvbk9ic2VydmVyKGU9Pntmb3IoY29uc3QgciBvZiBlKWlmKHIudHlwZT09PSJjaGlsZExpc3QiKWZvcihjb25zdCBvIG9mIHIuYWRkZWROb2RlcylvLnRhZ05hbWU9PT0iTElOSyImJm8ucmVsPT09Im1vZHVsZXByZWxvYWQiJiZpKG8pfSkub2JzZXJ2ZShkb2N1bWVudCx7Y2hpbGRMaXN0OiEwLHN1YnRyZWU6ITB9KTtmdW5jdGlvbiBzKGUpe2NvbnN0IHI9e307cmV0dXJuIGUuaW50ZWdyaXR5JiYoci5pbnRlZ3JpdHk9ZS5pbnRlZ3JpdHkpLGUucmVmZXJyZXJQb2xpY3kmJihyLnJlZmVycmVyUG9saWN5PWUucmVmZXJyZXJQb2xpY3kpLGUuY3Jvc3NPcmlnaW49PT0idXNlLWNyZWRlbnRpYWxzIj9yLmNyZWRlbnRpYWxzPSJpbmNsdWRlIjplLmNyb3NzT3JpZ2luPT09ImFub255bW91cyI/ci5jcmVkZW50aWFscz0ib21pdCI6ci5jcmVkZW50aWFscz0ic2FtZS1vcmlnaW4iLHJ9ZnVuY3Rpb24gaShlKXtpZihlLmVwKXJldHVybjtlLmVwPSEwO2NvbnN0IHI9cyhlKTtmZXRjaChlLmhyZWYscil9fSkoKTsK">
   <link rel="modulepreload" crossorigin href="/assets/styles-BxbEqz2_-Bw8gVkgQ-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr.js">
   <link rel="modulepreload" crossorigin href="data:text/javascript;base64,KGZ1bmN0aW9uKCl7Y29uc3QgdD1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJsaW5rIikucmVsTGlzdDtpZih0JiZ0LnN1cHBvcnRzJiZ0LnN1cHBvcnRzKCJtb2R1bGVwcmVsb2FkIikpcmV0dXJuO2Zvcihjb25zdCBlIG9mIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2xpbmtbcmVsPSJtb2R1bGVwcmVsb2FkIl0nKSlpKGUpO25ldyBNdXRhdGlvbk9ic2VydmVyKGU9Pntmb3IoY29uc3QgciBvZiBlKWlmKHIudHlwZT09PSJjaGlsZExpc3QiKWZvcihjb25zdCBvIG9mIHIuYWRkZWROb2RlcylvLnRhZ05hbWU9PT0iTElOSyImJm8ucmVsPT09Im1vZHVsZXByZWxvYWQiJiZpKG8pfSkub2JzZXJ2ZShkb2N1bWVudCx7Y2hpbGRMaXN0OiEwLHN1YnRyZWU6ITB9KTtmdW5jdGlvbiBzKGUpe2NvbnN0IHI9e307cmV0dXJuIGUuaW50ZWdyaXR5JiYoci5pbnRlZ3JpdHk9ZS5pbnRlZ3JpdHkpLGUucmVmZXJyZXJQb2xpY3kmJihyLnJlZmVycmVyUG9saWN5PWUucmVmZXJyZXJQb2xpY3kpLGUuY3Jvc3NPcmlnaW49PT0idXNlLWNyZWRlbnRpYWxzIj9yLmNyZWRlbnRpYWxzPSJpbmNsdWRlIjplLmNyb3NzT3JpZ2luPT09ImFub255bW91cyI/ci5jcmVkZW50aWFscz0ib21pdCI6ci5jcmVkZW50aWFscz0ic2FtZS1vcmlnaW4iLHJ9ZnVuY3Rpb24gaShlKXtpZihlLmVwKXJldHVybjtlLmVwPSEwO2NvbnN0IHI9cyhlKTtmZXRjaChlLmhyZWYscil9fSkoKTsK">
