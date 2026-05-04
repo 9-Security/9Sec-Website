@@ -329,10 +329,10 @@
         var asciiMatch = disposition.match(/filename=\"?([^\";]+)\"?/i);
         return asciiMatch && asciiMatch[1] ? asciiMatch[1] : "9sec-governance-collector.zip";
       }
-      async function startGovernanceDownload(url) {
+      async function startGovernanceDownload(url, tokenOverride) {
         var rewritten = rewriteUrl(url);
         var parsed = new URL(rewritten, window.location.origin);
-        var token = parsed.searchParams.get("token");
+        var token = tokenOverride || parsed.searchParams.get("token");
         if (!token || parsed.pathname.indexOf(GOV_PREFIX + "/download/") === -1) {
           return false;
         }
@@ -360,6 +360,10 @@
         setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
         return true;
       }
+      window.startGovernanceDownload = startGovernanceDownload;
+      window.startGovernanceDownloadFromSession = function (downloadUrl, token) {
+        return startGovernanceDownload(downloadUrl, token);
+      };
       if (originalOpen) {
         window.open = function (url, target, features) {
           try {
