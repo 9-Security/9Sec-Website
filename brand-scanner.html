@@ -492,10 +492,25 @@
                 exact_match: 'EXACT MATCH',
                 no_match: 'NO MATCH',
                 banner_asset_reuse: '{n} live domain(s) reused an exact favicon or logo hash from the official site.',
-                visual_title: 'VIEWPORT VISUAL CHECK',
+                visual_title: 'FULL-PAGE VISUAL CHECK',
+                capture_mode: 'CAPTURE MODE',
+                full_page: 'FULL PAGE',
+                viewport: 'VIEWPORT',
                 visual_score: 'VISUAL SCORE',
                 visual_none: 'No screenshot similarity summary available.',
-                banner_visual_reuse: '{n} live domain(s) showed strong screenshot-level similarity to the official site.'
+                banner_visual_reuse: '{n} live domain(s) showed strong screenshot-level similarity to the official site.',
+                ocr_title: 'OCR TEXT CHECK',
+                ocr_score: 'OCR SCORE',
+                ocr_none: 'No OCR similarity summary available.',
+                ocr_pending: 'OCR PENDING',
+                ocr_skipped: 'OCR SKIPPED',
+                ocr_near_clone: 'OCR CLONE',
+                ocr_strong_similarity: 'OCR STRONG',
+                ocr_partial_similarity: 'OCR PARTIAL',
+                ocr_low_similarity: 'OCR LOW',
+                ocr_unavailable: 'OCR UNAVAILABLE',
+                ocr_failed: 'OCR FAILED',
+                banner_ocr_similarity: '{n} live domain(s) showed strong OCR text similarity to the official site.'
             },
             tw: {
                 title: '官網克隆比對',
@@ -529,10 +544,25 @@
                 exact_match: '完全相同',
                 no_match: '未命中',
                 banner_asset_reuse: '共有 {n} 個存活網域重用了官方網站完全相同的 favicon 或 logo 指紋。',
-                visual_title: '頁面畫面比對',
+                visual_title: '整頁畫面比對',
+                capture_mode: '擷取模式',
+                full_page: '整頁',
+                viewport: '首屏',
                 visual_score: '畫面分數',
                 visual_none: '目前沒有可用的截圖相似度摘要。',
-                banner_visual_reuse: '共有 {n} 個存活網域在頁面截圖層面與官方網站高度相似。'
+                banner_visual_reuse: '共有 {n} 個存活網域在頁面截圖層面與官方網站高度相似。',
+                ocr_title: 'OCR 文字比對',
+                ocr_score: 'OCR 分數',
+                ocr_none: '目前沒有可用的 OCR 相似度摘要。',
+                ocr_pending: 'OCR 待比對',
+                ocr_skipped: '已略過 OCR',
+                ocr_near_clone: 'OCR 高度克隆',
+                ocr_strong_similarity: 'OCR 高度相似',
+                ocr_partial_similarity: 'OCR 部分相似',
+                ocr_low_similarity: 'OCR 低相似',
+                ocr_unavailable: 'OCR 不可用',
+                ocr_failed: 'OCR 失敗',
+                banner_ocr_similarity: '共有 {n} 個存活網域在 OCR 文字層面與官方網站高度相似。'
             },
             jp: {
                 title: '公式サイト複製チェック',
@@ -566,10 +596,25 @@
                 exact_match: '完全一致',
                 no_match: '不一致',
                 banner_asset_reuse: '{n} 件の稼働ドメインで公式サイトと同一の favicon または logo ハッシュが再利用されています。',
-                visual_title: 'ビューポート視覚チェック',
+                visual_title: 'ページ全体の視覚チェック',
+                capture_mode: '取得モード',
+                full_page: '全体ページ',
+                viewport: 'ビューポート',
                 visual_score: '視覚スコア',
                 visual_none: 'スクリーンショット比較の要約はありません。',
-                banner_visual_reuse: '{n} 件の稼働ドメインで公式サイトとのスクリーンショット類似度が高く検出されました。'
+                banner_visual_reuse: '{n} 件の稼働ドメインで公式サイトとのスクリーンショット類似度が高く検出されました。',
+                ocr_title: 'OCR テキスト比較',
+                ocr_score: 'OCR スコア',
+                ocr_none: 'OCR 比較の要約はありません。',
+                ocr_pending: 'OCR 比較待ち',
+                ocr_skipped: 'OCR スキップ',
+                ocr_near_clone: 'OCR ほぼクローン',
+                ocr_strong_similarity: 'OCR 高一致',
+                ocr_partial_similarity: 'OCR 部分一致',
+                ocr_low_similarity: 'OCR 低一致',
+                ocr_unavailable: 'OCR 利用不可',
+                ocr_failed: 'OCR 失敗',
+                banner_ocr_similarity: '{n} 件の稼働ドメインで OCR テキストの類似度が高く検出されました。'
             }
         };
 
@@ -615,6 +660,7 @@
             let officialRedirects = 0;
             let visualAssetReuses = 0;
             let visualNearClones = 0;
+            let ocrNearClones = 0;
 
             cards.forEach((card) => {
                 const existing = card.querySelector('.website-clone-panel');
@@ -630,6 +676,7 @@
                 if (cloneStatus === 'redirects_to_official') officialRedirects += 1;
                 if (hit.logo_hash_match || hit.favicon_hash_match) visualAssetReuses += 1;
                 if (hit.page_visual_clone_status === 'visual_near_clone' || hit.page_visual_clone_status === 'visual_strong_similarity') visualNearClones += 1;
+                if (hit.page_ocr_clone_status === 'ocr_near_clone' || hit.page_ocr_clone_status === 'ocr_strong_similarity') ocrNearClones += 1;
 
                 const hasScore = hit.site_similarity_score !== null
                     && hit.site_similarity_score !== undefined
@@ -654,6 +701,16 @@
                     ? escapeHtml(hit.page_visual_similarity_summary)
                     : escapeHtml(t('visual_none'));
                 const visualStatus = hit.page_visual_clone_status ? escapeHtml(statusLabel(String(hit.page_visual_clone_status))) : escapeHtml(t('visual_skipped'));
+                const visualMode = hit.page_visual_capture_mode ? escapeHtml(statusLabel(String(hit.page_visual_capture_mode))) : escapeHtml(t('not_available'));
+                const ocrScore = hit.page_ocr_similarity_score !== null
+                    && hit.page_ocr_similarity_score !== undefined
+                    && Number.isFinite(Number(hit.page_ocr_similarity_score))
+                    ? `${Math.round(Number(hit.page_ocr_similarity_score))}%`
+                    : t('not_available');
+                const ocrSummary = hit.page_ocr_similarity_summary
+                    ? escapeHtml(hit.page_ocr_similarity_summary)
+                    : escapeHtml(t('ocr_none'));
+                const ocrStatus = hit.page_ocr_clone_status ? escapeHtml(statusLabel(String(hit.page_ocr_clone_status))) : escapeHtml(t('ocr_skipped'));
 
                 const panel = document.createElement('div');
                 panel.className = `website-clone-panel clone-status-${cloneStatus}`;
@@ -675,8 +732,14 @@
                     <div class="clone-asset-flags">${assetFlags.join('')}</div>
                     <div class="clone-panel-subsection">
                         <div class="clone-panel-subtitle">${escapeHtml(t('visual_title'))}</div>
+                        <div class="clone-panel-summary">${escapeHtml(t('capture_mode'))}: ${visualMode}</div>
                         <div class="clone-panel-summary">${escapeHtml(t('visual_score'))}: ${escapeHtml(visualScore)} <span class="clone-badge">${visualStatus}</span></div>
                         <div class="clone-panel-summary">${visualSummary}</div>
+                    </div>
+                    <div class="clone-panel-subsection">
+                        <div class="clone-panel-subtitle">${escapeHtml(t('ocr_title'))}</div>
+                        <div class="clone-panel-summary">${escapeHtml(t('ocr_score'))}: ${escapeHtml(ocrScore)} <span class="clone-badge">${ocrStatus}</span></div>
+                        <div class="clone-panel-summary">${ocrSummary}</div>
                     </div>
                     ${links ? `<div class="clone-panel-links">${links}</div>` : ''}
                 `;
@@ -690,7 +753,7 @@
             const existingBanner = document.getElementById('cloneSummaryBanner');
             if (existingBanner) existingBanner.remove();
 
-            if (!strongMatches && !officialRedirects) return;
+            if (!strongMatches && !officialRedirects && !visualAssetReuses && !visualNearClones && !ocrNearClones) return;
 
             const banner = document.createElement('div');
             banner.id = 'cloneSummaryBanner';
@@ -700,6 +763,7 @@
             if (officialRedirects) messages.push(t('banner_redirect').replace('{n}', String(officialRedirects)));
             if (visualAssetReuses) messages.push(t('banner_asset_reuse').replace('{n}', String(visualAssetReuses)));
             if (visualNearClones) messages.push(t('banner_visual_reuse').replace('{n}', String(visualNearClones)));
+            if (ocrNearClones) messages.push(t('banner_ocr_similarity').replace('{n}', String(ocrNearClones)));
             banner.textContent = `${t('summary_prefix')} ${messages.join(' ')}`;
             statusBar.insertAdjacentElement('afterend', banner);
         }

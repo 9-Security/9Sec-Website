@@ -940,6 +940,12 @@
                 return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
             }
 
+            /** Manual /upload allows only .zip (scanner package) or .json (flat evidence). */
+            function isAllowedManualEvidenceFilename(name) {
+                const n = String(name || '').trim().toLowerCase();
+                return n.endsWith('.zip') || n.endsWith('.json');
+            }
+
             const TERMINAL_TITLE_FALLBACK = {
                 'veris_page.wait_title_fail': 'Analysis issue',
                 'veris_page.wait_title_report': 'Analysis result report',
@@ -1803,6 +1809,17 @@
                     showManualUploadApiErrorOverlay(
                         escapeHtml(v('veris_page.err_choose_file', 'Please choose an evidence package before upload.')),
                         '',
+                    );
+                    return;
+                }
+                if (!isAllowedManualEvidenceFilename(selectedFile.name)) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v(
+                            'veris_page.err_upload_file_type',
+                            'Only .zip (evidence package) or .json (evidence.json export) files are allowed.'
+                        )),
+                        escapeHtml(String(selectedFile.name || '')),
                     );
                     return;
                 }
