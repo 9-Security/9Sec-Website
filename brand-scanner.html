@@ -468,6 +468,30 @@
             line-height: 1.55;
         }
 
+        .enrichment-status-banner {
+            margin: 0 0 1rem;
+            padding: 0.9rem 1rem;
+            border: 1px solid rgba(0, 255, 157, 0.22);
+            background: rgba(0, 255, 157, 0.06);
+            color: #d9fff2;
+            font-family: var(--font-mono);
+            font-size: 0.79rem;
+            line-height: 1.55;
+        }
+
+        .enrichment-status-banner.pending,
+        .enrichment-status-banner.running {
+            border-color: rgba(255, 204, 0, 0.28);
+            background: rgba(255, 204, 0, 0.08);
+            color: #ffe38a;
+        }
+
+        .enrichment-status-banner.failed {
+            border-color: rgba(255, 77, 77, 0.28);
+            background: rgba(255, 77, 77, 0.08);
+            color: #ffb1b1;
+        }
+
         .variant-intel-panel {
             margin-top: 1rem;
             padding: 0.95rem 1rem;
@@ -625,7 +649,14 @@
                 banner_variant_clusters: '{n} campaign cluster(s) were identified in this scan.',
                 ai_profile_aliases: 'ALIASES',
                 ai_profile_products: 'PRODUCTS',
-                ai_profile_entrypoints: 'ENTRYPOINTS'
+                ai_profile_entrypoints: 'ENTRYPOINTS',
+                enrichment_pending: 'BACKGROUND ENRICHMENT PENDING',
+                enrichment_running: 'BACKGROUND ENRICHMENT RUNNING',
+                enrichment_failed: 'BACKGROUND ENRICHMENT FAILED',
+                enrichment_visual_pending: '{n} visual/OCR comparison job(s) still pending.',
+                enrichment_ai_pending: '{n} AI rerank job(s) still pending.',
+                enrichment_profile: 'ADAPTIVE BUDGET',
+                enrichment_polling: 'This page will refresh scan overlays automatically as background results arrive.'
             },
             tw: {
                 title: '官網克隆比對',
@@ -699,7 +730,14 @@
                 banner_variant_clusters: '本次掃描辨識出 {n} 個攻擊活動群組。',
                 ai_profile_aliases: '別名',
                 ai_profile_products: '產品',
-                ai_profile_entrypoints: '高風險入口'
+                ai_profile_entrypoints: '高風險入口',
+                enrichment_pending: '背景補強待完成',
+                enrichment_running: '背景補強執行中',
+                enrichment_failed: '背景補強失敗',
+                enrichment_visual_pending: '仍有 {n} 個 visual/OCR 比對工作待完成。',
+                enrichment_ai_pending: '仍有 {n} 個 AI rerank 工作待完成。',
+                enrichment_profile: '自適應配額',
+                enrichment_polling: '此頁面會在背景結果到達時自動刷新掃描疊層。'
             },
             jp: {
                 title: '公式サイト複製チェック',
@@ -773,7 +811,14 @@
                 banner_variant_clusters: 'このスキャンでは {n} 件のキャンペーンクラスターが識別されました。',
                 ai_profile_aliases: '別名',
                 ai_profile_products: '製品',
-                ai_profile_entrypoints: '高危険入口'
+                ai_profile_entrypoints: '高危険入口',
+                enrichment_pending: 'バックグラウンド補強待機中',
+                enrichment_running: 'バックグラウンド補強実行中',
+                enrichment_failed: 'バックグラウンド補強失敗',
+                enrichment_visual_pending: '{n} 件の visual/OCR 比較ジョブが未完了です。',
+                enrichment_ai_pending: '{n} 件の AI rerank ジョブが未完了です。',
+                enrichment_profile: '適応予算',
+                enrichment_polling: 'バックグラウンド結果が届くとこのページは自動で重ね表示を更新します。'
             }
         };
 
@@ -818,6 +863,52 @@
             return `<span class="variant-chip ${emphasis ? 'emphasis' : ''}">${escapeHtml(tagLabel(value))}</span>`;
         }
 
+        function normalizeDomainText(value) {
+            return String(value || '')
+                .toLowerCase()
+                .replace(/\s+/g, '')
+                .trim();
+        }
+
+        function findCardForHit(cards, hit) {
+            const candidates = [
+                normalizeDomainText(hit && hit.candidate_domain),
+                normalizeDomainText(hit && hit.unicode_domain),
+            ].filter(Boolean);
+            return cards.find((card) => {
+                const domainText = normalizeDomainText(card.querySelector('.hit-domain')?.textContent || '');
+                const punycodeText = normalizeDomainText(card.querySelector('.hit-punycode')?.textContent || '');
+                return candidates.some((candidate) => candidate && (domainText === candidate || punycodeText.includes(candidate)));
+            }) || null;
+        }
+
+        function renderBackgroundEnrichmentBanner(result) {
+            const statusBar = document.getElementById('statusBar');
+            if (!statusBar) return;
+
+            const existing = document.getElementById('enrichmentStatusBanner');
+            if (existing) existing.remove();
+
+            const state = result && result.background_enrichment && typeof result.background_enrichment === 'object'
+                ? result.background_enrichment
+                : null;
+            if (!state || state.status === 'completed') return;
+
+            const banner = document.createElement('div');
+            banner.id = 'enrichmentStatusBanner';
+            banner.className = `enrichment-status-banner ${escapeHtml(String(state.status || 'pending'))}`;
+            const messages = [];
+            if (state.pending_visual_count) messages.push(t('enrichment_visual_pending').replace('{n}', String(state.pending_visual_count)));
+            if (state.pending_ai_rerank_count) messages.push(t('enrichment_ai_pending').replace('{n}', String(state.pending_ai_rerank_count)));
+            const budgetProfile = state.budget && state.budget.profile ? String(state.budget.profile).toUpperCase() : '';
+            const titleKey = state.status === 'running' ? 'enrichment_running' : (state.status === 'failed' ? 'enrichment_failed' : 'enrichment_pending');
+            const details = [messages.join(' '), budgetProfile ? `${t('enrichment_profile')}: ${budgetProfile}` : '', t('enrichment_polling')]
+                .filter(Boolean)
+                .join(' ');
+            banner.textContent = `${t(titleKey)}. ${details}`.trim();
+            statusBar.insertAdjacentElement('afterend', banner);
+        }
+
         function renderAiInsights(result) {
             const panel = document.getElementById('ai-insights');
             const bucket = document.getElementById('ai-keywords');
@@ -859,9 +950,10 @@
                 if (existing) existing.remove();
             });
 
-            cards.forEach((card, index) => {
-                const hit = hits[index];
+            hits.forEach((hit) => {
+                const card = findCardForHit(cards, hit);
                 if (!hit) return;
+                if (!card) return;
 
                 const preScoreRaw = hit.variant_pre_score ?? hit.pre_score;
                 const preScore = Number.isFinite(Number(preScoreRaw)) ? Math.round(Number(preScoreRaw)) : null;
@@ -974,9 +1066,10 @@
                 if (existing) existing.remove();
             });
 
-            cards.forEach((card, index) => {
-                const hit = hits[index];
+            hits.forEach((hit) => {
+                const card = findCardForHit(cards, hit);
                 if (!hit || hit.status !== 'active' || !hit.site_clone_status) return;
+                if (!card) return;
 
                 const cloneStatus = String(hit.site_clone_status);
                 if (cloneStatus === 'near_clone' || cloneStatus === 'strong_similarity') strongMatches += 1;
@@ -1076,6 +1169,75 @@
         }
 
         const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+        let backgroundPollTimer = null;
+        let backgroundPollDomain = '';
+        let backgroundPollAttempts = 0;
+        const backgroundPollLimit = 18;
+
+        function stopBackgroundPolling() {
+            if (backgroundPollTimer) {
+                clearTimeout(backgroundPollTimer);
+                backgroundPollTimer = null;
+            }
+            backgroundPollDomain = '';
+            backgroundPollAttempts = 0;
+        }
+
+        async function runBackgroundPoll(domain) {
+            if (!originalFetch || !domain) return;
+            try {
+                const response = await originalFetch('/api/domain/instant-scan', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ domain }),
+                });
+                const type = response.headers.get('content-type') || '';
+                if (!type.includes('application/json')) {
+                    stopBackgroundPolling();
+                    return;
+                }
+                const data = await response.json();
+                window.__brandScannerLastResult = data;
+                window.dispatchEvent(new CustomEvent('9sec:brandScanResult', { detail: data }));
+                syncBackgroundPolling(data);
+            } catch {
+                stopBackgroundPolling();
+            }
+        }
+
+        function syncBackgroundPolling(result) {
+            const state = result && result.background_enrichment && typeof result.background_enrichment === 'object'
+                ? result.background_enrichment
+                : null;
+            const domain = String(result && result.target_domain || '').trim().toLowerCase();
+            if (!state || !domain) {
+                stopBackgroundPolling();
+                return;
+            }
+
+            if (!['pending', 'running'].includes(String(state.status || ''))) {
+                stopBackgroundPolling();
+                return;
+            }
+
+            if (backgroundPollDomain && backgroundPollDomain !== domain) {
+                stopBackgroundPolling();
+            }
+
+            backgroundPollDomain = domain;
+            if (backgroundPollAttempts >= backgroundPollLimit) {
+                stopBackgroundPolling();
+                return;
+            }
+
+            if (backgroundPollTimer) return;
+            backgroundPollTimer = setTimeout(() => {
+                backgroundPollTimer = null;
+                backgroundPollAttempts += 1;
+                void runBackgroundPoll(domain);
+            }, 3500);
+        }
+
         if (originalFetch) {
             window.fetch = async (...args) => {
                 const response = await originalFetch(...args);
@@ -1101,13 +1263,17 @@
         function scheduleRender(detail) {
             setTimeout(() => {
                 renderAiInsights(detail);
+                renderBackgroundEnrichmentBanner(detail);
                 renderClonePanels(detail);
                 renderVariantPanels(detail);
+                syncBackgroundPolling(detail);
             }, 60);
             setTimeout(() => {
                 renderAiInsights(detail);
+                renderBackgroundEnrichmentBanner(detail);
                 renderClonePanels(detail);
                 renderVariantPanels(detail);
+                syncBackgroundPolling(detail);
             }, 250);
         }
 
