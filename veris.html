@@ -946,6 +946,9 @@
                 return n.endsWith('.zip') || n.endsWith('.json');
             }
 
+            /** Must match Central MAX_VERIS_EVIDENCE_UPLOAD_BYTES (60 MiB). */
+            const MANUAL_UPLOAD_MAX_BYTES = 60 * 1024 * 1024;
+
             const TERMINAL_TITLE_FALLBACK = {
                 'veris_page.wait_title_fail': 'Analysis issue',
                 'veris_page.wait_title_report': 'Analysis result report',
@@ -1818,6 +1821,17 @@
                         escapeHtml(v(
                             'veris_page.err_upload_file_type',
                             'Only .zip (evidence package) or .json (evidence.json export) files are allowed.'
+                        )),
+                        escapeHtml(String(selectedFile.name || '')),
+                    );
+                    return;
+                }
+                if (selectedFile.size > MANUAL_UPLOAD_MAX_BYTES) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v(
+                            'veris_page.err_upload_file_too_large',
+                            'Evidence package must be 60 MB or smaller.'
                         )),
                         escapeHtml(String(selectedFile.name || '')),
                     );
