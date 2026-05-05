@@ -456,6 +456,99 @@
             color: #c8e6ff;
             text-decoration: underline;
         }
+
+        .variant-summary-banner {
+            margin: 0 0 1.25rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid rgba(137, 200, 255, 0.28);
+            background: rgba(137, 200, 255, 0.08);
+            color: #d8ecff;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.55;
+        }
+
+        .variant-intel-panel {
+            margin-top: 1rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid rgba(0, 255, 157, 0.12);
+            background: rgba(0, 255, 157, 0.03);
+        }
+
+        .variant-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .variant-panel-title {
+            color: #98ffd9;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+        }
+
+        .variant-panel-score {
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+        }
+
+        .variant-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.6rem 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .variant-metric {
+            min-width: 0;
+        }
+
+        .variant-metric-label {
+            color: #87b8aa;
+            font-family: var(--font-mono);
+            font-size: 0.69rem;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.18rem;
+        }
+
+        .variant-metric-value {
+            color: #edfdf7;
+            font-size: 0.84rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .variant-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+        }
+
+        .variant-chip {
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.03em;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            background: rgba(0, 255, 157, 0.06);
+            color: #bafbe3;
+        }
+
+        .variant-chip.emphasis {
+            color: #ffe38a;
+            border-color: rgba(255, 204, 0, 0.35);
+            background: rgba(255, 204, 0, 0.12);
+        }
+
+        .variant-intel-panel .clone-badge {
+            margin-left: 0.45rem;
+        }
     </style>
   <script>
     (() => {
@@ -510,7 +603,29 @@
                 ocr_low_similarity: 'OCR LOW',
                 ocr_unavailable: 'OCR UNAVAILABLE',
                 ocr_failed: 'OCR FAILED',
-                banner_ocr_similarity: '{n} live domain(s) showed strong OCR text similarity to the official site.'
+                banner_ocr_similarity: '{n} live domain(s) showed strong OCR text similarity to the official site.',
+                variant_title: 'VARIANT RISK LAYER',
+                variant_score: 'PRE-SCORE',
+                variant_edit_count: 'EDIT COUNT',
+                variant_rule_chain: 'RULE CHAIN',
+                variant_risk_flags: 'RISK FLAGS',
+                variant_keyboard: 'KEYBOARD',
+                variant_mixed_script: 'MIXED SCRIPT',
+                variant_detected: 'DETECTED',
+                variant_not_detected: 'NOT DETECTED',
+                ai_rerank_score: 'AI PRIORITY',
+                ai_rerank_reason: 'AI REASON',
+                cluster_title: 'CAMPAIGN CLUSTER',
+                cluster_size: 'CLUSTER SIZE',
+                cluster_tactics: 'TACTICS',
+                cluster_none: 'Unclustered',
+                variant_none: 'None',
+                banner_variant_high: '{n} candidate domain(s) landed in the high-priority variant band.',
+                banner_variant_mixed: '{n} candidate domain(s) used mixed-script spoofing.',
+                banner_variant_clusters: '{n} campaign cluster(s) were identified in this scan.',
+                ai_profile_aliases: 'ALIASES',
+                ai_profile_products: 'PRODUCTS',
+                ai_profile_entrypoints: 'ENTRYPOINTS'
             },
             tw: {
                 title: '官網克隆比對',
@@ -562,7 +677,29 @@
                 ocr_low_similarity: 'OCR 低相似',
                 ocr_unavailable: 'OCR 不可用',
                 ocr_failed: 'OCR 失敗',
-                banner_ocr_similarity: '共有 {n} 個存活網域在 OCR 文字層面與官方網站高度相似。'
+                banner_ocr_similarity: '共有 {n} 個存活網域在 OCR 文字層面與官方網站高度相似。',
+                variant_title: '變體風險層',
+                variant_score: '預評分',
+                variant_edit_count: '編輯次數',
+                variant_rule_chain: '規則鏈',
+                variant_risk_flags: '風險旗標',
+                variant_keyboard: '鍵盤語系',
+                variant_mixed_script: '混合字母系',
+                variant_detected: '已偵測',
+                variant_not_detected: '未偵測',
+                ai_rerank_score: 'AI 優先度',
+                ai_rerank_reason: 'AI 判斷',
+                cluster_title: '攻擊活動群組',
+                cluster_size: '群組規模',
+                cluster_tactics: '戰術',
+                cluster_none: '未分群',
+                variant_none: '無',
+                banner_variant_high: '共有 {n} 個候選網域落在高優先變體區間。',
+                banner_variant_mixed: '共有 {n} 個候選網域使用混合字母偽冒。',
+                banner_variant_clusters: '本次掃描辨識出 {n} 個攻擊活動群組。',
+                ai_profile_aliases: '別名',
+                ai_profile_products: '產品',
+                ai_profile_entrypoints: '高風險入口'
             },
             jp: {
                 title: '公式サイト複製チェック',
@@ -614,7 +751,29 @@
                 ocr_low_similarity: 'OCR 低一致',
                 ocr_unavailable: 'OCR 利用不可',
                 ocr_failed: 'OCR 失敗',
-                banner_ocr_similarity: '{n} 件の稼働ドメインで OCR テキストの類似度が高く検出されました。'
+                banner_ocr_similarity: '{n} 件の稼働ドメインで OCR テキストの類似度が高く検出されました。',
+                variant_title: 'バリアント危険層',
+                variant_score: '事前スコア',
+                variant_edit_count: '編集回数',
+                variant_rule_chain: 'ルール連鎖',
+                variant_risk_flags: 'リスクフラグ',
+                variant_keyboard: 'キーボード',
+                variant_mixed_script: '混在スクリプト',
+                variant_detected: '検知',
+                variant_not_detected: '未検知',
+                ai_rerank_score: 'AI 優先度',
+                ai_rerank_reason: 'AI 理由',
+                cluster_title: 'キャンペーンクラスター',
+                cluster_size: 'クラスター規模',
+                cluster_tactics: '戦術',
+                cluster_none: '未分類',
+                variant_none: 'なし',
+                banner_variant_high: '{n} 件の候補ドメインが高優先バリアント帯に入りました。',
+                banner_variant_mixed: '{n} 件の候補ドメインで混在スクリプト偽装が検出されました。',
+                banner_variant_clusters: 'このスキャンでは {n} 件のキャンペーンクラスターが識別されました。',
+                ai_profile_aliases: '別名',
+                ai_profile_products: '製品',
+                ai_profile_entrypoints: '高危険入口'
             }
         };
 
@@ -646,6 +805,154 @@
 
         function statusLabel(status) {
             return t(status) || status;
+        }
+
+        function tagLabel(value) {
+            return String(value || '')
+                .replace(/[_-]+/g, ' ')
+                .trim()
+                .toUpperCase();
+        }
+
+        function renderChip(value, emphasis = false) {
+            return `<span class="variant-chip ${emphasis ? 'emphasis' : ''}">${escapeHtml(tagLabel(value))}</span>`;
+        }
+
+        function renderAiInsights(result) {
+            const panel = document.getElementById('ai-insights');
+            const bucket = document.getElementById('ai-keywords');
+            if (!panel || !bucket) return;
+
+            const profile = result && result.ai_profile && typeof result.ai_profile === 'object' ? result.ai_profile : null;
+            const fallbackInsights = Array.isArray(result && result.ai_insights) ? result.ai_insights : [];
+            const tags = [];
+
+            if (profile && Array.isArray(profile.brand_aliases)) {
+                profile.brand_aliases.slice(0, 4).forEach((value) => tags.push(`${t('ai_profile_aliases')}: ${value}`));
+            }
+            if (profile && Array.isArray(profile.products)) {
+                profile.products.slice(0, 4).forEach((value) => tags.push(`${t('ai_profile_products')}: ${value}`));
+            }
+            if (profile && Array.isArray(profile.high_risk_entrypoints)) {
+                profile.high_risk_entrypoints.slice(0, 6).forEach((value) => tags.push(`${t('ai_profile_entrypoints')}: ${value}`));
+            }
+            fallbackInsights.slice(0, 6).forEach((value) => tags.push(String(value)));
+
+            const uniqueTags = [...new Set(tags.filter(Boolean))].slice(0, 14);
+            bucket.innerHTML = uniqueTags.map((value) => `<span class="ai-kw-tag">${escapeHtml(String(value))}</span>`).join('');
+            panel.style.display = uniqueTags.length ? 'block' : 'none';
+        }
+
+        function renderVariantPanels(result) {
+            const hitsList = document.getElementById('hitsList');
+            if (!hitsList) return;
+
+            const hits = Array.isArray(result && result.hits) ? result.hits : [];
+            const cards = Array.from(hitsList.querySelectorAll('.hit-card'));
+            if (!cards.length || !hits.length) return;
+
+            let highPriorityCount = 0;
+            let mixedScriptCount = 0;
+
+            cards.forEach((card) => {
+                const existing = card.querySelector('.variant-intel-panel');
+                if (existing) existing.remove();
+            });
+
+            cards.forEach((card, index) => {
+                const hit = hits[index];
+                if (!hit) return;
+
+                const preScoreRaw = hit.variant_pre_score ?? hit.pre_score;
+                const preScore = Number.isFinite(Number(preScoreRaw)) ? Math.round(Number(preScoreRaw)) : null;
+                const editCount = Number.isFinite(Number(hit.variant_edit_count ?? hit.edit_count)) ? Math.round(Number(hit.variant_edit_count ?? hit.edit_count)) : null;
+                const ruleChain = Array.isArray(hit.variant_rule_chain) ? hit.variant_rule_chain : (Array.isArray(hit.rule_chain) ? hit.rule_chain : []);
+                const riskFlags = Array.isArray(hit.variant_risk_flags) ? hit.variant_risk_flags : (Array.isArray(hit.risk_flags) ? hit.risk_flags : []);
+                const keyboardLocale = hit.variant_keyboard_locale || hit.keyboard_locale || null;
+                const mixedScript = Boolean(hit.variant_mixed_script_confusable ?? hit.mixed_script_confusable) || riskFlags.includes('mixed_script_confusable');
+                const aiScore = Number.isFinite(Number(hit.ai_rerank_score)) ? Math.round(Number(hit.ai_rerank_score)) : null;
+                const aiReason = hit.ai_rerank_reason ? String(hit.ai_rerank_reason) : '';
+                const clusterLabel = hit.campaign_cluster_label ? String(hit.campaign_cluster_label) : t('cluster_none');
+                const clusterSize = Number.isFinite(Number(hit.campaign_cluster_size)) ? Math.round(Number(hit.campaign_cluster_size)) : null;
+                const clusterTactics = Array.isArray(hit.campaign_cluster_tactics) ? hit.campaign_cluster_tactics : [];
+
+                if (preScore !== null && preScore >= 80) highPriorityCount += 1;
+                if (mixedScript) mixedScriptCount += 1;
+
+                const panel = document.createElement('div');
+                panel.className = 'variant-intel-panel';
+                panel.innerHTML = `
+                    <div class="variant-panel-header">
+                        <div class="variant-panel-title">${escapeHtml(t('variant_title'))}</div>
+                        <div class="variant-panel-score">${escapeHtml(t('variant_score'))}: ${escapeHtml(preScore !== null ? `${preScore}` : t('not_available'))}</div>
+                    </div>
+                    <div class="variant-metrics">
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('variant_rule_chain'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(ruleChain.length ? ruleChain.join(' -> ') : (hit.rule || t('variant_none')))}</div>
+                        </div>
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('variant_edit_count'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(editCount !== null ? `${editCount}` : t('not_available'))}</div>
+                        </div>
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('variant_keyboard'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(keyboardLocale || t('variant_none'))}</div>
+                        </div>
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('variant_mixed_script'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(mixedScript ? t('variant_detected') : t('variant_not_detected'))}</div>
+                        </div>
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('ai_rerank_score'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(aiScore !== null ? `${aiScore}/100` : t('not_available'))}</div>
+                        </div>
+                        <div class="variant-metric">
+                            <div class="variant-metric-label">${escapeHtml(t('cluster_title'))}</div>
+                            <div class="variant-metric-value">${escapeHtml(clusterLabel)}${clusterSize !== null ? ` <span class="clone-badge">${escapeHtml(`${t('cluster_size')}: ${clusterSize}`)}</span>` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="variant-metric">
+                        <div class="variant-metric-label">${escapeHtml(t('variant_risk_flags'))}</div>
+                        <div class="variant-chip-group">${riskFlags.length ? riskFlags.map((flag) => renderChip(flag, flag === 'mixed_script_confusable' || flag === 'multi_char_confusable')).join('') : renderChip(t('variant_none'))}</div>
+                    </div>
+                    <div class="variant-metric">
+                        <div class="variant-metric-label">${escapeHtml(t('cluster_tactics'))}</div>
+                        <div class="variant-chip-group">${clusterTactics.length ? clusterTactics.map((tactic) => renderChip(tactic, String(tactic).includes('clone') || String(tactic).includes('mixed'))).join('') : renderChip(t('variant_none'))}</div>
+                    </div>
+                    <div class="variant-metric">
+                        <div class="variant-metric-label">${escapeHtml(t('ai_rerank_reason'))}</div>
+                        <div class="variant-metric-value">${escapeHtml(aiReason || t('variant_none'))}</div>
+                    </div>
+                `;
+
+                const clonePanel = card.querySelector('.website-clone-panel');
+                if (clonePanel) {
+                    card.insertBefore(panel, clonePanel);
+                } else {
+                    card.appendChild(panel);
+                }
+            });
+
+            const statusBar = document.getElementById('statusBar');
+            if (!statusBar) return;
+
+            const existingBanner = document.getElementById('variantSummaryBanner');
+            if (existingBanner) existingBanner.remove();
+
+            const clusterCount = Array.isArray(result && result.campaign_clusters) ? result.campaign_clusters.length : 0;
+            if (!highPriorityCount && !mixedScriptCount && !clusterCount) return;
+
+            const banner = document.createElement('div');
+            banner.id = 'variantSummaryBanner';
+            banner.className = 'variant-summary-banner';
+            const messages = [];
+            if (highPriorityCount) messages.push(t('banner_variant_high').replace('{n}', String(highPriorityCount)));
+            if (mixedScriptCount) messages.push(t('banner_variant_mixed').replace('{n}', String(mixedScriptCount)));
+            if (clusterCount) messages.push(t('banner_variant_clusters').replace('{n}', String(clusterCount)));
+            banner.textContent = messages.join(' ');
+            const cloneBanner = document.getElementById('cloneSummaryBanner');
+            (cloneBanner || statusBar).insertAdjacentElement('afterend', banner);
         }
 
         function renderClonePanels(result) {
@@ -792,8 +1099,16 @@
         }
 
         function scheduleRender(detail) {
-            setTimeout(() => renderClonePanels(detail), 60);
-            setTimeout(() => renderClonePanels(detail), 250);
+            setTimeout(() => {
+                renderAiInsights(detail);
+                renderClonePanels(detail);
+                renderVariantPanels(detail);
+            }, 60);
+            setTimeout(() => {
+                renderAiInsights(detail);
+                renderClonePanels(detail);
+                renderVariantPanels(detail);
+            }, 250);
         }
 
         window.addEventListener('9sec:brandScanResult', (event) => scheduleRender(event.detail));
@@ -803,12 +1118,12 @@
             if (!hitsList) return;
 
             const observer = new MutationObserver(() => {
-                if (window.__brandScannerLastResult) renderClonePanels(window.__brandScannerLastResult);
+                if (window.__brandScannerLastResult) scheduleRender(window.__brandScannerLastResult);
             });
             observer.observe(hitsList, { childList: true });
 
             window.addEventListener('9sec:langChange', () => {
-                if (window.__brandScannerLastResult) renderClonePanels(window.__brandScannerLastResult);
+                if (window.__brandScannerLastResult) scheduleRender(window.__brandScannerLastResult);
             });
         });
     })();
