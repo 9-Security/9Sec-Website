@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/theme-init.js"></script>
+    <title>AD / Hybrid Identity Health Check | Nine-Security</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=20260215-1">
+    <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW.png">
+    <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_.css">
+    <meta name="description" content="Anonymous AD and hybrid identity health check workflow for assessment kit download, evidence upload, and report retrieval.">
+    <link rel="canonical" href="https://nine-security.com/ad-assessment.html">
+    <style>
+        :root {
+            --ad-accent: #ff7a18;
+            --ad-secondary: #0fb9b1;
+            --ad-surface: rgba(11, 17, 31, 0.8);
+            --ad-border: rgba(255, 255, 255, 0.1);
+            --ad-warm: rgba(255, 122, 24, 0.18);
+            --ad-cool: rgba(15, 185, 177, 0.18);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(255, 122, 24, 0.14), transparent 32%),
+                radial-gradient(circle at top right, rgba(15, 185, 177, 0.14), transparent 30%),
+                linear-gradient(180deg, #08101d 0%, #091425 48%, #060b14 100%);
+        }
+
+        .ad-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 1.6rem 1.4rem 5rem;
+        }
+
+        .ad-hero {
+            padding-top: clamp(1.4rem, 3vw, 2.4rem);
+            margin-bottom: 2.2rem;
+        }
+
+        .ad-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: var(--ad-secondary);
+            text-decoration: none;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.88rem;
+            margin-bottom: 1rem;
+        }
+
+        .ad-terminal {
+            color: var(--ad-secondary);
+            font-family: "IBM Plex Mono", monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.8rem;
+        }
+
+        .ad-hero h1 {
+            margin: 0.45rem 0 0.6rem;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(2.4rem, 5vw, 4.8rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            max-width: 780px;
+        }
+
+        .ad-hero p {
+            max-width: 760px;
+            line-height: 1.72;
+            color: var(--text-secondary);
+        }
+
+        .ad-hero-band {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1.6rem;
+        }
+
+        .ad-band-item {
+            border: 1px solid var(--ad-border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            padding: 1rem 1.05rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ad-band-item strong {
+            display: block;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.84rem;
+            color: var(--ad-accent);
+            margin-bottom: 0.35rem;
+        }
+
+        .ad-band-item span {
+            display: block;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            font-size: 0.92rem;
+        }
+
+        .ad-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1.2rem;
+            align-items: start;
+        }
+
+        .ad-panel {
+            border: 1px solid var(--ad-border);
+            border-radius: 20px;
+            background: var(--ad-surface);
+            backdrop-filter: blur(10px);
+            padding: 1.35rem;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+        }
+
+        .ad-panel h2,
+        .ad-panel h3 {
+            margin: 0 0 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-family: "Space Grotesk", sans-serif;
+        }
+
+        .ad-panel h2 i,
+        .ad-panel h3 i {
+            color: var(--ad-accent);
+        }
+
+        .ad-subcopy {
+            margin: 0 0 1rem;
+            color: var(--text-secondary);
+            line-height: 1.62;
+        }
+
+        .ad-stack {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .ad-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .ad-field {
+            display: grid;
+            gap: 0.42rem;
+        }
+
+        .ad-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .ad-field label {
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.74rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ad-secondary);
+        }
+
+        .ad-field input,
+        .ad-field textarea {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(3, 7, 18, 0.62);
+            color: var(--text-primary);
+            padding: 0.88rem 0.95rem;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.92rem;
+        }
+
+        .ad-field textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .ad-field input:focus,
+        .ad-field textarea:focus {
+            outline: none;
+            border-color: rgba(255, 122, 24, 0.7);
+            box-shadow: 0 0 0 1px rgba(255, 122, 24, 0.18);
+        }
+
+        .ad-field input::file-selector-button {
+            margin-right: 0.75rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            font-family: "IBM Plex Mono", monospace;
+            cursor: pointer;
+        }
+
+        .ad-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 0.25rem;
+        }
+
+        .ad-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.85rem 1.2rem;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .ad-btn.primary {
+            background: linear-gradient(90deg, var(--ad-accent), #ff9d4d);
+            color: #160d05;
+        }
+
+        .ad-btn.secondary {
+            background: rgba(15, 185, 177, 0.12);
+            border-color: rgba(15, 185, 177, 0.32);
+            color: #d6fffd;
+        }
+
+        .ad-btn.ghost {
+            background: transparent;
+            border-color: rgba(255,255,255,0.16);
+            color: var(--text-primary);
+        }
+
+        .ad-feedback {
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .ad-feedback.ok {
+            border-color: rgba(15, 185, 177, 0.34);
+            background: rgba(15, 185, 177, 0.1);
+            color: #d8fffd;
+        }
+
+        .ad-feedback.err {
+            border-color: rgba(255, 96, 96, 0.34);
+            background: rgba(255, 96, 96, 0.1);
+            color: #ffe1e1;
+        }
+
+        .ad-artifact {
+            border-radius: 16px;
+            border: 1px solid rgba(255, 122, 24, 0.24);
+            background: linear-gradient(180deg, var(--ad-warm), rgba(255,255,255,0.02));
+            padding: 1rem;
+            display: grid;
+            gap: 0.55rem;
+        }
+
+        .ad-artifact code {
+            font-size: 0.84rem;
+            word-break: break-all;
+            color: #fff2db;
+        }
+
+        .ad-status-grid,
+        .ad-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8rem;
+        }
+
+        .ad-kv,
+        .ad-summary-card {
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            padding: 0.9rem 0.95rem;
+        }
+
+        .ad-kv span,
+        .ad-summary-card span {
+            display: block;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        .ad-kv strong,
+        .ad-summary-card strong {
+            display: block;
+            font-size: 1rem;
+        }
+
+        .ad-status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.42rem 0.72rem;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+
+        .ad-status-created,
+        .ad-status-downloaded,
+        .ad-status-uploaded {
+            background: rgba(255,255,255,0.08);
+            color: #f5f7ff;
+        }
+
+        .ad-status-analyzing {
+            background: rgba(255, 122, 24, 0.12);
+            color: #ffd9b3;
+        }
+
+        .ad-status-completed {
+            background: rgba(15, 185, 177, 0.12);
+            color: #d6fffd;
+        }
+
+        .ad-status-failed,
+        .ad-status-expired {
+            background: rgba(255, 96, 96, 0.12);
+            color: #ffd6d6;
+        }
+
+        .ad-list {
+            display: grid;
+            gap: 0.75rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .ad-list li {
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            padding: 0.9rem 1rem;
+        }
+
+        .ad-list li strong {
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        .ad-list li p {
+            margin: 0;
+            line-height: 1.55;
+            color: var(--text-secondary);
+        }
+
+        .ad-control-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ad-control-table th,
+        .ad-control-table td {
+            padding: 0.8rem 0.7rem;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.92rem;
+        }
+
+        .ad-control-table th {
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ad-secondary);
+        }
+
+        .ad-pill {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 0.22rem 0.55rem;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .status-pass { background: rgba(15, 185, 177, 0.12); color: #d6fffd; }
+        .status-partial { background: rgba(255, 186, 73, 0.14); color: #ffe6b4; }
+        .status-fail { background: rgba(255, 96, 96, 0.14); color: #ffd6d6; }
+        .status-not_observed { background: rgba(255,255,255,0.08); color: #e5ebff; }
+
+        .severity-critical { color: #ff9797; }
+        .severity-high { color: #ffbc8a; }
+        .severity-medium { color: #ffe08c; }
+        .severity-low { color: #9fe8ff; }
+        .severity-info { color: #d8deff; }
+
+        .ad-report-markdown {
+            margin-top: 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(3, 7, 18, 0.72);
+            padding: 1rem;
+            max-height: 360px;
+            overflow: auto;
+            white-space: pre-wrap;
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 960px) {
+            .ad-grid,
+            .ad-hero-band {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .ad-page {
+                padding: 1.2rem 1rem 4rem;
+            }
+
+            .ad-form-grid,
+            .ad-status-grid,
+            .ad-summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <a href="./" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="/assets/logo_v2.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="./">/Home</a></li>
+                <li><a href="services.html" class="active">/Services</a></li>
+                <li><a href="arsenal.html">/Arsenal</a></li>
+                <li><a href="./#model">/9SEC_Model</a></li>
+                <li><a href="./#threat-intel">/Threat_Intel</a></li>
+                <li><a href="contact.html">/Contact</a></li>
+            </ul>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">DARK</button>
+                <div class="lang-selector">
+                    <button id="current-lang" class="lang-btn">EN</button>
+                    <ul class="lang-menu">
+                        <li data-lang="tw">TW [繁體中文]</li>
+                        <li data-lang="en">EN [English]</li>
+                        <li data-lang="jp">JP [日本語]</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mobile-menu-btn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="ad-page">
+        <section class="ad-hero">
+            <a href="services.html" class="ad-back-link"><i class="fa-solid fa-chevron-left"></i> Return to Services</a>
+            <div class="ad-terminal">Node01 / Governance side / Anonymous task workflow</div>
+            <h1>AD and hybrid identity health check with offline evidence handoff.</h1>
+            <p>
+                Create a one-time task, download the assessment kit, run it inside the customer's AD environment,
+                upload the resulting ZIP, and retrieve the report through a signed report link or task secret.
+                This flow is designed for controlled environments where auto-submit is not acceptable.
+            </p>
+            <div class="ad-hero-band">
+                <div class="ad-band-item">
+                    <strong>Task-scoped</strong>
+                    <span>Anonymous task ID plus one-time secret. No customer account required for v1.</span>
+                </div>
+                <div class="ad-band-item">
+                    <strong>Hybrid evidence</strong>
+                    <span>On-prem AD evidence plus optional Entra export packaging in the same assessment ZIP.</span>
+                </div>
+                <div class="ad-band-item">
+                    <strong>Manual upload</strong>
+                    <span>Evidence stays offline until the customer explicitly returns to the portal and uploads it.</span>
+                </div>
+                <div class="ad-band-item">
+                    <strong>Report delivery</strong>
+                    <span>Completed tasks expose a signed report portal link and PDF retrieval path.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="ad-grid">
+            <div class="ad-stack">
+                <article class="ad-panel">
+                    <h2><i class="fa-solid fa-diagram-project"></i> Create a new AD assessment task</h2>
+                    <p class="ad-subcopy">This creates a one-time collection case and returns the task secret once. Store it immediately. You need the secret for assessment kit download, ZIP upload, and status lookup.</p>
+                    <form id="taskCreateForm" class="ad-stack">
+                        <div class="ad-form-grid">
+                            <div class="ad-field">
+                                <label for="companyName">Organization</label>
+                                <input id="companyName" name="company_name" type="text" placeholder="Example Corp" required>
+                            </div>
+                            <div class="ad-field">
+                                <label for="contactEmail">Report Email</label>
+                                <input id="contactEmail" name="contact_email" type="email" placeholder="security@example.com" required>
+                            </div>
+                            <div class="ad-field full">
+                                <label for="environmentName">Environment Name</label>
+                                <input id="environmentName" name="environment_name" type="text" placeholder="Taipei AD / Hybrid Identity">
+                            </div>
+                            <div class="ad-field full">
+                                <label for="taskNotes">Scope Notes</label>
+                                <textarea id="taskNotes" name="notes" placeholder="Optional scope notes, known constraints, or change window context."></textarea>
+                            </div>
+                        </div>
+                        <div class="ad-actions">
+                            <button class="ad-btn primary" type="submit"><i class="fa-solid fa-plus"></i> Create task</button>
+                        </div>
+                    </form>
+                    <div id="taskCreateFeedback" class="ad-feedback hidden"></div>
+                    <div id="createdArtifact" class="ad-artifact hidden">
+                        <strong>Task created</strong>
+                        <div><span>Task ID</span><code id="createdTaskId">-</code></div>
+                        <div><span>Task Secret</span><code id="createdTaskSecret">-</code></div>
+                        <div><span>Expires At</span><code id="createdTaskExpiry">-</code></div>
+                        <div class="ad-actions">
+                            <button id="downloadKitBtn" class="ad-btn secondary" type="button"><i class="fa-solid fa-download"></i> Download assessment kit</button>
+                            <button id="copyTaskSecretBtn" class="ad-btn ghost" type="button"><i class="fa-solid fa-key"></i> Copy secret</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ad-panel">
+                    <h2><i class="fa-solid fa-upload"></i> Upload evidence package</h2>
+                    <p class="ad-subcopy">Upload the ZIP produced by the assessment kit. The backend accepts a raw ZIP stream and starts analysis asynchronously.</p>
+                    <form id="uploadForm" class="ad-stack">
+                        <div class="ad-form-grid">
+                            <div class="ad-field">
+                                <label for="uploadTaskId">Task ID</label>
+                                <input id="uploadTaskId" name="task_id" type="text" placeholder="adt_xxx" required>
+                            </div>
+                            <div class="ad-field">
+                                <label for="uploadTaskSecret">Task Secret</label>
+                                <input id="uploadTaskSecret" name="task_secret" type="password" placeholder="One-time task secret" required>
+                            </div>
+                            <div class="ad-field full">
+                                <label for="evidenceZip">Evidence ZIP</label>
+                                <input id="evidenceZip" name="evidence_zip" type="file" accept=".zip,application/zip" required>
+                            </div>
+                        </div>
+                        <div class="ad-actions">
+                            <button class="ad-btn primary" type="submit"><i class="fa-solid fa-file-arrow-up"></i> Upload and analyze</button>
+                        </div>
+                    </form>
+                    <div id="uploadFeedback" class="ad-feedback hidden"></div>
+                </article>
+            </div>
+
+            <div class="ad-stack">
+                <article class="ad-panel">
+                    <h2><i class="fa-solid fa-radar"></i> Lookup task and report</h2>
+                    <p class="ad-subcopy">Use the task secret for normal status lookup, or open the same page through a signed email report link to retrieve the report without re-entering the secret.</p>
+                    <form id="lookupForm" class="ad-stack">
+                        <div class="ad-form-grid">
+                            <div class="ad-field">
+                                <label for="lookupTaskId">Task ID</label>
+                                <input id="lookupTaskId" name="lookup_task_id" type="text" placeholder="adt_xxx" required>
+                            </div>
+                            <div class="ad-field">
+                                <label for="lookupTaskSecret">Task Secret</label>
+                                <input id="lookupTaskSecret" name="lookup_task_secret" type="password" placeholder="Optional if opened via signed report link">
+                            </div>
+                        </div>
+                        <div class="ad-actions">
+                            <button class="ad-btn secondary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Load status</button>
+                        </div>
+                    </form>
+                    <div id="lookupFeedback" class="ad-feedback hidden"></div>
+                    <div id="taskStatusBlock" class="ad-stack hidden">
+                        <div class="ad-status-grid" id="taskStatusGrid"></div>
+                        <div class="ad-actions">
+                            <a id="openReportPortalLink" class="ad-btn secondary hidden" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open report portal</a>
+                            <a id="downloadPdfLink" class="ad-btn ghost hidden" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+                            <button id="loadReportBtn" class="ad-btn ghost hidden" type="button"><i class="fa-solid fa-file-lines"></i> Load report here</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="ad-panel">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Report preview</h2>
+                    <p class="ad-subcopy">Completed reports surface security findings and compliance results from the evidence package the assessment kit generated.</p>
+                    <div id="reportEmptyState" class="ad-feedback">No report loaded yet. Create a task or use a signed report link to populate this panel.</div>
+                    <div id="reportBlock" class="hidden">
+                        <div class="ad-summary-grid" id="reportSummaryGrid"></div>
+                        <h3 style="margin-top:1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Security findings</h3>
+                        <ul class="ad-list" id="securityFindingsList"></ul>
+                        <h3 style="margin-top:1rem;"><i class="fa-solid fa-list-check"></i> Compliance controls</h3>
+                        <div style="overflow:auto;">
+                            <table class="ad-control-table">
+                                <thead>
+                                    <tr>
+                                        <th>Control</th>
+                                        <th>Status</th>
+                                        <th>Rationale</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="complianceTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="ad-report-markdown" id="reportMarkdown"></div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="copyright">
+                <p>&copy; 2026 Nine-Security. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+            ? ""
+            : "https://gov.nine-security.com";
+        const SECRET_STORE_PREFIX = "9sec_ad_task_secret:";
+        let activeReportToken = new URLSearchParams(window.location.search).get("token") || "";
+
+        const $ = (id) => document.getElementById(id);
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function secretKey(taskId) {
+            return `${SECRET_STORE_PREFIX}${taskId}`;
+        }
+
+        function saveSecret(taskId, secret) {
+            if (!taskId || !secret) return;
+            sessionStorage.setItem(secretKey(taskId), secret);
+        }
+
+        function getSavedSecret(taskId) {
+            if (!taskId) return "";
+            return sessionStorage.getItem(secretKey(taskId)) || "";
+        }
+
+        function apiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
+
+        function showFeedback(id, message, variant = "ok") {
+            const el = $(id);
+            if (!el) return;
+            el.className = `ad-feedback ${variant}`;
+            el.innerHTML = message;
+            el.classList.remove("hidden");
+        }
+
+        function hideFeedback(id) {
+            const el = $(id);
+            if (el) el.classList.add("hidden");
+        }
+
+        async function apiFetch(path, options = {}) {
+            const response = await fetch(apiUrl(path), options);
+            const contentType = response.headers.get("content-type") || "";
+            const payload = contentType.includes("application/json")
+                ? await response.json()
+                : await response.text();
+            if (!response.ok) {
+                const msg = typeof payload === "object" && payload?.error ? payload.error : response.statusText;
+                throw new Error(msg || "Request failed");
+            }
+            return payload;
+        }
+
+        function getStatusChip(status) {
+            const safe = String(status || "unknown").toLowerCase();
+            return `<span class="ad-status-chip ad-status-${escapeHtml(safe)}">${escapeHtml(safe)}</span>`;
+        }
+
+        function renderTaskStatus(task) {
+            const grid = $("taskStatusGrid");
+            const block = $("taskStatusBlock");
+            if (!grid || !block) return;
+
+            grid.innerHTML = `
+                <div class="ad-kv"><span>Status</span><strong>${getStatusChip(task.status)}</strong></div>
+                <div class="ad-kv"><span>Task ID</span><strong>${escapeHtml(task.id)}</strong></div>
+                <div class="ad-kv"><span>Organization</span><strong>${escapeHtml(task.company_name)}</strong></div>
+                <div class="ad-kv"><span>Environment</span><strong>${escapeHtml(task.environment_name || "default")}</strong></div>
+                <div class="ad-kv"><span>Uploaded At</span><strong>${escapeHtml(task.uploaded_at || "not uploaded")}</strong></div>
+                <div class="ad-kv"><span>Analysis Completed</span><strong>${escapeHtml(task.analysis_completed_at || "pending")}</strong></div>
+                <div class="ad-kv"><span>Evidence</span><strong>${escapeHtml(task.evidence_name || "-")} / ${escapeHtml(task.evidence_size_bytes || 0)} bytes</strong></div>
+                <div class="ad-kv"><span>Notification</span><strong>${escapeHtml(task.notification_status || "pending")}</strong></div>
+            `;
+            block.classList.remove("hidden");
+
+            const openPortalLink = $("openReportPortalLink");
+            const downloadPdfLink = $("downloadPdfLink");
+            const loadReportBtn = $("loadReportBtn");
+            if (task.report_portal_url) {
+                openPortalLink.href = task.report_portal_url;
+                openPortalLink.classList.remove("hidden");
+            } else {
+                openPortalLink.classList.add("hidden");
+            }
+            if (task.report_pdf_url) {
+                downloadPdfLink.href = task.report_pdf_url;
+                downloadPdfLink.classList.remove("hidden");
+            } else {
+                downloadPdfLink.classList.add("hidden");
+            }
+            if (task.status === "completed") {
+                loadReportBtn.classList.remove("hidden");
+            } else {
+                loadReportBtn.classList.add("hidden");
+            }
+        }
+
+        function renderReport(task, result, reportMarkdown) {
+            const emptyState = $("reportEmptyState");
+            const block = $("reportBlock");
+            const summaryGrid = $("reportSummaryGrid");
+            const findingsList = $("securityFindingsList");
+            const tableBody = $("complianceTableBody");
+            const markdownBox = $("reportMarkdown");
+            if (!emptyState || !block || !summaryGrid || !findingsList || !tableBody || !markdownBox) return;
+
+            emptyState.classList.add("hidden");
+            block.classList.remove("hidden");
+
+            const summary = result?.summary || {};
+            const overview = result?.collection_overview || {};
+            summaryGrid.innerHTML = `
+                <div class="ad-summary-card"><span>Risk Score</span><strong>${escapeHtml(summary.risk_score ?? 0)} / 100</strong></div>
+                <div class="ad-summary-card"><span>Compliance Score</span><strong>${escapeHtml(summary.compliance_score ?? 0)} / 100</strong></div>
+                <div class="ad-summary-card"><span>Risk Level</span><strong>${escapeHtml(summary.risk_level || "-")}</strong></div>
+                <div class="ad-summary-card"><span>Entra Observed</span><strong>${overview.entra_observed ? "yes" : "no"}</strong></div>
+            `;
+
+            const findings = Array.isArray(result?.security_findings) ? result.security_findings : [];
+            findingsList.innerHTML = findings.length
+                ? findings.map((finding) => `
+                    <li>
+                        <strong class="severity-${escapeHtml(String(finding.severity || "info").toLowerCase())}">
+                            [${escapeHtml(String(finding.severity || "info").toUpperCase())}] ${escapeHtml(finding.title || "Untitled")}
+                        </strong>
+                        <p>${escapeHtml(finding.description || "")}</p>
+                        <p style="margin-top:0.45rem;"><strong style="display:inline;">Remediation:</strong> ${escapeHtml(finding.remediation || "-")}</p>
+                    </li>
+                `).join("")
+                : `<li><strong>No deterministic findings</strong><p>The submitted package did not trigger any rule-based findings.</p></li>`;
+
+            const controls = Array.isArray(result?.compliance_results) ? result.compliance_results : [];
+            tableBody.innerHTML = controls.length
+                ? controls.map((control) => `
+                    <tr>
+                        <td><strong>${escapeHtml(control.control_id || "-")}</strong><br>${escapeHtml(control.title || "")}</td>
+                        <td><span class="ad-pill status-${escapeHtml(String(control.status || "not_observed").toLowerCase())}">${escapeHtml(String(control.status || "not_observed").toUpperCase())}</span></td>
+                        <td>${escapeHtml(control.rationale || "-")}</td>
+                    </tr>
+                `).join("")
+                : `<tr><td colspan="3">No compliance controls were evaluated.</td></tr>`;
+
+            markdownBox.textContent = reportMarkdown || "";
+            document.title = `${task.company_name || "AD Assessment"} | Nine-Security`;
+        }
+
+        async function loadReport(taskId, secret = "", token = "") {
+            const headers = {};
+            let path = `/api/ad-assessment/tasks/${encodeURIComponent(taskId)}/report`;
+            if (secret) headers["X-Task-Secret"] = secret;
+            if (token) {
+                path += `?token=${encodeURIComponent(token)}`;
+            }
+            const payload = await apiFetch(path, { headers });
+            renderReport(payload.task, payload.result, payload.report_markdown);
+            return payload;
+        }
+
+        async function loadTaskStatus(taskId, secret = "", token = "") {
+            const headers = {};
+            let path = `/api/ad-assessment/tasks/${encodeURIComponent(taskId)}/status`;
+            if (secret) headers["X-Task-Secret"] = secret;
+            if (token) path += `?token=${encodeURIComponent(token)}`;
+            const payload = await apiFetch(path, { headers });
+            renderTaskStatus(payload.task);
+            return payload.task;
+        }
+
+        async function handleCreateTask(event) {
+            event.preventDefault();
+            hideFeedback("taskCreateFeedback");
+            try {
+                const payload = await apiFetch("/api/ad-assessment/tasks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                    body: JSON.stringify({
+                        company_name: $("companyName").value,
+                        contact_email: $("contactEmail").value,
+                        environment_name: $("environmentName").value,
+                        notes: $("taskNotes").value,
+                    }),
+                });
+
+                saveSecret(payload.task_id, payload.task_secret);
+                $("createdTaskId").textContent = payload.task_id;
+                $("createdTaskSecret").textContent = payload.task_secret;
+                $("createdTaskExpiry").textContent = payload.expires_at;
+                $("createdArtifact").classList.remove("hidden");
+                $("uploadTaskId").value = payload.task_id;
+                $("uploadTaskSecret").value = payload.task_secret;
+                $("lookupTaskId").value = payload.task_id;
+                $("lookupTaskSecret").value = payload.task_secret;
+                showFeedback("taskCreateFeedback", `Task created. Store the secret now. It is only returned once.`, "ok");
+            } catch (error) {
+                showFeedback("taskCreateFeedback", escapeHtml(error.message), "err");
+            }
+        }
+
+        async function handleDownloadAssessmentKit() {
+            const taskId = $("createdTaskId").textContent.trim() || $("uploadTaskId").value.trim();
+            const taskSecret = $("uploadTaskSecret").value.trim() || getSavedSecret(taskId);
+            if (!taskId || !taskSecret) {
+                showFeedback("taskCreateFeedback", "Task ID and secret are required before download.", "err");
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl(`/api/ad-assessment/tasks/${encodeURIComponent(taskId)}/download`), {
+                    headers: {
+                        "X-Task-Secret": taskSecret,
+                    },
+                });
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    throw new Error(payload.error || "Assessment kit download failed");
+                }
+                const blob = await response.blob();
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `nine-security-ad-assessment-${taskId}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(link.href);
+                showFeedback("taskCreateFeedback", "Assessment kit downloaded.", "ok");
+            } catch (error) {
+                showFeedback("taskCreateFeedback", escapeHtml(error.message), "err");
+            }
+        }
+
+        async function handleUpload(event) {
+            event.preventDefault();
+            hideFeedback("uploadFeedback");
+            const taskId = $("uploadTaskId").value.trim();
+            const taskSecret = $("uploadTaskSecret").value.trim();
+            const file = $("evidenceZip").files?.[0];
+            if (!file) {
+                showFeedback("uploadFeedback", "Choose an evidence ZIP before upload.", "err");
+                return;
+            }
+
+            try {
+                saveSecret(taskId, taskSecret);
+                const response = await fetch(apiUrl(`/api/ad-assessment/tasks/${encodeURIComponent(taskId)}/upload`), {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/zip",
+                        "X-Task-Secret": taskSecret,
+                        "X-File-Name": file.name,
+                    },
+                    body: file,
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(payload.error || "Upload failed");
+                showFeedback("uploadFeedback", `Evidence accepted. Analysis started for ${payload.task_id}.`, "ok");
+                $("lookupTaskId").value = taskId;
+                $("lookupTaskSecret").value = taskSecret;
+                await lookupCurrentTask();
+            } catch (error) {
+                showFeedback("uploadFeedback", escapeHtml(error.message), "err");
+            }
+        }
+
+        async function lookupCurrentTask(event) {
+            if (event) event.preventDefault();
+            hideFeedback("lookupFeedback");
+            const taskId = $("lookupTaskId").value.trim();
+            const taskSecret = $("lookupTaskSecret").value.trim() || getSavedSecret(taskId);
+            const token = activeReportToken;
+            if (!taskId) {
+                showFeedback("lookupFeedback", "Task ID is required.", "err");
+                return;
+            }
+
+            try {
+                const task = await loadTaskStatus(taskId, taskSecret, taskSecret ? "" : token);
+                if (taskSecret) saveSecret(taskId, taskSecret);
+                if (task.status === "completed") {
+                    await loadReport(taskId, taskSecret, taskSecret ? "" : token);
+                }
+            } catch (error) {
+                showFeedback("lookupFeedback", escapeHtml(error.message), "err");
+            }
+        }
+
+        async function loadReportFromCurrentTask() {
+            const taskId = $("lookupTaskId").value.trim();
+            const taskSecret = $("lookupTaskSecret").value.trim() || getSavedSecret(taskId);
+            try {
+                await loadReport(taskId, taskSecret, taskSecret ? "" : activeReportToken);
+            } catch (error) {
+                showFeedback("lookupFeedback", escapeHtml(error.message), "err");
+            }
+        }
+
+        function copyCurrentSecret() {
+            const secret = $("createdTaskSecret").textContent.trim();
+            if (!secret) return;
+            navigator.clipboard.writeText(secret).then(() => {
+                showFeedback("taskCreateFeedback", "Task secret copied to clipboard.", "ok");
+            }).catch(() => {
+                showFeedback("taskCreateFeedback", "Clipboard copy failed. Copy the secret manually.", "err");
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            $("taskCreateForm").addEventListener("submit", handleCreateTask);
+            $("downloadKitBtn").addEventListener("click", handleDownloadAssessmentKit);
+            $("copyTaskSecretBtn").addEventListener("click", copyCurrentSecret);
+            $("uploadForm").addEventListener("submit", handleUpload);
+            $("lookupForm").addEventListener("submit", lookupCurrentTask);
+            $("loadReportBtn").addEventListener("click", loadReportFromCurrentTask);
+
+            const query = new URLSearchParams(window.location.search);
+            const taskId = query.get("task") || "";
+            if (taskId) {
+                $("lookupTaskId").value = taskId;
+                $("uploadTaskId").value = taskId;
+                const storedSecret = getSavedSecret(taskId);
+                if (storedSecret) {
+                    $("lookupTaskSecret").value = storedSecret;
+                    $("uploadTaskSecret").value = storedSecret;
+                }
+                try {
+                    await loadTaskStatus(taskId, storedSecret, storedSecret ? "" : activeReportToken);
+                    if (activeReportToken || storedSecret) {
+                        const currentTask = readCurrentTaskId();
+                        if (currentTask) {
+                            await loadReport(currentTask, storedSecret, storedSecret ? "" : activeReportToken);
+                        }
+                    }
+                } catch (error) {
+                    showFeedback("lookupFeedback", escapeHtml(error.message), "err");
+                }
+            }
+        });
+
+        function readCurrentTaskId() {
+            return $("lookupTaskId").value.trim();
+        }
+    </script>
+
+    <script type="module">
+        const reapply = () => window.__NINESEC_APPLY_LANG?.(localStorage.getItem("9sec_lang") || "en");
+        await import("/assets/main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js");
+        reapply();
+        window.addEventListener("9sec:langChange", reapply);
+    </script>
+</body>
+
+</html>

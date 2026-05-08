@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine-Security | AxEDR Offline MDR Entry</title>
+    <meta name="description"
+        content="Offline-first MDR entry for Nine-Security AxEDR. A static operational portal for case intake, telemetry flow, sensor modernization, and analyst triage planning.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png"
+        href="assets/favicon-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW.png">
+    <style>
+        :root {
+            --bg: #08111a;
+            --panel: rgba(9, 21, 31, 0.88);
+            --panel-strong: rgba(12, 28, 42, 0.96);
+            --line: rgba(125, 211, 252, 0.15);
+            --text: #e6f2ff;
+            --muted: #8aa3b8;
+            --cyan: #76e5ff;
+            --teal: #5cf0c6;
+            --amber: #ffb75e;
+            --red: #ff6b6b;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", sans-serif;
+            --font-body: "Segoe UI Variable Text", "Segoe UI", sans-serif;
+            --font-mono: "Consolas", "Cascadia Mono", "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            font-family: var(--font-body);
+            background:
+                radial-gradient(circle at top left, rgba(92, 240, 198, 0.12), transparent 24rem),
+                radial-gradient(circle at top right, rgba(118, 229, 255, 0.14), transparent 28rem),
+                linear-gradient(180deg, #09131d 0%, #08111a 48%, #050b11 100%);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.35));
+            pointer-events: none;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            width: min(1180px, calc(100% - 2rem));
+            margin: 0 auto;
+            padding: 1.25rem 0 4rem;
+        }
+
+        .topbar,
+        .panel,
+        .rail-card,
+        .module-card,
+        .lane,
+        .risk-item,
+        .playbook {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+        }
+
+        .topbar {
+            border-radius: 20px;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            animation: rise 600ms ease-out;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .brand-title {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            min-width: 0;
+        }
+
+        .brand-title strong {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-title span {
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+        }
+
+        .topbar-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.65rem;
+        }
+
+        .topbar-links a,
+        .cta-row a {
+            border: 1px solid rgba(118, 229, 255, 0.18);
+            padding: 0.68rem 0.95rem;
+            border-radius: 999px;
+            color: var(--cyan);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        .topbar-links a:hover,
+        .cta-row a:hover {
+            transform: translateY(-1px);
+            border-color: rgba(118, 229, 255, 0.4);
+            background: rgba(118, 229, 255, 0.06);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .panel {
+            border-radius: 28px;
+            padding: 1.6rem;
+        }
+
+        .hero {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: -8rem;
+            top: -6rem;
+            width: 20rem;
+            height: 20rem;
+            background: radial-gradient(circle, rgba(118, 229, 255, 0.16), transparent 62%);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.42rem 0.72rem;
+            border-radius: 999px;
+            border: 1px solid rgba(92, 240, 198, 0.22);
+            color: var(--teal);
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(92, 240, 198, 0.06);
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 12px rgba(92, 240, 198, 0.8);
+        }
+
+        h1 {
+            margin: 1rem 0 0.85rem;
+            font-family: var(--font-display);
+            font-size: clamp(2.25rem, 5vw, 4.45rem);
+            line-height: 0.96;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .lead {
+            margin: 0;
+            max-width: 48rem;
+            color: #d2e6f7;
+            font-size: 1.08rem;
+            line-height: 1.72;
+        }
+
+        .lead strong {
+            color: #ffffff;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .status-chip {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 0.85rem 0.95rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-chip span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.76rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .status-chip strong {
+            display: block;
+            margin-top: 0.35rem;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .cta-row a.primary {
+            color: #041018;
+            background: linear-gradient(135deg, var(--teal), var(--cyan));
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        .cta-row a.primary:hover {
+            background: linear-gradient(135deg, #7affd9, #8decff);
+        }
+
+        .rail {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .rail-card {
+            border-radius: 24px;
+            padding: 1.2rem;
+        }
+
+        .rail-card h2,
+        .section-title {
+            margin: 0 0 0.85rem;
+            font-family: var(--font-display);
+            font-size: 0.98rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .rail-list,
+        .risk-list,
+        .playbook ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .rail-list li {
+            padding: 0.75rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d3e5f4;
+            line-height: 1.55;
+        }
+
+        .rail-list li:first-child {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .rail-label {
+            display: block;
+            color: var(--amber);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            margin-bottom: 0.18rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .section {
+            margin-top: 1.35rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.95rem;
+        }
+
+        .section-header p {
+            margin: 0;
+            color: var(--muted);
+            max-width: 34rem;
+            font-size: 0.95rem;
+        }
+
+        .module-grid,
+        .lane-grid,
+        .risk-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .module-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .module-card,
+        .lane,
+        .risk-item,
+        .playbook {
+            border-radius: 24px;
+            padding: 1.2rem;
+        }
+
+        .module-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: attr(data-tag);
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            color: rgba(255, 255, 255, 0.08);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+        }
+
+        .module-card h3,
+        .lane h3,
+        .risk-item h3 {
+            margin: 0 0 0.6rem;
+            font-size: 1.08rem;
+            font-family: var(--font-display);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .module-card p,
+        .lane p,
+        .risk-item p,
+        .playbook li {
+            margin: 0;
+            color: #d0e1ef;
+            line-height: 1.68;
+        }
+
+        .module-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 1rem;
+        }
+
+        .module-meta span {
+            border-radius: 999px;
+            padding: 0.3rem 0.55rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            font-size: 0.76rem;
+            font-family: var(--font-mono);
+        }
+
+        .lane-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .lane-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: rgba(118, 229, 255, 0.08);
+            color: var(--cyan);
+            font-family: var(--font-mono);
+            margin-bottom: 0.9rem;
+        }
+
+        .risk-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .risk-state {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+            padding: 0.35rem 0.62rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .risk-state.high {
+            color: #ffd7d7;
+            background: rgba(255, 107, 107, 0.12);
+            border: 1px solid rgba(255, 107, 107, 0.24);
+        }
+
+        .risk-state.medium {
+            color: #ffe3be;
+            background: rgba(255, 183, 94, 0.12);
+            border: 1px solid rgba(255, 183, 94, 0.24);
+        }
+
+        .playbook {
+            margin-top: 1rem;
+        }
+
+        .playbook ol {
+            counter-reset: step;
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .playbook li {
+            position: relative;
+            padding-left: 3rem;
+            min-height: 2rem;
+        }
+
+        .playbook li::before {
+            counter-increment: step;
+            content: counter(step, decimal-leading-zero);
+            position: absolute;
+            left: 0;
+            top: 0.05rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 1px solid rgba(118, 229, 255, 0.16);
+            color: var(--cyan);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+        }
+
+        footer {
+            margin-top: 1.35rem;
+            padding: 1.2rem 0 0.25rem;
+            color: var(--muted);
+            text-align: center;
+            font-size: 0.88rem;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1080px) {
+            .hero-grid,
+            .module-grid,
+            .lane-grid,
+            .risk-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            .shell {
+                width: min(100% - 1rem, 100%);
+                padding-top: 0.7rem;
+            }
+
+            .topbar,
+            .panel,
+            .rail-card,
+            .module-card,
+            .lane,
+            .risk-item,
+            .playbook {
+                border-radius: 20px;
+            }
+
+            .topbar,
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-grid,
+            .module-grid,
+            .lane-grid,
+            .risk-grid,
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar-links {
+                justify-content: flex-start;
+            }
+
+            h1 {
+                font-size: 2.35rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <img src="assets/logo_v2.png" alt="Nine-Security logo">
+                <div class="brand-title">
+                    <strong>AxEDR Offline MDR Entry</strong>
+                    <span>Nine-Security endpoint defense staging portal</span>
+                </div>
+            </div>
+            <div class="topbar-links">
+                <a href="./services.html">/Services</a>
+                <a href="./arsenal.html">/Arsenal</a>
+                <a href="./veris.html">/VERIS</a>
+                <a href="./ad-assessment.html">/AD_Check</a>
+            </div>
+        </div>
+
+        <div class="hero-grid">
+            <section class="panel hero">
+                <div class="eyebrow">Offline Static Mode</div>
+                <h1>Managed Detection Starts Before the Cloud</h1>
+                <p class="lead">
+                    This page is a <strong>local-first MDR entry</strong> for the Nine-Security AxEDR fork.
+                    It stages case intake, sensor modernization, analyst workflow, and endpoint triage
+                    <strong>without any backend dependency</strong>. 適合先把 EDR 納進產品線，再逐步接上真正的 SaaS pipeline。
+                </p>
+
+                <div class="status-grid">
+                    <div class="status-chip">
+                        <span>Mode</span>
+                        <strong>Offline / Static</strong>
+                    </div>
+                    <div class="status-chip">
+                        <span>Sensor Core</span>
+                        <strong>AxEDR / OpenEDR Fork</strong>
+                    </div>
+                    <div class="status-chip">
+                        <span>Cloud Path</span>
+                        <strong>Disabled by Design</strong>
+                    </div>
+                    <div class="status-chip">
+                        <span>Primary Goal</span>
+                        <strong>MDR Service Entry</strong>
+                    </div>
+                </div>
+
+                <div class="cta-row">
+                    <a class="primary" href="#operations">Open MDR Tracks</a>
+                    <a href="#risk-flags">Review Risk Flags</a>
+                    <a href="#playbook">Analyst Playbook</a>
+                </div>
+            </section>
+
+            <aside class="rail">
+                <div class="rail-card">
+                    <h2>Entry Scope</h2>
+                    <ul class="rail-list">
+                        <li>
+                            <span class="rail-label">Case Intake</span>
+                            Stage endpoint incidents before tenant onboarding or cloud transport integration.
+                        </li>
+                        <li>
+                            <span class="rail-label">Sensor Positioning</span>
+                            Map kernel driver, user-mode service, injection surface, and modernization backlog.
+                        </li>
+                        <li>
+                            <span class="rail-label">Operator Workflow</span>
+                            Give analysts a stable local entry even when API, RMM, or SIEM links are not ready.
+                        </li>
+                    </ul>
+                </div>
+                <div class="rail-card">
+                    <h2>Immediate Use</h2>
+                    <ul class="rail-list">
+                        <li>
+                            <span class="rail-label">With VERIS</span>
+                            Use agentless triage for evidence packaging and Central-side correlation.
+                        </li>
+                        <li>
+                            <span class="rail-label">With AxEDR</span>
+                            Use this page as the internal operator front door while sensor hardening is in progress.
+                        </li>
+                        <li>
+                            <span class="rail-label">With Governance</span>
+                            Attach modernization decisions to roadmap, risk, and service packaging tracks.
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+
+        <section class="section" id="operations">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">MDR Operation Tracks</div>
+                </div>
+                <p>四條線並行：先能收案、能看訊號、能定義風險，再把資料路徑接成真正的 SaaS MDR 服務。</p>
+            </div>
+            <div class="module-grid">
+                <article class="module-card" data-tag="TRACK_01">
+                    <h3>Offline Case Intake</h3>
+                    <p>Use a static operator briefing layer for customer hostname, incident source, scope notes, and expected evidence packages.</p>
+                    <div class="module-meta">
+                        <span>No backend</span>
+                        <span>Analyst-first</span>
+                        <span>Tenant staging</span>
+                    </div>
+                </article>
+                <article class="module-card" data-tag="TRACK_02">
+                    <h3>Sensor Modernization</h3>
+                    <p>Track the AxEDR gaps that block productization on Windows 11: HVCI, W^X, ETW-Ti, AMSI, and reduced dependence on user-mode hooks.</p>
+                    <div class="module-meta">
+                        <span>Kernel review</span>
+                        <span>Win11 target</span>
+                        <span>HVCI aware</span>
+                    </div>
+                </article>
+                <article class="module-card" data-tag="TRACK_03">
+                    <h3>Threat Hunt Queue</h3>
+                    <p>Define which telemetry is reliable today, which telemetry is bypassable, and which artifacts still need VERIS, HostWitness, or manual enrichment.</p>
+                    <div class="module-meta">
+                        <span>Evidence gaps</span>
+                        <span>Hunt backlog</span>
+                        <span>Telemetry confidence</span>
+                    </div>
+                </article>
+                <article class="module-card" data-tag="TRACK_04">
+                    <h3>Service Packaging</h3>
+                    <p>Translate the engineering state into an MDR offer: offline triage, pilot endpoint coverage, modernization milestones, and managed response boundaries.</p>
+                    <div class="module-meta">
+                        <span>MDR packaging</span>
+                        <span>Pre-SaaS</span>
+                        <span>Product line fit</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="telemetry">
+            <div class="section-header">
+                <div class="section-title">Telemetry Flow</div>
+                <p>Use this static map as the baseline for what the service should eventually expose into your MDR platform.</p>
+            </div>
+            <div class="lane-grid">
+                <article class="lane">
+                    <div class="lane-index">01</div>
+                    <h3>Kernel Sensor</h3>
+                    <p>`edrdrv` captures process, file, registry, object, and minifilter activity. This is the highest-value surface for direct-syscall-resistant telemetry.</p>
+                </article>
+                <article class="lane">
+                    <div class="lane-index">02</div>
+                    <h3>User Service</h3>
+                    <p>`edrsvc` orchestrates collection, caching, serialization, control flow, and cloud transport. It is also the main local control and update risk surface.</p>
+                </article>
+                <article class="lane">
+                    <div class="lane-index">03</div>
+                    <h3>Offline Analyst Layer</h3>
+                    <p>This portal stands in for the future MDR console: scope the case, record what is trustworthy, and route the host into VERIS or other forensic lanes.</p>
+                </article>
+                <article class="lane">
+                    <div class="lane-index">04</div>
+                    <h3>SaaS Readiness</h3>
+                    <p>Only after hardening transport, control-plane auth, and update trust should the telemetry move into a shared multi-tenant MDR service.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="risk-flags">
+            <div class="section-header">
+                <div class="section-title">Immediate Risk Flags</div>
+                <p>這些是先前程式碼審查已經確認、而且會直接影響產品化安全邊界的項目。</p>
+            </div>
+            <div class="risk-grid">
+                <article class="risk-item">
+                    <div class="risk-state high">High · Control Plane</div>
+                    <h3>Local RPC trust is too weak</h3>
+                    <p>The internal JSON-RPC control surface behaves like a management endpoint but relies on a fixed built-in key model instead of real caller authentication.</p>
+                </article>
+                <article class="risk-item">
+                    <div class="risk-state high">High · Transport</div>
+                    <h3>TLS verification needs hard proof</h3>
+                    <p>The legacy HTTP client path must be refactored to enforce certificate validation and hostname verification before any SaaS-grade telemetry transport is enabled.</p>
+                </article>
+                <article class="risk-item">
+                    <div class="risk-state high">High · Supply Chain</div>
+                    <h3>Update integrity is outdated</h3>
+                    <p>Self-update logic still allows weak integrity behavior and should move to signed packages plus modern hash verification before managed rollout.</p>
+                </article>
+                <article class="risk-item">
+                    <div class="risk-state medium">Medium · Local IPC</div>
+                    <h3>IPC surfaces need ACL tightening</h3>
+                    <p>Named events, proxy ports, and related local communication paths should be reduced to least privilege so analysts trust the sensor under real adversary pressure.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="playbook">
+            <div class="section-title">Offline Analyst Playbook</div>
+            <div class="playbook">
+                <ol>
+                    <li>Define the host scope first: tenant, hostname, incident source, and whether AxEDR is the primary sensor or a supporting endpoint lane.</li>
+                    <li>Decide the evidence route: AxEDR telemetry, VERIS evidence package, HostWitness live collection, or a combined triage path.</li>
+                    <li>Mark which signals are modernization-sensitive: injection hooks, cloud transport, local control RPC, update path, or Windows 11 compatibility.</li>
+                    <li>Record the minimum service promise: detection-only, triage plus hunting, or full managed containment once network isolation and response controls are ready.</li>
+                </ol>
+            </div>
+        </section>
+
+        <footer>
+            Offline-first static entry for Nine-Security AxEDR MDR staging. No API calls. No cloud dependency. Local assets only.
+        </footer>
+    </div>
+</body>
+
+</html>

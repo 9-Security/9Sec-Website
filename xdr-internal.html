@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/theme-init.js"></script>
+    <title>Nine-Security Internal XDR Console</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_.css">
+    <style>
+        .xdr-wrap { max-width: 1280px; margin: 0 auto; padding: 110px 20px 40px; }
+        .xdr-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .xdr-filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .terminal-input, .terminal-select {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 10px 12px; font-family: var(--font-mono); min-width: 180px;
+        }
+        .status-pill { font-family: var(--font-mono); font-size: 11px; padding: 4px 8px; border-radius: 4px; }
+        .status-online { color: #00ff41; border: 1px solid #00ff41; background: rgba(0,255,65,0.08); }
+        .status-offline { color: #ff0055; border: 1px solid #ff0055; background: rgba(255,0,85,0.08); }
+        .muted { color: var(--text-secondary); font-family: var(--font-mono); font-size: 12px; }
+        .hidden { display: none !important; }
+        #login-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 5000; background: var(--bg-color); }
+        #login-box { width: 420px; padding: 28px; border: 1px solid var(--accent-color); }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <div id="login-overlay">
+        <div class="card" id="login-box">
+            <h3 style="font-family: var(--font-mono); margin: 0 0 10px;">XDR_INTERNAL_AUTH</h3>
+            <p class="muted">Operator session required</p>
+            <input id="login-email" class="terminal-input" type="email" placeholder="EMAIL_IDENTITY" style="width:100%; margin:12px 0;">
+            <input id="login-password" class="terminal-input" type="password" placeholder="SECRET_PASSPHRASE" style="width:100%; margin-bottom:12px;">
+            <button id="btn-login" class="btn primary-btn" style="width:100%; justify-content:center;">INITIALIZE_SESSION</button>
+            <div id="login-error" class="muted" style="margin-top:10px; color:#ff0055;"></div>
+        </div>
+    </div>
+
+    <main id="xdr-shell" class="xdr-wrap hidden">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px;">
+            <div>
+                <p class="terminal-text" style="margin:0;">Internal XDR Validation Console <span class="status-pill status-online">PRIVATE</span></p>
+                <h1 class="glitch-title" data-text="XDR_INTERNAL_CONSOLE" style="margin:6px 0 0; font-size:1.8rem;">XDR_INTERNAL_CONSOLE</h1>
+                <p id="session-user" class="muted">Operator: ---</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button id="btn-refresh" class="btn secondary-btn"><i class="fa-solid fa-rotate"></i> REFRESH</button>
+                <button id="btn-logout" class="btn secondary-btn"><i class="fa-solid fa-power-off"></i> LOGOUT</button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+            <div class="xdr-filters">
+                <select id="tenant-filter" class="terminal-select"></select>
+                <select id="group-filter" class="terminal-select"></select>
+                <button id="btn-apply" class="btn primary-btn">APPLY_FILTER</button>
+                <span id="summary" class="muted"></span>
+            </div>
+        </div>
+
+        <div class="xdr-grid">
+            <section class="card">
+                <h3 style="font-family: var(--font-mono);">ENDPOINT_INVENTORY</h3>
+                <div style="overflow-x:auto;">
+                    <table class="terminal-table">
+                        <thead>
+                            <tr>
+                                <th>ENDPOINT_ID</th>
+                                <th>TENANT</th>
+                                <th>GROUP</th>
+                                <th>HOSTNAME</th>
+                                <th>STATUS</th>
+                                <th>LAST_HEARTBEAT</th>
+                                <th>LAST_EVENT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="endpoint-rows"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3 style="font-family: var(--font-mono);">RECENT_EVENTS</h3>
+                <div style="overflow-x:auto;">
+                    <table class="terminal-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>TENANT</th>
+                                <th>GROUP</th>
+                                <th>ENDPOINT</th>
+                                <th>EVENT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="event-rows"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="/js/xdr-internal.js"></script>
+</body>
+</html>
