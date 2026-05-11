@@ -450,15 +450,17 @@
             z-index: 3;
         }
 
-        /* Same chrome as [x] / [-]: neutral slate border + dark glass fill; only wider for label. */
+        /* Same chrome as [x] / [-]: neutral slate border + dark glass fill; icon-only. */
         .veris-wait-download-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.3rem;
+            gap: 0;
+            width: 2rem;
+            min-width: 2rem;
             height: 2rem;
             min-height: 2rem;
-            padding: 0 0.5rem;
+            padding: 0;
             border: 1px solid rgba(148, 163, 184, 0.35);
             border-radius: 4px;
             background: rgba(15, 23, 42, 0.28);
@@ -792,9 +794,8 @@
                 <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
                     <div class="veris-wait-modal-shell">
                         <div class="veris-wait-modal-top-actions" data-i18n-aria="veris_page.wait_top_actions_aria" aria-label="Report actions" role="toolbar">
-                            <button type="button" class="veris-wait-download-btn" id="downloadReportBtn" hidden aria-label="Download markdown report">
+                            <button type="button" class="veris-wait-download-btn" id="downloadReportBtn" hidden aria-label="Download markdown report" title="Download markdown report">
                                 <span class="veris-wait-download-glyph" aria-hidden="true">[↓]</span>
-                                <span id="downloadReportBtnLabel">Download report</span>
                             </button>
                             <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
                             <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="Minimize wait window (polling continues)">[-]</button>
@@ -919,7 +920,6 @@
             const waitKvLabelReq = document.getElementById('waitKvLabelReq');
             const waitKvLabelEmail = document.getElementById('waitKvLabelEmail');
             const downloadReportBtn = document.getElementById('downloadReportBtn');
-            const downloadReportBtnLabel = document.getElementById('downloadReportBtnLabel');
             /** @type {string} Resolved GET URL for report.md (blob download). */
             let lastReportMdUrl = '';
             /** @type {null | string} i18n key for terminal-state modal title (scanner flow) */
@@ -972,14 +972,10 @@
                 if (topBar) {
                     topBar.setAttribute('aria-label', v('veris_page.wait_top_actions_aria', 'Report actions'));
                 }
-                if (downloadReportBtnLabel) {
-                    downloadReportBtnLabel.textContent = v('veris_page.btn_download_report', 'Download report');
-                }
                 if (downloadReportBtn) {
-                    downloadReportBtn.setAttribute(
-                        'aria-label',
-                        v('veris_page.btn_download_report_aria', 'Download markdown report')
-                    );
+                    const dlAria = v('veris_page.btn_download_report_aria', 'Download markdown report');
+                    downloadReportBtn.setAttribute('aria-label', dlAria);
+                    downloadReportBtn.setAttribute('title', dlAria);
                 }
                 if (waitKvLabelCase) waitKvLabelCase.textContent = v('veris_page.lab_case', 'Case ID');
                 if (waitKvLabelReq) waitKvLabelReq.textContent = v('veris_page.wait_kv_request_id', 'Request ID');
