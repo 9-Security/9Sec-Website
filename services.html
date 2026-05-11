@@ -100,6 +100,13 @@
             text-align: right;
         }
 
+        .link-btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            user-select: none;
+        }
+
     </style>
     <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW.png">
   <link rel="modulepreload" crossorigin href="data:text/javascript;base64,KGZ1bmN0aW9uKCl7Y29uc3QgdD1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJsaW5rIikucmVsTGlzdDtpZih0JiZ0LnN1cHBvcnRzJiZ0LnN1cHBvcnRzKCJtb2R1bGVwcmVsb2FkIikpcmV0dXJuO2Zvcihjb25zdCBlIG9mIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2xpbmtbcmVsPSJtb2R1bGVwcmVsb2FkIl0nKSlpKGUpO25ldyBNdXRhdGlvbk9ic2VydmVyKGU9Pntmb3IoY29uc3QgciBvZiBlKWlmKHIudHlwZT09PSJjaGlsZExpc3QiKWZvcihjb25zdCBvIG9mIHIuYWRkZWROb2RlcylvLnRhZ05hbWU9PT0iTElOSyImJm8ucmVsPT09Im1vZHVsZXByZWxvYWQiJiZpKG8pfSkub2JzZXJ2ZShkb2N1bWVudCx7Y2hpbGRMaXN0OiEwLHN1YnRyZWU6ITB9KTtmdW5jdGlvbiBzKGUpe2NvbnN0IHI9e307cmV0dXJuIGUuaW50ZWdyaXR5JiYoci5pbnRlZ3JpdHk9ZS5pbnRlZ3JpdHkpLGUucmVmZXJyZXJQb2xpY3kmJihyLnJlZmVycmVyUG9saWN5PWUucmVmZXJyZXJQb2xpY3kpLGUuY3Jvc3NPcmlnaW49PT0idXNlLWNyZWRlbnRpYWxzIj9yLmNyZWRlbnRpYWxzPSJpbmNsdWRlIjplLmNyb3NzT3JpZ2luPT09ImFub255bW91cyI/ci5jcmVkZW50aWFscz0ib21pdCI6ci5jcmVkZW50aWFscz0ic2FtZS1vcmlnaW4iLHJ9ZnVuY3Rpb24gaShlKXtpZihlLmVwKXJldHVybjtlLmVwPSEwO2NvbnN0IHI9cyhlKTtmZXRjaChlLmhyZWYscil9fSkoKTsK">
@@ -258,27 +265,27 @@
 
             <!-- AxEDR Offline MDR Entry -->
             <div class="card service-card" style="border-top-color: #52e3c2;">
-                <div class="service-status status-beta">MDR_OFFLINE</div>
+                <div class="service-status status-planned">ENTRY_CLOSED</div>
                 <i class="fa-solid fa-shield-halved service-icon" style="color:#52e3c2;"></i>
                 <h3>AxEDR Offline MDR Entry</h3>
                 <p>Static operator entry for the Nine-Security AxEDR fork. Stage case intake, modernization priorities, and analyst workflow before cloud MDR integration is enabled.</p>
                 <div class="service-cta">
-                    <a href="axedr-mdr-offline.html" class="link-btn">
-                        ENTER_MDR_ENTRY <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                    <span class="link-btn link-btn-disabled" aria-disabled="true"
+                        title="Entry closed until this service is ready.">ENTER_MDR_ENTRY <i
+                            class="fa-solid fa-lock" aria-hidden="true"></i></span>
                 </div>
             </div>
 
             <!-- AD / Hybrid Identity Health Check -->
             <div class="card service-card" style="border-top-color: #ff7a18;">
-                <div class="service-status status-active">MOD_ACTIVE</div>
+                <div class="service-status status-planned">ENTRY_CLOSED</div>
                 <i class="fa-solid fa-building-shield service-icon" style="color:#ff7a18;"></i>
                 <h3>AD / Hybrid Identity Health Check</h3>
                 <p>Anonymous task-based AD and Entra posture review with offline assessment kit download, manual ZIP upload, and signed report retrieval.</p>
                 <div class="service-cta">
-                    <a href="ad-assessment.html" class="link-btn">
-                        ENTER_AD_CHECK <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                    <span class="link-btn link-btn-disabled" aria-disabled="true"
+                        title="Entry closed until this service is ready.">ENTER_AD_CHECK <i class="fa-solid fa-lock"
+                            aria-hidden="true"></i></span>
                 </div>
             </div>
         </section>

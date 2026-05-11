@@ -7,6 +7,16 @@ const eventRows = document.getElementById('event-rows');
 const summary = document.getElementById('summary');
 const tenantFilter = document.getElementById('tenant-filter');
 const groupFilter = document.getElementById('group-filter');
+const installerTokenKey = document.getElementById('installer-tokenkey');
+const installerCloudHost = document.getElementById('installer-cloudhost');
+const installerCloudPort = document.getElementById('installer-cloudport');
+const installerGroup = document.getElementById('installer-group');
+const installerStatus = document.getElementById('installer-status');
+const installerCommand = document.getElementById('installer-command');
+const btnDownloadMsi = document.getElementById('btn-download-msi');
+const btnDownloadLauncher = document.getElementById('btn-download-launcher');
+
+let installerMeta = { available: false, filename: 'NineSecurityAxEDR.msi', suggestedCloudHost: '', suggestedCloudPort: '443', downloadPath: '/api/agent/internal/download-msi' };
 
 function esc(value) {
     return String(value ?? '')
@@ -27,6 +37,60 @@ async function api(path, init = {}) {
         throw new Error(payload?.error || `${response.status} ${response.statusText}`);
     }
     return payload;
+}
+
+function currentInstallCommand() {
+    const msiName = installerMeta.filename || 'NineSecurityAxEDR.msi';
+    const tokenKey = (installerTokenKey.value || '').trim();
+    const cloudHost = (installerCloudHost.value || '').trim();
+    const cloudPort = (installerCloudPort.value || '').trim();
+    const group = (installerGroup.value || '').trim();
+    const args = [];
+
+    if (tokenKey) args.push(`TOKENKEY="${tokenKey.replace(/"/g, '""')}"`);
+    if (cloudHost) args.push(`CLOUDADDR="${cloudHost.replace(/"/g, '""')}"`);
+    if (cloudPort) args.push(`CLOUDPORT="${cloudPort.replace(/"/g, '""')}"`);
+    if (group) args.push(`GROUP="${group.replace(/"/g, '""')}"`);
+
+    return `msiexec /i "${msiName}" ${args.join(' ')}`.trim();
+}
+
+function renderInstallerCommand() {
+    const command = currentInstallCommand();
+    installerCommand.textContent = command;
+}
+
+function downloadBlob(filename, content, type = 'text/plain;charset=utf-8') {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+async function loadInstallerMeta() {
+    const meta = await api('/api/agent/internal/installer-meta');
+    installerMeta = {
+        available: !!meta.available,
+        filename: meta.filename || 'NineSecurityAxEDR.msi',
+        suggestedCloudHost: meta.suggestedCloudHost || '',
+        suggestedCloudPort: meta.suggestedCloudPort || '443',
+        downloadPath: meta.downloadPath || '/api/agent/internal/download-msi'
+    };
+
+    if (!installerCloudHost.value) installerCloudHost.value = installerMeta.suggestedCloudHost;
+    if (!installerCloudPort.value) installerCloudPort.value = installerMeta.suggestedCloudPort;
+
+    btnDownloadMsi.disabled = !installerMeta.available;
+    btnDownloadLauncher.disabled = !installerMeta.available;
+    installerStatus.textContent = installerMeta.available
+        ? `MSI ready: ${installerMeta.filename}`
+        : 'MSI unavailable on this server. Set XDR_AGENT_MSI_PATH to enable download.';
+    renderInstallerCommand();
 }
 
 function renderEndpoints(items) {
@@ -104,6 +168,7 @@ async function checkSession() {
         sessionUser.textContent = `Operator: ${me.user?.email || me.user?.id || 'unknown'}`;
         loginOverlay.classList.add('hidden');
         xdrShell.classList.remove('hidden');
+        await loadInstallerMeta();
         await loadMeta();
         await refresh();
         return true;
@@ -138,5 +203,31 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 
 document.getElementById('btn-refresh').addEventListener('click', refresh);
 document.getElementById('btn-apply').addEventListener('click', refresh);
+btnDownloadMsi.addEventListener('click', () => {
+    if (!installerMeta.available) {
+        installerStatus.textContent = 'MSI unavailable on this server.';
+        return;
+    }
+    window.location.href = installerMeta.downloadPath;
+});
+btnDownloadLauncher.addEventListener('click', () => {
+    if (!installerMeta.available) {
+        installerStatus.textContent = 'MSI unavailable on this server.';
+        return;
+    }
+    const msiName = installerMeta.filename || 'NineSecurityAxEDR.msi';
+    const script = [
+        '@echo off',
+        'setlocal',
+        `set MSI_NAME=${msiName}`,
+        currentInstallCommand(),
+        'endlocal',
+        ''
+    ].join('\r\n');
+    downloadBlob('install-axedr.cmd', script, 'application/octet-stream');
+});
+[installerTokenKey, installerCloudHost, installerCloudPort, installerGroup].forEach((el) => {
+    el.addEventListener('input', renderInstallerCommand);
+});
 
 checkSession();

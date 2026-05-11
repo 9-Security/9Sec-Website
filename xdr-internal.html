@@ -67,6 +67,23 @@
 
         <div class="xdr-grid">
             <section class="card">
+                <h3 style="font-family: var(--font-mono);">AGENT_DOWNLOAD</h3>
+                <p class="muted" style="margin-top:0;">Internal validation only. Download the MSI from this host and generate a local installer launcher with token, cloud host, and port prefilled.</p>
+                <div class="xdr-filters" style="margin-bottom:12px;">
+                    <input id="installer-tokenkey" class="terminal-input" type="text" placeholder="TOKENKEY" style="min-width:220px;">
+                    <input id="installer-cloudhost" class="terminal-input" type="text" placeholder="CLOUDHOST" style="min-width:220px;">
+                    <input id="installer-cloudport" class="terminal-input" type="text" placeholder="CLOUDPORT" style="min-width:120px;">
+                    <input id="installer-group" class="terminal-input" type="text" placeholder="GROUP" style="min-width:160px;">
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                    <button id="btn-download-msi" class="btn primary-btn"><i class="fa-solid fa-download"></i> DOWNLOAD_MSI</button>
+                    <button id="btn-download-launcher" class="btn secondary-btn"><i class="fa-solid fa-terminal"></i> DOWNLOAD_INSTALLER_CMD</button>
+                </div>
+                <div id="installer-status" class="muted">Checking installer availability...</div>
+                <pre id="installer-command" class="muted" style="white-space:pre-wrap; margin-top:12px; background:rgba(0,0,0,0.35); border:1px solid var(--border-color); padding:12px;"></pre>
+            </section>
+
+            <section class="card">
                 <h3 style="font-family: var(--font-mono);">ENDPOINT_INVENTORY</h3>
                 <div style="overflow-x:auto;">
                     <table class="terminal-table">
