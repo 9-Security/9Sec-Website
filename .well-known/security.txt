@@ -1,0 +1,7 @@
+# Nine-Security Inc. — security disclosure policy (RFC 9116)
+# Served at https://nine-security.com/.well-known/security.txt
+
+Contact: mailto:security@nine-security.com
+Expires: 2027-06-06T00:00:00.000Z
+Preferred-Languages: en, zh-Hant
+Canonical: https://nine-security.com/.well-known/security.txt

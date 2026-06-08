@@ -1,3 +1,13 @@
+# ⚠️ WARNING: This file is IGNORED in production.
+# The site is deployed to GitHub Pages (see deploy-frontend-pages.sh), and
+# GitHub Pages does NOT support `_headers` (that is a Cloudflare Pages / Netlify
+# feature). Verified: live HSTS max-age=15552000 != the 31536000 declared below,
+# and CSP / X-Frame-Options / Referrer-Policy are absent on the live site.
+#
+# Security headers MUST be applied at the Cloudflare edge instead.
+# See: cloudflare/security-headers/README.md
+# This file is kept only as the source-of-truth CSP draft for that config.
+
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
