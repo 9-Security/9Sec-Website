@@ -165,6 +165,31 @@
             font-size: 0.95rem;
         }
 
+        .veris-consult-card {
+            grid-column: 1 / -1;
+            border-color: rgba(0, 229, 255, 0.42);
+            border-top: 4px solid var(--accent-secondary);
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.11), rgba(0, 255, 65, 0.05));
+            padding: clamp(1.4rem, 2.5vw, 2rem);
+        }
+
+        .veris-consult-card h3 {
+            font-size: clamp(1.15rem, 2vw, 1.55rem);
+            color: var(--accent-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .veris-consult-card p {
+            max-width: 780px;
+            font-size: 1.02rem;
+            color: var(--text-primary);
+        }
+
+        .veris-consult-card .veris-note-link {
+            font-size: 1rem;
+            padding: 0.35rem 0;
+        }
+
         .veris-note-link {
             display: inline-flex;
             align-items: center;
@@ -776,6 +801,27 @@
             </div>
         </section>
 
+        <section class="veris-fit">
+            <div class="section-header">
+                <h2><span class="hash">#</span> <span data-i18n="veris_page.fit_title">BEST_FIT</span></h2>
+                <div class="line"></div>
+            </div>
+            <div class="veris-fit-list">
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_1">SOC alert triage when an endpoint needs fast, reproducible evidence packaging.</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_2">Temporary investigation where a resident agent is not approved or not practical.</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_3">IR handoff where analysts need facts, validation status, and reportable reasoning.</span>
+                </div>
+            </div>
+        </section>
+
         <section class="veris-flow-grid" data-i18n-aria="veris_page.flow_aria" aria-label="VERIS workflows">
             <article class="veris-action-card">
                 <h2><i class="fa-solid fa-download"></i> <span data-i18n="veris_page.new_title">New Endpoint Scan</span></h2>
@@ -886,7 +932,7 @@
                     <span data-veris-local-i18n="source_link">VIEW_SOURCE_ON_GITHUB</span>
                 </a>
             </div>
-            <div class="veris-note">
+            <div class="veris-note veris-consult-card">
                 <h3 data-veris-local-i18n="consult_h">CUSTOM ENDPOINT TRIAGE</h3>
                 <p data-veris-local-i18n="consult_p">Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.</p>
                 <a class="veris-note-link" href="mailto:consult@nine-security.com">
@@ -896,26 +942,6 @@
             </div>
         </section>
 
-        <section class="veris-fit">
-            <div class="section-header">
-                <h2><span class="hash">#</span> <span data-i18n="veris_page.fit_title">BEST_FIT</span></h2>
-                <div class="line"></div>
-            </div>
-            <div class="veris-fit-list">
-                <div class="veris-fit-item">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span data-i18n="veris_page.fit_1">SOC alert triage when an endpoint needs fast, reproducible evidence packaging.</span>
-                </div>
-                <div class="veris-fit-item">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span data-i18n="veris_page.fit_2">Temporary investigation where a resident agent is not approved or not practical.</span>
-                </div>
-                <div class="veris-fit-item">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span data-i18n="veris_page.fit_3">IR handoff where analysts need facts, validation status, and reportable reasoning.</span>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer>
