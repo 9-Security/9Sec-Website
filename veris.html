@@ -879,11 +879,19 @@
                     investigation pivots in one path.</p>
             </div>
             <div class="veris-note">
-                <h3>SCANNER SOURCE</h3>
-                <p>Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.</p>
+                <h3 data-veris-local-i18n="source_h">SCANNER SOURCE</h3>
+                <p data-veris-local-i18n="source_p">Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.</p>
                 <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage" target="_blank" rel="noopener noreferrer">
                     <i class="fa-brands fa-github"></i>
-                    <span>VIEW_SOURCE_ON_GITHUB</span>
+                    <span data-veris-local-i18n="source_link">VIEW_SOURCE_ON_GITHUB</span>
+                </a>
+            </div>
+            <div class="veris-note">
+                <h3 data-veris-local-i18n="consult_h">CUSTOM ENDPOINT TRIAGE</h3>
+                <p data-veris-local-i18n="consult_p">Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.</p>
+                <a class="veris-note-link" href="mailto:consult@nine-security.com">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>consult@nine-security.com</span>
                 </a>
             </div>
         </section>
@@ -1946,8 +1954,40 @@
         })();
     </script>
     <script type="module">
+        const verisLocalCopy = {
+            en: {
+                source_h: "SCANNER SOURCE",
+                source_p: "Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.",
+                source_link: "VIEW_SOURCE_ON_GITHUB",
+                consult_h: "CUSTOM ENDPOINT TRIAGE",
+                consult_p: "Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.",
+            },
+            tw: {
+                source_h: "SCANNER 原始碼",
+                source_p: "使用服務前，可檢視公開的 9STriage scanner 原始碼，確認端點證據蒐集範圍。",
+                source_link: "在 GitHub 檢視原始碼",
+                consult_h: "客製化大量端點檢測",
+                consult_p: "如果需要客製化流程，或要對大範圍、大量端點進行檢測服務，請聯繫 Nine-Security 進行需求評估。",
+            },
+            jp: {
+                source_h: "SCANNER ソース",
+                source_p: "サービス利用前に、公開されている 9STriage scanner のソースを確認し、端末証拠の収集範囲を検証できます。",
+                source_link: "GitHub でソースを見る",
+                consult_h: "大規模カスタム端末トリアージ",
+                consult_p: "カスタムワークフローや多数の端末を対象とした大規模トリアージが必要な場合は、Nine-Security にご相談ください。",
+            },
+        };
+        const applyVerisLocalCopy = (lang) => {
+            const dict = verisLocalCopy[lang] || verisLocalCopy.en;
+            document.querySelectorAll("[data-veris-local-i18n]").forEach((el) => {
+                const key = el.getAttribute("data-veris-local-i18n");
+                if (key && dict[key]) el.textContent = dict[key];
+            });
+        };
         const reapply = () => {
-            window.__NINESEC_APPLY_LANG?.(localStorage.getItem("9sec_lang") || "en");
+            const lang = localStorage.getItem("9sec_lang") || "en";
+            window.__NINESEC_APPLY_LANG?.(lang);
+            applyVerisLocalCopy(lang);
             const g = window.__NINESEC_I18N;
             if (typeof g === "function") {
                 document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
