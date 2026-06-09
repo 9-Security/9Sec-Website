@@ -165,6 +165,22 @@
             font-size: 0.95rem;
         }
 
+        .veris-note-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-top: 0.85rem;
+            color: var(--accent-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.86rem;
+            text-decoration: none;
+        }
+
+        .veris-note-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
         .veris-fit {
             margin-top: 3rem;
         }
@@ -861,6 +877,14 @@
                 <h3 data-i18n="veris_page.n_report_h">FULL REPORT</h3>
                 <p data-i18n="veris_page.n_report_p">Central reports surface rule matches, evidence trust, gap detection, attack-chain candidates, and
                     investigation pivots in one path.</p>
+            </div>
+            <div class="veris-note">
+                <h3>SCANNER SOURCE</h3>
+                <p>Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.</p>
+                <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-github"></i>
+                    <span>VIEW_SOURCE_ON_GITHUB</span>
+                </a>
             </div>
         </section>
 
