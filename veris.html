@@ -206,6 +206,17 @@
             text-decoration: underline;
         }
 
+        .veris-note-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem 1rem;
+            margin-top: 0.9rem;
+        }
+
+        .veris-note-links .veris-note-link {
+            margin-top: 0;
+        }
+
         .veris-fit {
             margin-top: 3rem;
         }
@@ -913,11 +924,23 @@
                 <h3 data-i18n="veris_page.n_collect_h">WHAT IT COLLECTS</h3>
                 <p data-i18n="veris_page.n_collect_p">Process context, user-mode memory heuristics, persistence, network snapshots, artefact indicators,
                     integrity signals, and scan diagnostics.</p>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/COLLECTION_SCOPE.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span data-veris-local-i18n="scope_link">COLLECTION_SCOPE</span>
+                    </a>
+                </div>
             </div>
             <div class="veris-note">
                 <h3 data-i18n="veris_page.n_not_h">WHAT IT DOES NOT DO</h3>
                 <p data-i18n="veris_page.n_not_p">No real-time blocking, endpoint isolation, kernel collection, resident monitoring, or full disk
                     forensic imaging.</p>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span data-veris-local-i18n="privacy_link">PRIVACY_NOTES</span>
+                    </a>
+                </div>
             </div>
             <div class="veris-note">
                 <h3 data-i18n="veris_page.n_report_h">FULL REPORT</h3>
@@ -927,10 +950,16 @@
             <div class="veris-note">
                 <h3 data-veris-local-i18n="source_h">SCANNER SOURCE</h3>
                 <p data-veris-local-i18n="source_p">Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.</p>
-                <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage" target="_blank" rel="noopener noreferrer">
-                    <i class="fa-brands fa-github"></i>
-                    <span data-veris-local-i18n="source_link">VIEW_SOURCE_ON_GITHUB</span>
-                </a>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-brands fa-github"></i>
+                        <span data-veris-local-i18n="source_link">VIEW_SOURCE_ON_GITHUB</span>
+                    </a>
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/BUILD.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-code"></i>
+                        <span data-veris-local-i18n="build_link">BUILD_NOTES</span>
+                    </a>
+                </div>
             </div>
             <div class="veris-note veris-consult-card">
                 <h3 data-veris-local-i18n="consult_h">CUSTOM ENDPOINT TRIAGE</h3>
@@ -1985,6 +2014,9 @@
                 source_h: "SCANNER SOURCE",
                 source_p: "Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.",
                 source_link: "VIEW_SOURCE_ON_GITHUB",
+                scope_link: "COLLECTION_SCOPE",
+                privacy_link: "PRIVACY_NOTES",
+                build_link: "BUILD_NOTES",
                 consult_h: "CUSTOM ENDPOINT TRIAGE",
                 consult_p: "Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.",
             },
@@ -1992,6 +2024,9 @@
                 source_h: "SCANNER 原始碼",
                 source_p: "使用服務前，可檢視公開的 9STriage scanner 原始碼，確認端點證據蒐集範圍。",
                 source_link: "在 GitHub 檢視原始碼",
+                scope_link: "蒐集範圍",
+                privacy_link: "隱私說明",
+                build_link: "編譯說明",
                 consult_h: "客製化大量端點檢測",
                 consult_p: "如果需要客製化流程，或要對大範圍、大量端點進行檢測服務，請聯繫 Nine-Security 進行需求評估。",
             },
@@ -1999,6 +2034,9 @@
                 source_h: "SCANNER ソース",
                 source_p: "サービス利用前に、公開されている 9STriage scanner のソースを確認し、端末証拠の収集範囲を検証できます。",
                 source_link: "GitHub でソースを見る",
+                scope_link: "収集範囲",
+                privacy_link: "プライバシー注意事項",
+                build_link: "ビルド手順",
                 consult_h: "大規模カスタム端末トリアージ",
                 consult_p: "カスタムワークフローや多数の端末を対象とした大規模トリアージが必要な場合は、Nine-Security にご相談ください。",
             },
