@@ -1,0 +1,19 @@
+# Dependencies (never commit — reinstallable from package.json)
+node_modules/
+
+# Build / tooling artifacts
+.wrangler/
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
