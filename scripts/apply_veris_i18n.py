@@ -528,11 +528,11 @@ def main():
     i18n_old = "window.__NINESEC_APPLY_LANG=k;"
     i18n_new = "window.__NINESEC_APPLY_LANG=k,window.__NINESEC_I18N=g;"
     for name in (
-        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC-B0bvABPC.js",
         "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js",
-        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-CSmd-R4W-CSmd-R4W-CSmd-R4W-CSmd-R4W-CSmd-R4W.js",
-        "styles-BxbEqz2_-Bw8gVkgQ-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr-Bkkm1Nzr.js",
-        "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2-BCfmUaQ2.js",
+        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js",
+        "main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js",
+        "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4.js",
+        "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4.js",
         "styles-BxbEqz2_-Bw8gVkgQ-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4-DBteQM0S-CppWhsn4.js",
     ):
         path = ASSETS / name
