@@ -461,6 +461,48 @@
             display: none;
         }
 
+        /* Minimized: shrink to a small, non-blocking corner pill so the wait
+           window never covers the user's screen. Background polling continues;
+           tap the pill to expand, and it auto-expands when results arrive. */
+        .veris-wait-overlay.minimized {
+            background: transparent;
+            pointer-events: none;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 1rem;
+            overflow: visible;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal-shell {
+            width: auto;
+            max-width: min(360px, 90vw);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal-top-actions {
+            display: none;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal {
+            max-height: none;
+            padding: 0.55rem 0.85rem;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+        }
+        .veris-wait-overlay.minimized .veris-wait-body,
+        .veris-wait-overlay.minimized .veris-wait-kv {
+            display: none;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header {
+            margin: 0;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header h3 {
+            margin: 0;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header h3::after {
+            content: " ⤢";
+            opacity: 0.7;
+        }
+
         .veris-wait-actions button[hidden] {
             display: none !important;
             visibility: hidden !important;
@@ -1475,6 +1517,7 @@
 
             function restoreWaitChromeDefaults() {
                 if (!waitModalTitle || !waitModalIntro) return;
+                scannerWaitOverlay.classList.remove('minimized');
                 clearReportDownloadUrl();
                 waitTerminalState = false;
                 overlayTerminalTitleI18nKey = null;
@@ -1601,6 +1644,7 @@
                     closeScannerResultX.textContent = '[x]';
                     closeScannerResultX.title = v('veris_page.close_title', 'Close');
                 }
+                scannerWaitOverlay.classList.remove('minimized'); // results: always expand
                 scannerWaitOverlay.hidden = false;
             }
 
@@ -1705,8 +1749,7 @@
                             break;
                         }
                         setFeedback(waitResultStatus, 'pending',
-                            `<strong>${v('veris_page.state_waiting_exec', 'Waiting for scanner upload or correlation.')}</strong>` +
-                            `<p>${v('veris_page.state_waiting_exec_p', 'status.json feeds this page; execution stays agentless.')}</p>`
+                            `<strong>${v('veris_page.state_waiting_exec', 'Waiting for scanner upload or correlation.')}</strong>`
                         );
                     } catch (_) {
                         /* transient */
@@ -1834,19 +1877,18 @@
                 }
             });
 
-            closeScannerWaitBtn?.addEventListener('click', () => {
-                const ctx = overlayContext;
-                scannerWaitOverlay.hidden = true;
-                if (ctx === 'scanner') {
-                    setFeedback(scannerStatus, 'pending',
-                        `<strong>${v('veris_page.wait_minimized', 'Wait window minimized.')}</strong><p>${v('veris_page.wait_minimized_p', 'Background polling continues. The report window will reopen automatically when results arrive.')}</p>`
-                    );
-                } else if (ctx === 'manual') {
-                    if (uploadStatus) uploadStatus.hidden = false;
-                    setFeedback(uploadStatus, 'pending',
-                        `<strong>${v('veris_page.wait_minimized', 'Wait window minimized.')}</strong><p>${v('veris_page.wait_minimized_p', 'Background polling continues. The report window will reopen automatically when results arrive.')}</p>`
-                    );
-                }
+            closeScannerWaitBtn?.addEventListener('click', (ev) => {
+                // Shrink to a non-blocking corner pill instead of hiding entirely, so the
+                // user keeps a visible progress indicator. Background polling continues and
+                // the window auto-expands when results arrive (showTerminalWaitChrome).
+                ev.stopPropagation();
+                scannerWaitOverlay.classList.add('minimized');
+            });
+
+            // Tapping the minimized corner pill restores the full wait window.
+            scannerWaitOverlay?.addEventListener('click', () => {
+                if (scannerWaitOverlay.classList.contains('minimized'))
+                    scannerWaitOverlay.classList.remove('minimized');
             });
 
             downloadReportBtn?.addEventListener('click', async (ev) => {
