@@ -145,15 +145,38 @@
                 Protection Act (PDPA).</p>
 
             <h2>1. Data We Collect</h2>
+            <p><strong>Account &amp; contact data</strong> — name, work email, phone, organization, and the
+                credentials you use to sign in to the console.</p>
+            <p><strong>Security telemetry</strong> — from systems you enroll, the endpoint agent and platform collect
+                security-relevant events. This is used solely to detect and respond to threats and is governed by your
+                deployment authorization. It includes:</p>
             <ul>
-                <li><strong>Account &amp; contact data</strong> — name, work email, phone, organization, and the
-                    credentials you use to sign in to the console.</li>
-                <li><strong>Security telemetry</strong> — from systems you enroll in the platform: host and process
-                    metadata, file/registry/network events, authentication events, and detection findings. This is
-                    used to detect and respond to threats and is governed by your deployment authorization.</li>
-                <li><strong>Usage data</strong> — log, device, and analytics data about how the Services are used.</li>
-                <li><strong>Communications</strong> — information you provide when you contact us or request a trial.</li>
+                <li><strong>Endpoint &amp; host identity</strong> — hostname, operating-system version, a machine
+                    identifier, agent version, local IP address(es), last reboot, and the logged-on user.</li>
+                <li><strong>Process activity</strong> — process names, <em>command-line arguments</em>, parent/child
+                    relationships, executable paths, file hashes (SHA-256), code-signing status, and the run-as
+                    account and integrity level. (Command lines and account names can contain personal data.)</li>
+                <li><strong>File activity</strong> — creation, rename, and deletion of executables and of files in
+                    sensitive or auto-start locations, plus events indicating a process opened a credential store.
+                    We do <em>not</em> collect the contents of your files in the course of monitoring.</li>
+                <li><strong>Registry activity</strong> — changes and deletions to auto-start, service, and
+                    security-relevant registry keys.</li>
+                <li><strong>Network activity</strong> — outbound connection destinations (IP and port), DNS hostnames
+                    queried, and local listening sockets.</li>
+                <li><strong>Authentication &amp; account activity</strong> — Windows logon events (success and
+                    failure) including the account name, logon type, and <em>source IP address</em>; account and
+                    group-membership changes; service installations; and security-log clearing.</li>
+                <li><strong>Script activity</strong> — the de-obfuscated content of scripts inspected by the
+                    Antimalware Scan Interface (AMSI) where a detection rule applies.</li>
+                <li><strong>Removable media</strong> — mounting of USB / removable volumes (drive letter, volume
+                    label, filesystem).</li>
+                <li><strong>Detection findings</strong> — rule matches, severity, and MITRE ATT&amp;CK mappings.</li>
             </ul>
+            <p><strong>Files submitted for analysis</strong> — file contents are collected only when you or an
+                authorized operator explicitly submit a file (or run an investigative &ldquo;deep scan&rdquo;); the
+                agent does not perform general content inspection of your documents or bulk file exfiltration.</p>
+            <p><strong>Usage data</strong> — log, device, and analytics data about how the Services are used.
+                <strong>Communications</strong> — information you provide when you contact us or request a trial.</p>
 
             <h2>2. How We Use Data</h2>
             <ul>
