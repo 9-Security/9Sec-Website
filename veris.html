@@ -900,6 +900,14 @@
                                 <option value="observe_180">Observe (180s)</option>
                             </select>
                         </div>
+                        <div class="veris-field">
+                            <label for="scanner-platform" data-i18n="veris_page.lab_platform">Target Platform</label>
+                            <select id="scanner-platform" name="target_platform">
+                                <option value="windows">Windows</option>
+                                <option value="linux">Linux (beta)</option>
+                                <option value="macos">macOS (beta)</option>
+                            </select>
+                        </div>
                     </div>
                     <p class="veris-form-hint" data-i18n="veris_page.hint_scanner">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API. The signed launcher token is fixed to 72 hours and expires automatically if unused for 3 days.</p>
                     <button class="btn primary-btn" id="generateScannerBtn" type="submit">
@@ -1794,6 +1802,8 @@
                     const selectedPreset = verisPresets.find((p) => p.id === selectedPresetId) || verisPresets[0];
                     params.set('observation_window_sec', String(selectedPreset?.observation_window_sec ?? 60));
                     params.set('collection_profile', String(selectedPreset?.profile || 'fast'));
+                    const selectedPlatform = String(formData.get('target_platform') || 'windows');
+                    params.set('target_platform', selectedPlatform);
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
                         headers: {
@@ -1836,6 +1846,7 @@
                         `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
                         `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
                         `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(selectedPreset?.profile || 'fast'))}</code></p>` +
+                        `<p>Target Platform: <code>${escapeHtml(selectedPlatform)}</code>${selectedPlatform !== 'windows' ? ' <em>(beta)</em>' : ''}</p>` +
                         `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(selectedPreset?.observation_window_sec || 60))}s</code></p>` +
                         (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
                         (launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(launcherSizeBytes))}</code></p>` : '') +
