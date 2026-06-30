@@ -958,7 +958,7 @@
                     <div class="veris-form-grid">
                         <div class="veris-field full">
                             <label for="upload-package" data-i18n="veris_page.lab_package">Evidence Package</label>
-                            <input id="upload-package" name="package" type="file" accept=".zip,.json" required>
+                            <input id="upload-package" name="package" type="file" accept=".zip,.json,.tar.gz,.tgz,.tar,.gz" required>
                         </div>
                     </div>
                     <p class="veris-form-hint" data-i18n="veris_page.hint_upload">The upload stays on this page. The internal VERIS API validates, analyzes, and returns status in the background.</p>
@@ -1078,10 +1078,13 @@
                 return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
             }
 
-            /** Manual /upload allows only .zip (scanner package) or .json (flat evidence). */
+            /** Manual /upload allows .zip (scanner package), .json (flat evidence), or
+             *  .tar.gz / .tgz / .tar (Unix triage bundle — Linux & macOS). Mirrors Central's
+             *  _classify_evidence_upload_basename. */
             function isAllowedManualEvidenceFilename(name) {
                 const n = String(name || '').trim().toLowerCase();
-                return n.endsWith('.zip') || n.endsWith('.json');
+                return n.endsWith('.zip') || n.endsWith('.json')
+                    || n.endsWith('.tar.gz') || n.endsWith('.tgz') || n.endsWith('.tar');
             }
 
             /** Must match Central MAX_VERIS_EVIDENCE_UPLOAD_BYTES (60 MiB). */
@@ -1969,7 +1972,7 @@
                     showManualUploadApiErrorOverlay(
                         escapeHtml(v(
                             'veris_page.err_upload_file_type',
-                            'Only .zip (evidence package) or .json (evidence.json export) files are allowed.'
+                            'Only .zip / .tar.gz (evidence package) or .json (evidence.json export) files are allowed.'
                         )),
                         escapeHtml(String(selectedFile.name || '')),
                     );
