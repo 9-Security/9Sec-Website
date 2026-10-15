@@ -265,6 +265,27 @@
             grid-column: 1 / -1;
         }
 
+        .veris-consent {
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            margin: 0.9rem 0 0.2rem;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .veris-consent input {
+            margin-top: 0.25rem;
+            accent-color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .veris-consent a {
+            color: var(--accent-color);
+        }
+
         .veris-field label {
             font-family: var(--font-mono);
             font-size: 0.78rem;
@@ -908,7 +929,35 @@
                                 <option value="macos">macOS (beta)</option>
                             </select>
                         </div>
+                        <div class="veris-field">
+                            <label for="scanner-company" data-i18n="veris_page.lab_company">Company (optional)</label>
+                            <input id="scanner-company" name="company" type="text" maxlength="120" autocomplete="organization">
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-endpoints" data-i18n="veris_page.lab_endpoints">Endpoints (optional)</label>
+                            <select id="scanner-endpoints" name="endpoint_count">
+                                <option value="" data-i18n="veris_page.opt_unspecified">Prefer not to say</option>
+                                <option value="1-10">1&ndash;10</option>
+                                <option value="11-50">11&ndash;50</option>
+                                <option value="51-200">51&ndash;200</option>
+                                <option value="200+">200+</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-reason" data-i18n="veris_page.lab_reason">Why are you checking? (optional)</label>
+                            <select id="scanner-reason" name="reason">
+                                <option value="" data-i18n="veris_page.opt_unspecified">Prefer not to say</option>
+                                <option value="suspect_compromise" data-i18n="veris_page.opt_reason_suspect">I suspect a compromise</option>
+                                <option value="routine_check" data-i18n="veris_page.opt_reason_routine">Routine security check</option>
+                                <option value="evaluation" data-i18n="veris_page.opt_reason_eval">Evaluating VERIS</option>
+                            </select>
+                        </div>
                     </div>
+                    <label class="veris-consent">
+                        <input type="checkbox" name="consent" value="1" required>
+                        <span><span data-i18n="veris_page.consent_label">I agree that Nine-Security may use these contact details to email the download link and follow up about this assessment, as described in the</span>
+                            <a href="privacy.html" target="_blank" rel="noopener" data-i18n="veris_page.consent_link">Privacy Policy</a>.</span>
+                    </label>
                     <p class="veris-form-hint" data-i18n="veris_page.hint_scanner">Request creation, launcher packaging, and download are handled in the background through the internal VERIS API. The signed launcher token is fixed to 72 hours and expires automatically if unused for 3 days.</p>
                     <button class="btn primary-btn" id="generateScannerBtn" type="submit">
                         <i class="fa-solid fa-download"></i> <span data-i18n="veris_page.btn_generate">GENERATE_SCANNER</span>
@@ -1787,25 +1836,127 @@
 
             const LAUNCHER_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
 
+            /* Central's JSON error codes -> [i18n key, English fallback]. */
+            const VERIS_ERROR_MESSAGES = {
+                consent_required: ['veris_page.err_consent', 'Please agree to the privacy notice to continue.'],
+                invalid_email: ['veris_page.err_invalid_email', 'Please enter a valid email address.'],
+                rate_limited: ['veris_page.err_rate_limited', 'Too many requests. Please try again in about an hour.'],
+                verification_email_failed: ['veris_page.err_verify_email_failed', 'We could not send the verification email. Please try again later.'],
+                verification_link_expired: ['veris_page.err_verify_expired', 'This verification link has expired. Please request a new scanner.'],
+                verification_link_invalid: ['veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'],
+                request_not_found: ['veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'],
+            };
+
+            /* Throw a localized message for a known Central error code, else the generic HTTP error. */
+            async function throwForResponse(response, fallbackMessage) {
+                const ct = String(response.headers.get('content-type') || '').toLowerCase();
+                if (ct.includes('application/json')) {
+                    let code = '';
+                    try {
+                        code = String((await response.clone().json()).error || '');
+                    } catch (_) {
+                        code = '';
+                    }
+                    const known = VERIS_ERROR_MESSAGES[code];
+                    if (known) throw new Error(v(known[0], known[1]));
+                }
+                await fetchTextOrThrow(response, fallbackMessage);
+            }
+
+            function currentLang() {
+                try {
+                    const lang = localStorage.getItem('9sec_lang') || 'en';
+                    return ['en', 'tw', 'jp'].includes(lang) ? lang : 'en';
+                } catch (_) {
+                    return 'en';
+                }
+            }
+
             /* Poll a request's status.json until the background launcher build finishes.
-               Resolves with the final status payload; throws if the build failed or timed out. */
+               Resolves with the final status payload; throws if the build failed, the request
+               is no longer usable, or the build timed out. */
             async function waitForLauncherReady(statusUrl) {
                 const deadline = Date.now() + LAUNCHER_BUILD_TIMEOUT_MS;
                 while (Date.now() < deadline) {
-                    await new Promise((resolve) => setTimeout(resolve, 2500));
                     let st;
                     try {
                         st = await fetchJsonStrict(statusUrl, 'request status');
                     } catch (_) {
-                        continue; /* transient */
+                        st = null; /* transient */
                     }
-                    const status = String(st.status || '');
+                    const status = st ? String(st.status || '') : '';
                     if (status === 'ready') return st;
                     if (status === 'failed') {
                         throw new Error(`${v('veris_page.err_req_create', 'Request creation failed')}: ${String(st.error || status)}`);
                     }
+                    if (status && status !== 'generating') {
+                        throw new Error(v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 2500));
                 }
                 throw new Error(v('veris_page.err_build_timeout', 'Launcher build is taking longer than expected. Please try again in a few minutes.'));
+            }
+
+            /* Not normalizeVerisResourceUrl(): it collapses /requests/<id>/status.json to the HTML page. */
+            function requestStatusUrl(requestId) {
+                return `${GOV_API_BASE}/requests/${encodeURIComponent(String(requestId || ''))}/status.json`;
+            }
+
+            function buildingFeedback() {
+                setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_building_launcher', 'Building and signing your dedicated launcher...')}</strong><p>${v('veris_page.msg_building_launcher_p', 'This usually takes under a minute. The download starts automatically.')}</p>`);
+            }
+
+            /* Start the launcher download, show the summary, then wait for the scanner's upload
+               and analysis in the overlay. Shared by the form submit and the email-verify link. */
+            async function deliverLauncherAndWait(d) {
+                if (!d.requestId || !d.downloadUrl) {
+                    throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
+                }
+                stashRequest(d.requestId);
+                startDirectBinaryDownload(d.downloadUrl, d.requestNorm, d.requestId);
+                setFeedback(scannerStatus, 'success',
+                    `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
+                    `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(d.requestId)}</code>`)}</p>` +
+                    `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(d.profile || 'fast'))}</code></p>` +
+                    `<p>Target Platform: <code>${escapeHtml(d.platform)}</code>${d.platform !== 'windows' ? ' <em>(beta)</em>' : ''}</p>` +
+                    `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(d.observationWindowSec || 60))}s</code></p>` +
+                    (d.launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(d.launcherSigned ? 'signed' : (d.signingStatus || 'unsigned'))}</code></p>`) +
+                    (d.launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(d.launcherSizeBytes))}</code></p>` : '') +
+                    (d.launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(d.launcherSha256)}</code></p>` : '') +
+                    `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(d.caseId)}</code></p>`
+                );
+
+                showWaitOverlay({ caseId: d.caseId, requestId: d.requestId, email: d.email });
+                const result = await pollScannerResult(d.requestNorm, d.requestId, Date.now());
+
+                if (waitClosedManually) {
+                    /* Overlay already dismissed by 「關閉」.*/
+                    setFeedback(scannerStatus, 'pending',
+                        `<strong>${v('veris_page.wait_closed', 'Wait dialog closed.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
+                    );
+                    return;
+                }
+                if (!result) {
+                    closeWaitOverlay();
+                    setFeedback(scannerStatus, 'pending',
+                        `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong><p>${v('veris_page.wait_timeout_p', 'No automated result yet. If the launcher runs later, upload the package below.')}</p>`
+                    );
+                }
+                /* OVERLAY_JOB_FAILED is already shown in the overlay; on success the overlay stays on the report until [×]. */
+            }
+
+            function launcherDetailsFrom(jr, fallbackRequestUrl) {
+                const requestId = String(jr.request_id || jr.id || '');
+                const requestNorm = normalizeVerisResourceUrl(jr.request_url || fallbackRequestUrl || `${GOV_API_BASE}/requests/${requestId}`);
+                return {
+                    requestId,
+                    requestNorm,
+                    downloadUrl: normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`),
+                    launcherSigned: (typeof jr.launcher_signed === 'boolean') ? jr.launcher_signed : null,
+                    signingStatus: String(jr.signing_status || ''),
+                    launcherSizeBytes: Number(jr.launcher_size_bytes || 0),
+                    launcherSha256: String(jr.launcher_sha256 || ''),
+                };
             }
 
             scannerForm?.addEventListener('submit', async (event) => {
@@ -1830,6 +1981,11 @@
                     params.set('collection_profile', String(selectedPreset?.profile || 'fast'));
                     const selectedPlatform = String(formData.get('target_platform') || 'windows');
                     params.set('target_platform', selectedPlatform);
+                    params.set('company', String(formData.get('company') || '').trim());
+                    params.set('endpoint_count', String(formData.get('endpoint_count') || ''));
+                    params.set('reason', String(formData.get('reason') || ''));
+                    params.set('consent', formData.get('consent') ? '1' : '');
+                    params.set('lang', currentLang());
                     /* Central builds the launcher in the background and answers 202; we poll
                        status.json below instead of holding the request open past the proxy timeout. */
                     params.set('async_build', '1');
@@ -1842,81 +1998,45 @@
                         body: params.toString(),
                         redirect: 'follow'
                     });
+                    if (!response.ok) {
+                        await throwForResponse(response, v('veris_page.err_req_create', 'Request creation failed'));
+                    }
 
-                    let requestNorm = '';
-                    let requestId = '';
-                    let downloadUrl = '';
-                    let launcherSigned = null;
-                    let signingStatus = '';
-                    let launcherSizeBytes = 0;
-                    let launcherSha256 = '';
+                    let details;
                     const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
-                    if ((response.ok || response.status === 201) && rqCt.includes('application/json')) {
+                    if (rqCt.includes('application/json')) {
                         let jr = await response.json();
+                        if (String(jr.status || '') === 'pending_verification') {
+                            /* Central emailed a confirmation link; the download continues from that link. */
+                            setFeedback(scannerStatus, 'success',
+                                `<strong>${v('veris_page.msg_check_email', 'Check your inbox to continue.')}</strong>` +
+                                `<p>${v('veris_page.msg_check_email_p', 'We sent a confirmation link to {email}. Open it within 24 hours to build and download your scanner. Check your spam folder if it does not arrive in a few minutes.').replace('{email}', `<code>${escapeHtml(String(jr.email_sent_to || email))}</code>`)}</p>`
+                            );
+                            scannerForm.reset();
+                            return;
+                        }
                         if (String(jr.status || '') === 'generating') {
-                            setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_building_launcher', 'Building and signing your dedicated launcher...')}</strong><p>${v('veris_page.msg_building_launcher_p', 'This usually takes under a minute. The download starts automatically.')}</p>`);
+                            buildingFeedback();
                             const built = await waitForLauncherReady(
-                                /* Not normalizeVerisResourceUrl(): it collapses /requests/<id>/status.json to the HTML page. */
-                                `${GOV_API_BASE}/requests/${encodeURIComponent(String(jr.request_id || ''))}/status.json`
+                                requestStatusUrl(jr.request_id)
                             );
                             jr = { ...jr, ...built, request_id: jr.request_id };
                         }
-                        requestId = String(jr.request_id || '');
-                        requestNorm = normalizeVerisResourceUrl(jr.request_url || `${GOV_API_BASE}/requests/${requestId}`);
-                        downloadUrl = normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`);
-                        launcherSigned = (typeof jr.launcher_signed === 'boolean') ? jr.launcher_signed : null;
-                        signingStatus = String(jr.signing_status || '');
-                        launcherSizeBytes = Number(jr.launcher_size_bytes || 0);
-                        launcherSha256 = String(jr.launcher_sha256 || '');
+                        details = launcherDetailsFrom(jr);
                     } else {
+                        /* Older Central: HTML redirect to the request page. */
                         await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
-                        requestNorm = normalizeVerisResourceUrl(response.url || '');
-                        requestId = parseRequestId(requestNorm);
-                        downloadUrl = `${requestNorm.replace(/\/+$/, '')}/download`;
+                        const requestNorm = normalizeVerisResourceUrl(response.url || '');
+                        details = launcherDetailsFrom({ request_id: parseRequestId(requestNorm) }, requestNorm);
                     }
-                    if (!requestId || !downloadUrl) {
-                        throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
-                    }
-                    stashRequest(requestId);
-                    downloadUrl = startDirectBinaryDownload(downloadUrl, requestNorm, requestId);
-                    setFeedback(scannerStatus, 'success',
-                        `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
-                        `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(requestId)}</code>`)}</p>` +
-                        `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(selectedPreset?.profile || 'fast'))}</code></p>` +
-                        `<p>Target Platform: <code>${escapeHtml(selectedPlatform)}</code>${selectedPlatform !== 'windows' ? ' <em>(beta)</em>' : ''}</p>` +
-                        `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(selectedPreset?.observation_window_sec || 60))}s</code></p>` +
-                        (launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(launcherSigned ? 'signed' : (signingStatus || 'unsigned'))}</code></p>`) +
-                        (launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(launcherSizeBytes))}</code></p>` : '') +
-                        (launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(launcherSha256)}</code></p>` : '') +
-                        `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(randomCaseId)}</code></p>`
-                    );
-
-                    showWaitOverlay({ caseId: randomCaseId, requestId, email });
-                    const startedAt = Date.now();
-
-                    const result = await pollScannerResult(requestNorm, requestId, startedAt);
-
-                    if (waitClosedManually) {
-                        /* Overlay already dismissed by 「關閉」.*/
-                        setFeedback(scannerStatus, 'pending',
-                            `<strong>${v('veris_page.wait_closed', 'Wait dialog closed.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
-                        );
-                        return;
-                    }
-
-                    if (!result) {
-                        closeWaitOverlay();
-                        setFeedback(scannerStatus, 'pending',
-                            `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong><p>${v('veris_page.wait_timeout_p', 'No automated result yet. If the launcher runs later, upload the package below.')}</p>`
-                        );
-                        return;
-                    }
-
-                    if (result === OVERLAY_JOB_FAILED) {
-                        return;
-                    }
-
-                    /* Analysis succeeded: overlay stays on the report until [×]. */
+                    await deliverLauncherAndWait({
+                        ...details,
+                        profile: String(selectedPreset?.profile || 'fast'),
+                        platform: selectedPlatform,
+                        observationWindowSec: selectedPreset?.observation_window_sec || 60,
+                        caseId: randomCaseId,
+                        email,
+                    });
                 } catch (error) {
                     setFeedback(scannerStatus, 'error',
                         `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
@@ -1925,6 +2045,65 @@
                     scannerButton.disabled = false;
                 }
             });
+
+            /* Email-verification landing: veris.html?verify=<requestId>.<token> */
+            async function handleVerificationLink() {
+                let raw = '';
+                try {
+                    raw = new URLSearchParams(window.location.search).get('verify') || '';
+                } catch (_) {
+                    raw = '';
+                }
+                if (!raw) return;
+                try {
+                    const clean = new URL(window.location.href);
+                    clean.searchParams.delete('verify');
+                    window.history.replaceState(null, '', clean.toString());
+                } catch (_) {
+                    /* leaving the token in the address bar is harmless: it is single-request and expires */
+                }
+                const dot = raw.indexOf('.');
+                const requestId = dot > 0 ? raw.slice(0, dot) : '';
+                const token = dot > 0 ? raw.slice(dot + 1) : '';
+                scannerStatus?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                scannerButton.disabled = true;
+                setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_verifying', 'Confirming your email...')}</strong>`);
+                try {
+                    if (!/^[0-9a-f]{12,64}$/i.test(requestId) || !token) {
+                        throw new Error(v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    const response = await fetch(`${GOV_API_BASE}/requests/${encodeURIComponent(requestId)}/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: new URLSearchParams({ token }).toString()
+                    });
+                    if (!response.ok) {
+                        await throwForResponse(response, v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    const jr = await response.json();
+                    buildingFeedback();
+                    const st = await waitForLauncherReady(
+                        requestStatusUrl(requestId)
+                    );
+                    await deliverLauncherAndWait({
+                        ...launcherDetailsFrom({ ...jr, ...st, request_id: requestId }),
+                        profile: String(st.collection_profile || 'fast'),
+                        platform: String(st.target_platform || jr.target_platform || 'windows'),
+                        observationWindowSec: st.observation_window_sec || 60,
+                        caseId: String(st.case_id || jr.case_id || '-'),
+                        email: '',
+                    });
+                } catch (error) {
+                    setFeedback(scannerStatus, 'error',
+                        `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
+                    );
+                } finally {
+                    scannerButton.disabled = false;
+                }
+            }
 
             closeScannerWaitBtn?.addEventListener('click', (ev) => {
                 // Shrink to a non-blocking corner pill instead of hiding entirely, so the
@@ -2097,6 +2276,7 @@
                 }
             });
             loadCapabilities();
+            handleVerificationLink();
         })();
     </script>
     <script type="module">
