@@ -1785,6 +1785,29 @@
                 return outcome.payload;
             }
 
+            const LAUNCHER_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
+
+            /* Poll a request's status.json until the background launcher build finishes.
+               Resolves with the final status payload; throws if the build failed or timed out. */
+            async function waitForLauncherReady(statusUrl) {
+                const deadline = Date.now() + LAUNCHER_BUILD_TIMEOUT_MS;
+                while (Date.now() < deadline) {
+                    await new Promise((resolve) => setTimeout(resolve, 2500));
+                    let st;
+                    try {
+                        st = await fetchJsonStrict(statusUrl, 'request status');
+                    } catch (_) {
+                        continue; /* transient */
+                    }
+                    const status = String(st.status || '');
+                    if (status === 'ready') return st;
+                    if (status === 'failed') {
+                        throw new Error(`${v('veris_page.err_req_create', 'Request creation failed')}: ${String(st.error || status)}`);
+                    }
+                }
+                throw new Error(v('veris_page.err_build_timeout', 'Launcher build is taking longer than expected. Please try again in a few minutes.'));
+            }
+
             scannerForm?.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 scannerButton.disabled = true;
@@ -1807,6 +1830,9 @@
                     params.set('collection_profile', String(selectedPreset?.profile || 'fast'));
                     const selectedPlatform = String(formData.get('target_platform') || 'windows');
                     params.set('target_platform', selectedPlatform);
+                    /* Central builds the launcher in the background and answers 202; we poll
+                       status.json below instead of holding the request open past the proxy timeout. */
+                    params.set('async_build', '1');
                     const response = await fetch(`${GOV_API_BASE}/requests`, {
                         method: 'POST',
                         headers: {
@@ -1826,7 +1852,14 @@
                     let launcherSha256 = '';
                     const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
                     if ((response.ok || response.status === 201) && rqCt.includes('application/json')) {
-                        const jr = await response.json();
+                        let jr = await response.json();
+                        if (String(jr.status || '') === 'generating') {
+                            setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_building_launcher', 'Building and signing your dedicated launcher...')}</strong><p>${v('veris_page.msg_building_launcher_p', 'This usually takes under a minute. The download starts automatically.')}</p>`);
+                            const built = await waitForLauncherReady(
+                                normalizeVerisResourceUrl(jr.status_url || `${GOV_API_BASE}/requests/${jr.request_id}/status.json`)
+                            );
+                            jr = { ...jr, ...built, request_id: jr.request_id };
+                        }
                         requestId = String(jr.request_id || '');
                         requestNorm = normalizeVerisResourceUrl(jr.request_url || `${GOV_API_BASE}/requests/${requestId}`);
                         downloadUrl = normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`);
