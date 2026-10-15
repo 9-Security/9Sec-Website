@@ -1850,6 +1850,10 @@
             /* Throw a localized message for a known Central error code, else the generic HTTP error. */
             async function throwForResponse(response, fallbackMessage) {
                 const ct = String(response.headers.get('content-type') || '').toLowerCase();
+                if (response.status === 429 && !ct.includes('application/json')) {
+                    /* Cloudflare edge rate limit (plain "error code: 1015"); it lifts within seconds. */
+                    throw new Error(v('veris_page.err_rate_limited_edge', 'Too many requests in a short time. Please wait a few seconds and try again.'));
+                }
                 if (ct.includes('application/json')) {
                     let code = '';
                     try {
