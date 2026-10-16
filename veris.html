@@ -405,6 +405,46 @@
             color: var(--accent-secondary);
         }
 
+        .veris-summary-feedback textarea {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 0.4rem;
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-primary);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 4px;
+            font: inherit;
+            padding: 0.5rem;
+        }
+
+        .veris-summary-feedback .veris-fb-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .veris-summary-feedback .veris-fb-buttons button {
+            display: inline-flex;
+            width: auto;
+            margin: 0;
+        }
+
+        .veris-summary-feedback button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .veris-summary-feedback[data-rating="up"] [data-fb-rating="up"],
+        .veris-summary-feedback[data-rating="down"] [data-fb-rating="down"] {
+            opacity: 1;
+        }
+
+        .veris-summary-feedback .veris-fb-status {
+            margin: 0.3rem 0 0;
+            color: var(--accent-secondary);
+        }
+
         .veris-summary-details {
             margin-top: 0.4rem;
         }
@@ -1384,6 +1424,7 @@
                     ? s.host_disposition
                     : (typeof p.disposition === 'string' ? p.disposition : '');
                 return Object.assign({}, s, {
+                    job_id: typeof p.job_id === 'string' ? p.job_id : '',
                     log_trust_score: s.log_trust_score,
                     gap_count: s.gap_count,
                     recommended_next_step: recommended_next_step,
@@ -1533,6 +1574,15 @@
                 const reviewBlock = reviewHref
                     ? `<div class="veris-summary-block veris-summary-review"><h4>${v('veris_page.review_title', 'Free 30-minute report review')}</h4><p>${v('veris_page.review_body', 'Want an expert to walk you through this result? Email us to book a free 30-minute review with a Nine-Security analyst.')}</p><p><a class="veris-note-link" href="${escapeHtml(reviewHref)}">${v('veris_page.review_button', 'Book by email')}</a> <small>${escapeHtml(String(review.email || ''))}</small></p></div>`
                     : '';
+                const fbJob = /^[A-Za-z0-9_-]{1,64}$/.test(String(summary.job_id || '')) ? String(summary.job_id) : '';
+                const feedbackBlock = fbJob
+                    ? `<div class="veris-summary-block veris-summary-feedback" data-job="${escapeHtml(fbJob)}"><h4>${v('veris_page.fb_title', 'Was this result useful?')}</h4>`
+                      + `<p class="veris-fb-buttons"><button type="button" class="lang-btn" data-fb-rating="up">${v('veris_page.fb_up', '👍 Useful')}</button> `
+                      + `<button type="button" class="lang-btn" data-fb-rating="down">${v('veris_page.fb_down', '👎 Not useful')}</button></p>`
+                      + `<div class="veris-fb-more" hidden><textarea maxlength="500" rows="3" placeholder="${v('veris_page.fb_comment_ph', 'What could be better? (optional)')}"></textarea>`
+                      + `<p><button type="button" class="lang-btn" data-fb-send>${v('veris_page.fb_send', 'Send')}</button></p></div>`
+                      + `<p class="veris-fb-status" role="status"></p></div>`
+                    : '';
                 const highlightBlock = highlights.length
                     ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_findings', 'Key findings')}</h4><ul class="veris-summary-list">${highlights.map((row) => `<li>${escapeHtml(row)}</li>`).join('')}</ul></div>`
                     : '';
@@ -1576,7 +1626,7 @@
                         return `<span class="veris-summary-chip">${escapeHtml(signal)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
                     }).join('')}</div></div>`
                     : '';
-                return `<div class="veris-summary">${verdictBlock}${reviewBlock}<details class="veris-summary-details"><summary>${v('veris_page.sum_details_toggle', 'Show technical details')}</summary><div class="veris-summary">${recLine}${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${escWhy}</div></details></div>`;
+                return `<div class="veris-summary">${verdictBlock}${reviewBlock}${feedbackBlock}<details class="veris-summary-details"><summary>${v('veris_page.sum_details_toggle', 'Show technical details')}</summary><div class="veris-summary">${recLine}${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${escWhy}</div></details></div>`;
             }
 
             function generateCaseId() {
@@ -1799,6 +1849,49 @@
             }
 
             /** Dedicated-scanner flow: keep #scannerRequestStatus as launcher-ready info only; full report stays in the overlay. */
+            /* Result-panel feedback + review-click tracking (POST /jobs/<id>/feedback, form-encoded). */
+            function postJobFeedback(jobId, fields) {
+                return fetch(`${GOV_API_BASE}/jobs/${encodeURIComponent(jobId)}/feedback`, {
+                    method: 'POST', keepalive: true,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+                    body: new URLSearchParams(fields).toString(),
+                }).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r; });
+            }
+            document.addEventListener('click', (e) => {
+                const t = e.target instanceof Element ? e.target : null;
+                if (!t) return;
+                const review = t.closest('.veris-summary-review a');
+                const fbBox = t.closest('.veris-summary-feedback');
+                if (review) {
+                    const jobEl = document.querySelector('.veris-summary-feedback[data-job]');
+                    if (jobEl) postJobFeedback(jobEl.dataset.job, { event: 'review_click' }).catch(() => {});
+                    return;
+                }
+                if (!fbBox) return;
+                const jobId = fbBox.dataset.job || '';
+                const status = fbBox.querySelector('.veris-fb-status');
+                const more = fbBox.querySelector('.veris-fb-more');
+                const thanks = () => { status.textContent = v('veris_page.fb_thanks', 'Thank you for the feedback!'); };
+                const failed = () => { status.textContent = v('veris_page.fb_error', 'Could not send feedback. Please try again later.'); };
+                const btn = t.closest('[data-fb-rating]');
+                if (btn) {
+                    const rating = btn.getAttribute('data-fb-rating');
+                    fbBox.dataset.rating = rating;
+                    fbBox.querySelectorAll('[data-fb-rating]').forEach((b) => { b.disabled = true; });
+                    postJobFeedback(jobId, { rating }).then(() => {
+                        thanks();
+                        if (rating === 'down' && more) more.hidden = false;
+                    }).catch(failed);
+                    return;
+                }
+                if (t.closest('[data-fb-send]')) {
+                    const comment = (fbBox.querySelector('textarea') || {}).value || '';
+                    if (!comment.trim()) return;
+                    postJobFeedback(jobId, { rating: fbBox.dataset.rating || 'down', comment: comment.slice(0, 500) })
+                        .then(() => { if (more) more.hidden = true; thanks(); }).catch(failed);
+                }
+            });
+
             function finalizeOverlayAnalysisSuccess(payload, jobBase) {
                 const summed = summarizeResultPayload(payload);
 
