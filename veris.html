@@ -405,6 +405,18 @@
             color: var(--accent-secondary);
         }
 
+        .veris-summary-details {
+            margin-top: 0.4rem;
+        }
+
+        .veris-summary-details > summary {
+            cursor: pointer;
+            padding: 0.55rem 0.2rem;
+            color: var(--accent-secondary);
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+        }
+
         .veris-summary-verdict {
             border-color: rgba(255, 184, 77, 0.24);
             background: linear-gradient(135deg, rgba(52, 28, 4, 0.55), rgba(8, 18, 34, 0.5));
@@ -1418,20 +1430,20 @@
                     no_clear_risk: v('veris_page.exec_verdict_no_clear_risk', 'No clear risk')
                 };
                 const reasons = {
-                    multi_domain_chain_activity: v('veris_page.exec_reason_multi_domain_chain_activity', 'multi-domain process activity and correlated attack-chain candidates indicate material risk'),
-                    collection_gaps_limit_confidence: v('veris_page.exec_reason_collection_gaps_limit_confidence', 'collection gaps are limiting confidence more than confirmed hostile linkage'),
-                    common_app_memory_gap_pressure: v('veris_page.exec_reason_common_app_memory_gap_pressure', 'anomalies cluster around common-app memory behavior while persistence linkage remains incomplete'),
-                    bounded_anomaly_without_strong_chain: v('veris_page.exec_reason_bounded_anomaly_without_strong_chain', 'bounded anomalies are present, but the current linkage remains partially ambiguous'),
-                    low_signal_with_acceptable_coverage: v('veris_page.exec_reason_low_signal_with_acceptable_coverage', 'no strong multi-domain pivot or structural gap pressure stands out in this collection'),
-                    dual_axis_compromise_elevated: v('veris_page.exec_reason_dual_axis_compromise_elevated', 'the authoritative compromise assessment is elevated'),
+                    multi_domain_chain_activity: v('veris_page.exec_reason_multi_domain_chain_activity', 'several processes show linked suspicious activity'),
+                    collection_gaps_limit_confidence: v('veris_page.exec_reason_collection_gaps_limit_confidence', 'the scan could not see enough of this host to rule risk out'),
+                    common_app_memory_gap_pressure: v('veris_page.exec_reason_common_app_memory_gap_pressure', 'unusual memory activity in common applications, with some startup entries not yet traced'),
+                    bounded_anomaly_without_strong_chain: v('veris_page.exec_reason_bounded_anomaly_without_strong_chain', 'some unusual activity was found, but nothing links it to an attack'),
+                    low_signal_with_acceptable_coverage: v('veris_page.exec_reason_low_signal_with_acceptable_coverage', 'nothing suspicious stood out in what we checked'),
+                    dual_axis_compromise_elevated: v('veris_page.exec_reason_dual_axis_compromise_elevated', 'activity on this host is consistent with a possible compromise'),
                     known_malware_hash_match: v('veris_page.exec_reason_known_malware_hash_match', 'executables on this host match known malware')
                 };
                 const actions = {
-                    maintain_baseline_and_compare_future_runs: v('veris_page.exec_action_maintain_baseline_and_compare_future_runs', 'keep baseline monitoring and compare against future runs'),
-                    recollect_with_follow_up_profile: v('veris_page.exec_action_recollect_with_follow_up_profile', 'rerun with the recommended follow-up profile to improve linkage'),
-                    rerun_observe_and_review_startup: v('veris_page.exec_action_rerun_observe_and_review_startup', 'rerun Observe and review startup artifacts tied to the primary pivot'),
-                    review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the primary pivot and adjacent persistence artifacts immediately'),
-                    monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'compare a follow-up timeline before escalating further'),
+                    maintain_baseline_and_compare_future_runs: v('veris_page.exec_action_maintain_baseline_and_compare_future_runs', 'scan again in about 30 days and compare'),
+                    recollect_with_follow_up_profile: v('veris_page.exec_action_recollect_with_follow_up_profile', 're-run the scanner as Administrator for a complete picture'),
+                    rerun_observe_and_review_startup: v('veris_page.exec_action_rerun_observe_and_review_startup', 're-run the scanner and review the startup entries listed in the report'),
+                    review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the processes and startup entries listed in the report now'),
+                    monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'scan again later and compare before taking further action'),
                     isolate_and_review_matched_binaries: v('veris_page.exec_action_isolate_and_review_matched_binaries', 'isolate the host and review the matched binaries listed in the report')
                 };
                 if (code) {
@@ -1440,8 +1452,10 @@
                     const actionCode = String(verdict.action_code || '').trim();
                     const reason = reasons[reasonCode] || String(verdict.reason_text || '').trim();
                     const action = actions[actionCode] || String(verdict.action_text || '').trim();
-                    if (reason && action) return `${label}: ${reason}; ${action}.`;
-                    if (reason) return `${label}: ${reason}.`;
+                    const cjk = currentLang() !== 'en';
+                    const [colon, semi, stop] = cjk ? ['：', '；', '。'] : [': ', '; ', '.'];
+                    if (reason && action) return `${label}${colon}${reason}${semi}${action}${stop}`;
+                    if (reason) return `${label}${colon}${reason}${stop}`;
                     return label;
                 }
                 const sentence = String(summary && (summary.executive_verdict_sentence || verdict.sentence) || '').trim();
@@ -1562,7 +1576,7 @@
                         return `<span class="veris-summary-chip">${escapeHtml(signal)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
                     }).join('')}</div></div>`
                     : '';
-                return `<div class="veris-summary">${lines}${piv}${verdictBlock}${reviewBlock}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${recLine}${escWhy}</div>`;
+                return `<div class="veris-summary">${verdictBlock}${reviewBlock}<details class="veris-summary-details"><summary>${v('veris_page.sum_details_toggle', 'Show technical details')}</summary><div class="veris-summary">${recLine}${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${escWhy}</div></details></div>`;
             }
 
             function generateCaseId() {
