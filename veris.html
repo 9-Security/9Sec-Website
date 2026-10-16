@@ -1477,7 +1477,8 @@
                     bounded_anomaly_without_strong_chain: v('veris_page.exec_reason_bounded_anomaly_without_strong_chain', 'some unusual activity was found, but nothing links it to an attack'),
                     low_signal_with_acceptable_coverage: v('veris_page.exec_reason_low_signal_with_acceptable_coverage', 'nothing suspicious stood out in what we checked'),
                     dual_axis_compromise_elevated: v('veris_page.exec_reason_dual_axis_compromise_elevated', 'activity on this host is consistent with a possible compromise'),
-                    known_malware_hash_match: v('veris_page.exec_reason_known_malware_hash_match', 'executables on this host match known malware')
+                    known_malware_hash_match: v('veris_page.exec_reason_known_malware_hash_match', 'executables on this host match known malware'),
+                    known_c2_connection: v('veris_page.exec_reason_known_c2_connection', 'this host is talking to known command-and-control (C2) servers')
                 };
                 const actions = {
                     maintain_baseline_and_compare_future_runs: v('veris_page.exec_action_maintain_baseline_and_compare_future_runs', 'scan again in about 30 days and compare'),
@@ -1485,7 +1486,8 @@
                     rerun_observe_and_review_startup: v('veris_page.exec_action_rerun_observe_and_review_startup', 're-run the scanner and review the startup entries listed in the report'),
                     review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the processes and startup entries listed in the report now'),
                     monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'scan again later and compare before taking further action'),
-                    isolate_and_review_matched_binaries: v('veris_page.exec_action_isolate_and_review_matched_binaries', 'isolate the host and review the matched binaries listed in the report')
+                    isolate_and_review_matched_binaries: v('veris_page.exec_action_isolate_and_review_matched_binaries', 'isolate the host and review the matched binaries listed in the report'),
+                    isolate_and_block_c2: v('veris_page.exec_action_isolate_and_block_c2', 'isolate the host, block the listed C2 addresses and investigate the connecting processes')
                 };
                 if (code) {
                     const label = labels[code] || String(verdict.label || '').trim() || v('veris_page.exec_verdict_needs_attention', 'Needs attention');
