@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" data-force-lang="tw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="veris_page.doc_title">VERIS 免費主機入侵檢查 | Nine-Security</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=20260215-1">
+    <meta name="description"
+        content="免費檢查電腦有沒有被入侵的跡象（支援 Windows，Linux 與 macOS 測試中）。不用安裝，執行一次掃描器，幾分鐘內拿到白話報告。檔案不會離開電腦。">
+    <meta name="keywords"
+        content="VERIS, 免費, 電腦被入侵, 中毒檢查, 惡意程式掃描, 資安健檢, 端點初篩, Windows, Linux, macOS">
+    <link rel="alternate" hreflang="en" href="https://nine-security.com/veris.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://nine-security.com/veris.zh-tw.html">
+    <link rel="alternate" hreflang="x-default" href="https://nine-security.com/veris.html">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://nine-security.com/veris.zh-tw.html">
+    <link rel="icon" type="image/png" href="/assets/favicon-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW-CBZfJaNW.png">
+    <script type="module" crossorigin src="/assets/services-DUa3Catr.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/arsenal-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_-BxbEqz2_.css">
+    <style>
+        .veris-page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 6rem;
+        }
+
+        .veris-hero {
+            text-align: center;
+            margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+            margin-bottom: 2.5rem;
+        }
+
+        .veris-hero .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .veris-hero .subtitle {
+            max-width: 760px;
+            margin: 0.5rem auto 0;
+        }
+
+        .veris-badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.35rem;
+        }
+
+        .veris-badge {
+            border: 1px solid rgba(0, 229, 255, 0.55);
+            color: var(--accent-secondary);
+            background: rgba(0, 229, 255, 0.08);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 4px;
+        }
+
+        .veris-flow-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            align-items: start;
+        }
+
+        .veris-action-card {
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .veris-action-card.secondary {
+            border-top-color: var(--accent-secondary);
+        }
+
+        .veris-action-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .veris-action-card p {
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+        }
+
+        .veris-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.75rem;
+        }
+
+        .veris-steps li {
+            display: grid;
+            grid-template-columns: 2.2rem 1fr;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            margin-bottom: 0.85rem;
+            line-height: 1.45;
+        }
+
+        .veris-steps li>span:first-child {
+            width: 2.2rem;
+            height: 2.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .secondary .veris-steps li>span:first-child {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .veris-note-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 2.25rem;
+        }
+
+        .veris-note {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.25rem;
+            border-radius: 4px;
+        }
+
+        .veris-note h3 {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            color: var(--accent-color);
+        }
+
+        .veris-note p {
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .veris-consult-card {
+            grid-column: 1 / -1;
+            border-color: rgba(0, 229, 255, 0.42);
+            border-top: 4px solid var(--accent-secondary);
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.11), rgba(0, 255, 65, 0.05));
+            padding: clamp(1.4rem, 2.5vw, 2rem);
+        }
+
+        .veris-consult-card h3 {
+            font-size: clamp(1.15rem, 2vw, 1.55rem);
+            color: var(--accent-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .veris-consult-card p {
+            max-width: 780px;
+            font-size: 1.02rem;
+            color: var(--text-primary);
+        }
+
+        .veris-consult-card .veris-note-link {
+            font-size: 1rem;
+            padding: 0.35rem 0;
+        }
+
+        .veris-note-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-top: 0.85rem;
+            color: var(--accent-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.86rem;
+            text-decoration: none;
+        }
+
+        .veris-note-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        .veris-note-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem 1rem;
+            margin-top: 0.9rem;
+        }
+
+        .veris-note-links .veris-note-link {
+            margin-top: 0;
+        }
+
+        .veris-fit {
+            margin-top: 3rem;
+        }
+
+        .veris-fit .section-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .veris-fit-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .veris-fit-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            padding: 1rem 0;
+        }
+
+        .veris-fit-item i {
+            color: var(--accent-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .veris-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .veris-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .veris-field {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .veris-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .veris-consent {
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            margin: 0.9rem 0 0.2rem;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .veris-consent input {
+            margin-top: 0.25rem;
+            accent-color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .veris-consent a {
+            color: var(--accent-color);
+        }
+
+        .veris-field label {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .veris-field input,
+        .veris-field select {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-primary);
+            padding: 0.8rem 0.95rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+        }
+
+        .veris-field input::file-selector-button {
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            padding: 0.55rem 0.85rem;
+            border-radius: 4px;
+            margin-right: 0.85rem;
+            cursor: pointer;
+        }
+
+        .veris-field input:focus,
+        .veris-field select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.25);
+        }
+
+        .veris-form-hint {
+            margin: -0.1rem 0 0;
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .veris-feedback {
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .veris-feedback[hidden] {
+            display: none;
+        }
+
+        .veris-feedback.success {
+            border-color: rgba(0, 255, 157, 0.4);
+            background: rgba(0, 255, 157, 0.06);
+        }
+
+        .veris-feedback.error {
+            border-color: rgba(255, 77, 77, 0.42);
+            background: rgba(255, 77, 77, 0.08);
+        }
+
+        .veris-feedback.pending {
+            border-color: rgba(0, 229, 255, 0.4);
+            background: rgba(0, 229, 255, 0.07);
+        }
+
+        .veris-feedback strong {
+            display: block;
+            margin-bottom: 0.45rem;
+        }
+
+        .veris-feedback code {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .veris-summary {
+            margin: 0.9rem 0 0;
+            display: grid;
+            gap: 0.45rem;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            color: var(--text-primary);
+        }
+
+        .veris-summary .veris-summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.45rem;
+        }
+
+        .veris-summary .veris-summary-row span:last-child {
+            text-align: right;
+        }
+
+        .veris-summary-block {
+            margin-top: 0.4rem;
+            padding: 0.8rem 0.95rem;
+            border: 1px solid rgba(0, 229, 255, 0.14);
+            border-radius: 6px;
+            background: rgba(8, 18, 34, 0.45);
+        }
+
+        .veris-summary-block h4 {
+            margin: 0 0 0.55rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent-secondary);
+        }
+
+        .veris-summary-feedback textarea {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 0.4rem;
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-primary);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 4px;
+            font: inherit;
+            padding: 0.5rem;
+        }
+
+        .veris-summary-feedback .veris-fb-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .veris-summary-feedback .veris-fb-buttons button {
+            display: inline-flex;
+            width: auto;
+            margin: 0;
+        }
+
+        .veris-summary-feedback button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .veris-summary-feedback[data-rating="up"] [data-fb-rating="up"],
+        .veris-summary-feedback[data-rating="down"] [data-fb-rating="down"] {
+            opacity: 1;
+        }
+
+        .veris-summary-feedback .veris-fb-status {
+            margin: 0.3rem 0 0;
+            color: var(--accent-secondary);
+        }
+
+        .veris-summary-details {
+            margin-top: 0.4rem;
+        }
+
+        .veris-summary-details > summary {
+            cursor: pointer;
+            padding: 0.55rem 0.2rem;
+            color: var(--accent-secondary);
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+        }
+
+        .veris-summary-verdict {
+            border-color: rgba(255, 184, 77, 0.24);
+            background: linear-gradient(135deg, rgba(52, 28, 4, 0.55), rgba(8, 18, 34, 0.5));
+        }
+
+        .veris-summary-verdict p {
+            margin: 0;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+
+        .veris-summary-list {
+            margin: 0;
+            padding-left: 1rem;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .veris-summary-list li {
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .veris-summary-list strong,
+        .veris-summary-list span,
+        .veris-summary-list small {
+            display: block;
+        }
+
+        .veris-summary-list small {
+            color: var(--text-secondary);
+        }
+
+        .veris-summary-chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .veris-summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            font-size: 0.79rem;
+            line-height: 1.2;
+        }
+
+        .veris-summary-chip small {
+            color: var(--text-secondary);
+        }
+
+        .veris-summary-muted {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .veris-wait-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 8, 20, 0.86);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 1.2rem;
+            z-index: 9999;
+            overflow-y: auto;
+        }
+
+        .veris-wait-overlay[hidden] {
+            display: none;
+        }
+
+        /* Minimized: shrink to a small, non-blocking corner pill so the wait
+           window never covers the user's screen. Background polling continues;
+           tap the pill to expand, and it auto-expands when results arrive. */
+        .veris-wait-overlay.minimized {
+            background: transparent;
+            pointer-events: none;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 1rem;
+            overflow: visible;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal-shell {
+            width: auto;
+            max-width: min(360px, 90vw);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal-top-actions {
+            display: none;
+        }
+        .veris-wait-overlay.minimized .veris-wait-modal {
+            max-height: none;
+            padding: 0.55rem 0.85rem;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+        }
+        .veris-wait-overlay.minimized .veris-wait-body,
+        .veris-wait-overlay.minimized .veris-wait-kv {
+            display: none;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header {
+            margin: 0;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header h3 {
+            margin: 0;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .veris-wait-overlay.minimized .veris-wait-header h3::after {
+            content: " ⤢";
+            opacity: 0.7;
+        }
+
+        .veris-wait-actions button[hidden] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* Wraps the out-of-card toolbar + modal so width stays aligned. */
+        .veris-wait-modal-shell {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: min(680px, 96vw);
+            max-width: 100%;
+        }
+
+        .veris-wait-modal {
+            position: relative;
+            width: 100%;
+            max-height: calc(100dvh - 2.4rem);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            border-radius: 8px;
+            background: #050914;
+            padding: 1.3rem;
+            /* Keep typography readable: page theme vars are meant for Page bg, not this dark HUD. */
+            color: #e8eef9;
+            overflow-y: auto;
+        }
+
+        /* Toolbar sits above the modal card (outside the bordered box), controls in one row. */
+        .veris-wait-modal-top-actions {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.35rem;
+            width: 100%;
+            margin: 0 0 0.5rem 0;
+            padding: 0;
+            z-index: 3;
+        }
+
+        /* Same chrome as [x] / [-]: neutral slate border + dark glass fill; icon-only. */
+        .veris-wait-download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            width: 2rem;
+            min-width: 2rem;
+            height: 2rem;
+            min-height: 2rem;
+            padding: 0;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.28);
+            color: rgba(248, 250, 252, 0.85);
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            white-space: nowrap;
+        }
+
+        .veris-wait-download-glyph {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.25rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.95rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: inherit;
+        }
+
+        .veris-wait-download-btn[hidden],
+        .veris-wait-modal-top-actions button[hidden] {
+            display: none !important;
+        }
+
+        .veris-wait-header {
+            margin-bottom: 0.8rem;
+        }
+
+        .veris-wait-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .veris-wait-dismiss-x,
+        .veris-wait-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.28);
+            color: rgba(248, 250, 252, 0.85);
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            font-family: var(--font-mono);
+        }
+
+        .veris-wait-dismiss-x:hover,
+        .veris-wait-icon-btn:hover,
+        .veris-wait-download-btn:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: rgba(96, 165, 250, 0.55);
+            color: #f8fafc;
+        }
+
+        .veris-wait-header h3 {
+            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: #f8fafc !important;
+        }
+
+        .veris-wait-body p {
+            margin: 0 0 0.8rem;
+            color: #cbd5e1 !important;
+            line-height: 1.5;
+        }
+
+        .veris-wait-kv {
+            margin: 0.7rem 0 0.9rem;
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        /* Arsenal / global resets sometimes break [hidden]; never show scanner-only KV on manual upload errors. */
+        #waitKvSection.veris-wait-kv[hidden] {
+            display: none !important;
+            margin: 0 !important;
+            visibility: hidden !important;
+        }
+
+        .veris-wait-kv div {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.9rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+            padding-bottom: 0.35rem;
+        }
+
+        .veris-wait-kv span {
+            color: #94a3b8 !important;
+            font-weight: 500;
+        }
+
+        .veris-wait-kv strong {
+            color: #f1f5f9 !important;
+            font-weight: 600;
+        }
+
+        /* Status panel injected by JS inherits dark-HUD-safe text */
+        .veris-wait-modal .veris-feedback {
+            margin-top: 0.85rem;
+        }
+
+        .veris-wait-modal .veris-feedback strong {
+            color: #f1f5f9 !important;
+        }
+
+        .veris-wait-modal .veris-feedback p,
+        .veris-wait-modal .veris-feedback code {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme=light] .veris-wait-overlay {
+            background: rgba(15, 23, 42, 0.52);
+        }
+
+        [data-theme=light] .veris-wait-modal {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-color: rgba(0, 86, 179, 0.35);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        [data-theme=light] .veris-wait-header h3 {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-dismiss-x,
+        [data-theme=light] .veris-wait-icon-btn,
+        [data-theme=light] .veris-wait-download-btn {
+            color: #475569 !important;
+            border-color: rgba(71, 85, 105, 0.28);
+            background: rgba(241, 245, 249, 0.95);
+        }
+
+        [data-theme=light] .veris-wait-dismiss-x:hover,
+        [data-theme=light] .veris-wait-icon-btn:hover,
+        [data-theme=light] .veris-wait-download-btn:hover {
+            background: rgba(15, 23, 42, 0.08);
+            border-color: rgba(59, 130, 246, 0.45);
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-body p {
+            color: #475569 !important;
+        }
+
+        [data-theme=light] .veris-wait-kv span {
+            color: #64748b !important;
+        }
+
+        [data-theme=light] .veris-wait-kv strong {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-kv div {
+            border-bottom-color: rgba(15, 23, 42, 0.18);
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.pending {
+            background: rgba(8, 145, 178, 0.1) !important;
+            border-color: rgba(8, 145, 178, 0.4) !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback strong {
+            color: #0f172a !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback p,
+        [data-theme=light] .veris-wait-modal .veris-feedback code {
+            color: #334155 !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.success strong,
+        [data-theme=light] .veris-wait-modal .veris-feedback.success p {
+            color: #14532d !important;
+        }
+
+        [data-theme=light] .veris-wait-modal .veris-feedback.error strong,
+        [data-theme=light] .veris-wait-modal .veris-feedback.error p {
+            color: #991b1b !important;
+        }
+
+        /* Dark HUD: ensure success/error text stays light on tinted panels */
+        .veris-wait-modal .veris-feedback.success strong {
+            color: #bbf7d0 !important;
+        }
+
+        .veris-wait-modal .veris-feedback.success p {
+            color: #cbd5e1 !important;
+        }
+
+        .veris-wait-modal .veris-feedback.error strong {
+            color: #fecaca !important;
+        }
+
+        .veris-wait-modal .veris-feedback.error p {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme=light] .veris-action-card,
+        [data-theme=light] .veris-note {
+            background: #ffffff !important;
+        }
+
+        [data-theme=light] .veris-action-card h2,
+        [data-theme=light] .veris-action-card p,
+        [data-theme=light] .veris-note p,
+        [data-theme=light] .veris-fit-item,
+        [data-theme=light] .subtitle {
+            color: #0f172a !important;
+        }
+
+        @media (max-width: 640px) {
+            .veris-page {
+                padding: 1.25rem 1rem 4rem;
+            }
+
+            .veris-action-card {
+                padding: 1.5rem;
+            }
+
+            .veris-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <a href="./"
+                    style="text-decoration: none; display: flex; align-items: center; gap: 1rem; color: inherit;">
+                    <img src="/assets/logo_v2.png" alt="Nine-Security Logo" class="logo-img">
+                    <span class="logo-text">Nine<span class="accent">Security</span><span class="blink">_</span></span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="./" data-i18n="nav.home">/首頁</a></li>
+                <li><a href="services.html" class="active" data-i18n="nav.services">/服務項目</a></li>
+                <li><a href="arsenal.html" data-i18n="nav.tools">/軍火庫</a></li>
+                <li><a href="./#model" data-i18n="nav.model">/九層防護模型</a></li>
+                <li><a href="./#threat-intel" data-i18n="nav.threat_intel">/威脅情資</a></li>
+                <li><a href="contact.html" data-i18n="nav.contact">/聯絡我們</a></li>
+            </ul>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">
+                    DARK
+                </button>
+                <div class="lang-selector">
+                    <button id="current-lang" class="lang-btn">EN</button>
+                    <ul class="lang-menu">
+                        <li data-lang="tw">TW [繁體中文]</li>
+                        <li data-lang="en">EN [English]</li>
+                        <li data-lang="jp">JP [日本語]</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mobile-menu-btn" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main class="veris-page">
+        <section class="veris-hero">
+            <a href="services.html" class="back-link"><i class="fa-solid fa-chevron-left"></i> <span data-i18n="nav.back_to_services">回到服務項目</span></a>
+            <p class="terminal-text" data-i18n="veris_page.terminal">VERIS Central <span class='status-ok'>[就緒]</span></p>
+            <h1 class="glitch-title" data-text="VERIS 免費主機入侵檢查" data-i18n="veris_page.hero_title">VERIS 免費主機入侵檢查</h1>
+            <p class="subtitle" data-i18n="veris_page.hero_sub">幾分鐘內知道一台電腦有沒有被入侵的跡象。免費、不用安裝：執行一次掃描器，就會拿到一份白話報告，說明檢查了什麼、哪裡可疑、下一步該做什麼。你的檔案不會離開電腦，只會送出系統資訊與檔案指紋（雜湊值）進行分析。支援 Windows，Linux 與 macOS 為測試版。</p>
+            <div class="veris-badges">
+                <span class="veris-badge" data-i18n="veris_page.badge_1">免費</span>
+                <span class="veris-badge" data-i18n="veris_page.badge_2">不用安裝</span>
+                <span class="veris-badge" data-i18n="veris_page.badge_3">幾分鐘出報告</span>
+                <span class="veris-badge" data-i18n="veris_page.badge_4">檔案不離開電腦</span>
+                <span class="veris-badge" title="Linux and macOS triage are in beta">LINUX_MACOS_BETA</span>
+            </div>
+        </section>
+
+        <section class="veris-fit">
+            <div class="section-header">
+                <h2><span class="hash">#</span> <span data-i18n="veris_page.fit_title">什麼時候用</span></h2>
+                <div class="line"></div>
+            </div>
+            <div class="veris-fit-list">
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_1">懷疑電腦中毒：出現奇怪的視窗、收到不確定真假的警告、電腦行為異常。</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_2">定期檢查伺服器或筆電，又不想在上面安裝防護軟體。</span>
+                </div>
+                <div class="veris-fit-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span data-i18n="veris_page.fit_3">找資安團隊協助之前，先準備好證據而不是猜測。</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="veris-flow-grid" data-i18n-aria="veris_page.flow_aria" aria-label="VERIS 作業流程">
+            <article class="veris-action-card">
+                <h2><i class="fa-solid fa-download"></i> <span data-i18n="veris_page.new_title">檢查一台電腦</span></h2>
+                <p data-i18n="veris_page.new_desc">輸入 Email 並選擇平台。確認 Email 後，即可下載這次申請專用的掃描器。掃描器只執行一次，72 小時後失效。</p>
+                <ol class="veris-steps">
+                    <li><span>01</span> <span data-i18n="veris_page.step_new_1">申請掃描器並確認 Email。</span></li>
+                    <li><span>02</span> <span data-i18n="veris_page.step_new_2">在要檢查的電腦上執行一次，不會安裝任何東西；Windows 請以系統管理員身分執行，檢查才完整。</span></li>
+                    <li><span>03</span> <span data-i18n="veris_page.step_new_3">看報告：最上面是 30 秒摘要，下面是佐證細節。</span></li>
+                </ol>
+                <form id="scannerRequestForm" class="veris-form">
+                    <div class="veris-form-grid">
+                        <div class="veris-field">
+                            <label for="scanner-email">Email</label>
+                            <input id="scanner-email" name="email" type="email" placeholder="analyst@example.com" required autocomplete="email">
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-preset" data-i18n="veris_page.lab_preset">蒐集預設</label>
+                            <select id="scanner-preset" name="collection_preset">
+                                <option value="fast_60">Fast (60s)</option>
+                                <option value="observe_180">Observe (180s)</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-platform" data-i18n="veris_page.lab_platform">Target Platform</label>
+                            <select id="scanner-platform" name="target_platform">
+                                <option value="windows">Windows</option>
+                                <option value="linux">Linux (beta)</option>
+                                <option value="macos">macOS (beta)</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-company" data-i18n="veris_page.lab_company">公司名稱（選填）</label>
+                            <input id="scanner-company" name="company" type="text" maxlength="120" autocomplete="organization">
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-endpoints" data-i18n="veris_page.lab_endpoints">端點數量（選填）</label>
+                            <select id="scanner-endpoints" name="endpoint_count">
+                                <option value="" data-i18n="veris_page.opt_unspecified">不便透露</option>
+                                <option value="1-10">1&ndash;10</option>
+                                <option value="11-50">11&ndash;50</option>
+                                <option value="51-200">51&ndash;200</option>
+                                <option value="200+">200+</option>
+                            </select>
+                        </div>
+                        <div class="veris-field">
+                            <label for="scanner-reason" data-i18n="veris_page.lab_reason">檢查原因（選填）</label>
+                            <select id="scanner-reason" name="reason">
+                                <option value="" data-i18n="veris_page.opt_unspecified">不便透露</option>
+                                <option value="suspect_compromise" data-i18n="veris_page.opt_reason_suspect">懷疑已遭入侵</option>
+                                <option value="routine_check" data-i18n="veris_page.opt_reason_routine">例行資安健檢</option>
+                                <option value="evaluation" data-i18n="veris_page.opt_reason_eval">評估 VERIS 功能</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label class="veris-consent">
+                        <input type="checkbox" name="consent" value="1" required>
+                        <span><span data-i18n="veris_page.consent_label">我同意 Nine-Security 使用上述聯絡資訊寄送下載連結，並就本次檢測結果與我聯繫，詳見</span>
+                            <a href="privacy.html" target="_blank" rel="noopener" data-i18n="veris_page.consent_link">隱私權政策</a>.</span>
+                    </label>
+                    <p class="veris-form-hint" data-i18n="veris_page.hint_scanner">申請建立、啟動器封裝與下載在背景由內部 VERIS API 處理。簽章啟動器權杖固定 72 小時；若 3 日未使用將自動到期。</p>
+                    <button class="btn primary-btn" id="generateScannerBtn" type="submit">
+                        <i class="fa-solid fa-download"></i> <span data-i18n="veris_page.btn_generate">產生掃描器</span>
+                    </button>
+                </form>
+                <div id="scannerRequestStatus" class="veris-feedback" hidden></div>
+                <div id="scannerWaitOverlay" class="veris-wait-overlay" hidden>
+                    <div class="veris-wait-modal-shell">
+                        <div class="veris-wait-modal-top-actions" data-i18n-aria="veris_page.wait_top_actions_aria" aria-label="報告操作" role="toolbar">
+                            <button type="button" class="veris-wait-download-btn" id="downloadReportBtn" hidden aria-label="Download markdown report" title="Download markdown report">
+                                <span class="veris-wait-download-glyph" aria-hidden="true">[↓]</span>
+                            </button>
+                            <button type="button" class="veris-wait-dismiss-x" id="closeScannerResultX" hidden title="Close and stop waiting" aria-label="Close and stop waiting">[x]</button>
+                            <button type="button" class="veris-wait-icon-btn" id="closeScannerWaitBtn" title="Minimize wait window (polling continues)">[-]</button>
+                        </div>
+                        <div class="veris-wait-modal">
+                            <div class="veris-wait-header">
+                                <h3 id="waitModalTitle">Scanner wait</h3>
+                            </div>
+                            <div class="veris-wait-body">
+                                <p id="waitModalIntro">Scanner request created. Waiting for the client to run and return logs.</p>
+                                <div id="waitKvSection" class="veris-wait-kv">
+                                    <div><span id="waitKvLabelCase">Case ID</span><strong id="waitCaseId">-</strong></div>
+                                    <div><span id="waitKvLabelReq">Request ID</span><strong id="waitRequestId">-</strong></div>
+                                    <div><span id="waitKvLabelEmail">Email</span><strong id="waitEmail">-</strong></div>
+                                </div>
+                                <div id="waitResultStatus" class="veris-feedback pending">
+                                    <strong>Waiting for analysis...</strong>
+                                    <p>A summary will appear automatically when results arrive.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="veris-action-card secondary">
+                <h2><i class="fa-solid fa-file-arrow-up"></i> <span data-i18n="veris_page.up_title">分析既有封裝</span></h2>
+                <p data-i18n="veris_page.up_desc">當掃描器 zip 或證據封裝已存在時使用此路徑。Central 在規則處理、關聯與完整報告前，會驗證已簽章的封裝合約。</p>
+                <ol class="veris-steps">
+                    <li><span>01</span> <span data-i18n="veris_page.step_up_1">選擇掃描器 zip / tar.gz 或 evidence.json。</span></li>
+                    <li><span>02</span> <span data-i18n="veris_page.step_up_2">指定案件識別碼。</span></li>
+                    <li><span>03</span> <span data-i18n="veris_page.step_up_3">開啟產生的報告或 result JSON。</span></li>
+                </ol>
+                <form id="uploadEvidenceForm" class="veris-form" enctype="multipart/form-data">
+                    <div class="veris-form-grid">
+                        <div class="veris-field full">
+                            <label for="upload-package" data-i18n="veris_page.lab_package">證據封裝</label>
+                            <input id="upload-package" name="package" type="file" accept=".zip,.json,.tar.gz,.tgz,.tar,.gz" required>
+                        </div>
+                    </div>
+                    <p class="veris-form-hint" data-i18n="veris_page.hint_upload">上傳保留在本頁。內部 VERIS API 在背景驗證、分析並回傳狀態。</p>
+                    <button class="btn secondary-btn" id="uploadEvidenceBtn" type="submit">
+                        <i class="fa-solid fa-file-arrow-up"></i> <span data-i18n="veris_page.btn_upload">上傳證據</span>
+                    </button>
+                </form>
+                <div id="uploadEvidenceStatus" class="veris-feedback" hidden></div>
+            </article>
+        </section>
+
+        <section class="veris-note-grid" data-i18n-aria="veris_page.op_aria" aria-label="VERIS 作業要項">
+            <div class="veris-note">
+                <h3 data-i18n="veris_page.n_collect_h">檢查項目</h3>
+                <p data-i18n="veris_page.n_collect_p">執行中的程式與其數位簽章、開機自動啟動項目、網路連線、可疑的記憶體區段，以及最近出現的執行檔。檔案指紋會比對已知惡意程式，連線會比對已知的駭客控制伺服器（C2）。</p>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/COLLECTION_SCOPE.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span data-veris-local-i18n="scope_link">COLLECTION_SCOPE</span>
+                    </a>
+                </div>
+            </div>
+            <div class="veris-note">
+                <h3 data-i18n="veris_page.n_not_h">不會做的事</h3>
+                <p data-i18n="veris_page.n_not_p">不會封鎖、隔離或刪除任何東西，不會常駐在電腦上，也不會複製你的檔案或製作整顆硬碟的映像。</p>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span data-veris-local-i18n="privacy_link">PRIVACY_NOTES</span>
+                    </a>
+                    <a class="veris-note-link" href="veris-sample.html">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span data-veris-local-i18n="sample_link">SAMPLE_REPORT</span>
+                    </a>
+                </div>
+            </div>
+            <div class="veris-note">
+                <h3 data-i18n="veris_page.n_report_h">報告內容</h3>
+                <p data-i18n="veris_page.n_report_p">一句話結論加上最多三個下一步，下面是佐證：已知惡意程式與 C2 比對結果、可疑的活動鏈，以及哪些項目無法檢查。</p>
+            </div>
+            <div class="veris-note">
+                <h3 data-veris-local-i18n="source_h">SCANNER SOURCE</h3>
+                <p data-veris-local-i18n="source_p">Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.</p>
+                <div class="veris-note-links">
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-brands fa-github"></i>
+                        <span data-veris-local-i18n="source_link">VIEW_SOURCE_ON_GITHUB</span>
+                    </a>
+                    <a class="veris-note-link" href="https://github.com/9-Security/Nine-Security-VERIS-9STriage/blob/main/BUILD.md" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-code"></i>
+                        <span data-veris-local-i18n="build_link">BUILD_NOTES</span>
+                    </a>
+                </div>
+            </div>
+            <div class="veris-note veris-consult-card">
+                <h3 data-veris-local-i18n="consult_h">CUSTOM ENDPOINT TRIAGE</h3>
+                <p data-veris-local-i18n="consult_p">Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.</p>
+                <a class="veris-note-link" href="mailto:consult@nine-security.com">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>consult@nine-security.com</span>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="copyright">
+                <p>&copy; 2026 Nine-Security. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        (() => {
+            const GOV_API_BASE = `${window.location.origin}/api/veris`;
+            const STORAGE_KEY_REQ = 'veris_last_request_id';
+            const STORAGE_KEY_JOB = 'veris_last_job_id';
+            const scannerForm = document.getElementById('scannerRequestForm');
+            const scannerStatus = document.getElementById('scannerRequestStatus');
+            const scannerButton = document.getElementById('generateScannerBtn');
+            const scannerPreset = document.getElementById('scanner-preset');
+            const scannerWaitOverlay = document.getElementById('scannerWaitOverlay');
+            const closeScannerWaitBtn = document.getElementById('closeScannerWaitBtn');
+            const closeScannerResultX = document.getElementById('closeScannerResultX');
+            const waitModalTitle = document.getElementById('waitModalTitle');
+            const waitModalIntro = document.getElementById('waitModalIntro');
+            const waitCaseId = document.getElementById('waitCaseId');
+            const waitRequestId = document.getElementById('waitRequestId');
+            const waitEmail = document.getElementById('waitEmail');
+            const waitResultStatus = document.getElementById('waitResultStatus');
+            const uploadForm = document.getElementById('uploadEvidenceForm');
+            const uploadStatus = document.getElementById('uploadEvidenceStatus');
+            const uploadButton = document.getElementById('uploadEvidenceBtn');
+            const uploadPackageInput = document.getElementById('upload-package');
+            const waitKvSection = document.getElementById('waitKvSection');
+            const waitKvLabelCase = document.getElementById('waitKvLabelCase');
+            const waitKvLabelReq = document.getElementById('waitKvLabelReq');
+            const waitKvLabelEmail = document.getElementById('waitKvLabelEmail');
+            const downloadReportBtn = document.getElementById('downloadReportBtn');
+            /** @type {string} Resolved GET URL for report.md (blob download). */
+            let lastReportMdUrl = '';
+            /** @type {null | string} i18n key for terminal-state modal title (scanner flow) */
+            let overlayTerminalTitleI18nKey = null;
+            const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
+            let waitClosedManually = false;
+            let waitTerminalState = false;
+            /** Job finished badly; overlay stays open until user dismisses. */
+            const OVERLAY_JOB_FAILED = Object.freeze({ __kind: 'veris_overlay_job_failed' });
+            /** @type {'idle' | 'scanner' | 'manual'} */
+            let overlayContext = 'idle';
+            let verisPresets = [
+                { id: 'fast_60', label: 'Fast (60s)', profile: 'fast', observation_window_sec: 60 },
+                { id: 'observe_180', label: 'Observe (180s)', profile: 'observe', observation_window_sec: 180 }
+            ];
+
+            function v(key, fallback) {
+                return typeof window.__NINESEC_I18N === 'function' ? window.__NINESEC_I18N(key, fallback) : fallback;
+            }
+
+            /** Manual /upload allows .zip (scanner package), .json (flat evidence), or
+             *  .tar.gz / .tgz / .tar (Unix triage bundle — Linux & macOS). Mirrors Central's
+             *  _classify_evidence_upload_basename. */
+            function isAllowedManualEvidenceFilename(name) {
+                const n = String(name || '').trim().toLowerCase();
+                return n.endsWith('.zip') || n.endsWith('.json')
+                    || n.endsWith('.tar.gz') || n.endsWith('.tgz') || n.endsWith('.tar');
+            }
+
+            /** Must match Central MAX_VERIS_EVIDENCE_UPLOAD_BYTES (60 MiB). */
+            const MANUAL_UPLOAD_MAX_BYTES = 60 * 1024 * 1024;
+
+            const TERMINAL_TITLE_FALLBACK = {
+                'veris_page.wait_title_fail': 'Analysis issue',
+                'veris_page.wait_title_report': 'Analysis result report',
+                'veris_page.wait_timeout_overlay_title': 'Wait timed out',
+            };
+
+            function clearReportDownloadUrl() {
+                lastReportMdUrl = '';
+                if (downloadReportBtn) downloadReportBtn.hidden = true;
+            }
+
+            function setReportDownloadUrl(jobBaseUrl) {
+                const base = String(jobBaseUrl || '').replace(/\/+$/, '');
+                if (!base) return;
+                lastReportMdUrl = `${base}/report.md`;
+                if (downloadReportBtn) downloadReportBtn.hidden = false;
+            }
+
+            function refreshWaitOverlayI18n() {
+                const topBar = document.querySelector('.veris-wait-modal-top-actions');
+                if (topBar) {
+                    topBar.setAttribute('aria-label', v('veris_page.wait_top_actions_aria', 'Report actions'));
+                }
+                if (downloadReportBtn) {
+                    const dlAria = v('veris_page.btn_download_report_aria', 'Download markdown report');
+                    downloadReportBtn.setAttribute('aria-label', dlAria);
+                    downloadReportBtn.setAttribute('title', dlAria);
+                }
+                if (waitKvLabelCase) waitKvLabelCase.textContent = v('veris_page.lab_case', 'Case ID');
+                if (waitKvLabelReq) waitKvLabelReq.textContent = v('veris_page.wait_kv_request_id', 'Request ID');
+                if (waitKvLabelEmail) waitKvLabelEmail.textContent = v('veris_page.wait_kv_email', 'Email');
+                if (!waitModalTitle || !waitModalIntro) return;
+                if (overlayContext === 'manual') {
+                    if (!waitTerminalState && waitModalTitle) {
+                        waitModalTitle.textContent = v('veris_page.upload_wait_title', 'Evidence package analysis');
+                    }
+                    return;
+                }
+                if (overlayContext === 'scanner') {
+                    if (waitTerminalState && overlayTerminalTitleI18nKey) {
+                        waitModalTitle.textContent = v(
+                            overlayTerminalTitleI18nKey,
+                            TERMINAL_TITLE_FALLBACK[overlayTerminalTitleI18nKey] || ''
+                        );
+                    } else if (!waitTerminalState) {
+                        waitModalTitle.textContent = v('veris_page.wait_title_scanner', 'Scanner wait');
+                        waitModalIntro.textContent = v(
+                            'veris_page.wait_intro_scanner',
+                            'Scanner request created. Waiting for the client to run and return logs. This window closes automatically after 10 minutes if no result arrives.'
+                        );
+                    }
+                }
+            }
+
+            window.__VERIS_REFRESH_OVERLAY_I18N = refreshWaitOverlayI18n;
+
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char]));
+            }
+
+            function setFeedback(element, type, html) {
+                element.hidden = false;
+                element.className = `veris-feedback ${type}`;
+                element.innerHTML = html;
+            }
+
+            function parseRequestId(url) {
+                const match = String(url || '').match(/\/requests\/([^/?#]+)/);
+                return match ? match[1] : '';
+            }
+
+            function parseJobId(url) {
+                const match = String(url || '').match(/\/jobs\/([^/?#]+)/);
+                return match ? match[1] : '';
+            }
+
+            /** Map Central-internal absolute URLs or relative paths onto this site's /api/veris base (proxy-safe). */
+            function normalizeVerisResourceUrl(candidate) {
+                const s = String(candidate || '').trim();
+                if (!s) return '';
+                const jm = s.match(/\/jobs\/([^/?#]+)/);
+                if (jm) return `${GOV_API_BASE}/jobs/${jm[1]}`;
+                const rm = s.match(/\/requests\/([^/?#]+)/);
+                if (rm) return `${GOV_API_BASE}/requests/${rm[1]}`;
+                if (s.startsWith(`${window.location.origin}/api/veris`) || (s.startsWith('/api/veris'))) return s.startsWith('/') ? `${window.location.origin}${s.replace(/\/+$/, '')}` : s.replace(/\/+$/, '');
+                return s;
+            }
+
+            function stashRequest(id) {
+                try { if (id) sessionStorage.setItem(STORAGE_KEY_REQ, id); } catch (_) { /* ignore */ }
+            }
+            function stashJob(id) {
+                try { if (id) sessionStorage.setItem(STORAGE_KEY_JOB, id); } catch (_) { /* ignore */ }
+            }
+
+            async function fetchTextOrThrow(response, fallbackMessage) {
+                const text = await response.text();
+                if (!response.ok) {
+                    let detail = '';
+                    const ct = String(response.headers.get('content-type') || '').toLowerCase();
+                    if (ct.includes('application/json')) {
+                        try {
+                            const payload = JSON.parse(text || '{}');
+                            detail = String(payload.detail || payload.error || '').trim();
+                        } catch (_) {
+                            detail = '';
+                        }
+                    } else {
+                        detail = text
+                            .replace(/<[^>]*>/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                    }
+                    const suffix = detail ? `: ${detail.slice(0, 280)}` : '';
+                    throw new Error(`${fallbackMessage} (HTTP ${response.status})${suffix}`);
+                }
+                return text;
+            }
+
+            async function fetchJsonStrict(url, errLabel) {
+                const res = await fetch(url, {
+                    headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+                });
+                if (!res.ok) throw new Error(`${errLabel} (HTTP ${res.status})`);
+                return res.json();
+            }
+
+            async function loadCapabilities() {
+                try {
+                    const caps = await fetchJsonStrict(`${GOV_API_BASE}/capabilities.json`, 'capabilities');
+                    const list = Array.isArray(caps?.presets) ? caps.presets : [];
+                    const normalized = list
+                        .filter((p) => p && typeof p.profile === 'string' && Number.isFinite(Number(p.observation_window_sec)))
+                        .map((p) => ({
+                            id: String(p.id || `${p.profile}_${p.observation_window_sec}`),
+                            label: String(p.label || `${p.profile} (${p.observation_window_sec}s)`),
+                            profile: String(p.profile),
+                            observation_window_sec: Number(p.observation_window_sec)
+                        }));
+                    if (normalized.length) {
+                        verisPresets = normalized;
+                    }
+                } catch (_) {
+                    /* deterministic fallback stays enabled */
+                }
+                if (scannerPreset) {
+                    scannerPreset.innerHTML = verisPresets
+                        .map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.label)}</option>`)
+                        .join('');
+                }
+            }
+
+            function ensureLauncherDownloadFrame() {
+                let frame = document.getElementById('veris-launcher-download-frame');
+                if (frame) return frame;
+                frame = document.createElement('iframe');
+                frame.id = 'veris-launcher-download-frame';
+                frame.name = 'veris-launcher-download-frame';
+                frame.hidden = true;
+                frame.style.display = 'none';
+                document.body.appendChild(frame);
+                return frame;
+            }
+
+            function resolveLauncherDownloadUrl(downloadUrl, requestUrl, requestId) {
+                const asString = (v) => String(v || '').trim();
+                const normalize = (v) => normalizeVerisResourceUrl(asString(v));
+                const requestBase = normalize(requestUrl);
+                let candidate = normalize(downloadUrl);
+
+                if (!candidate && requestBase) {
+                    candidate = `${requestBase.replace(/\/+$/, '')}/download`;
+                }
+                if (!candidate && requestId) {
+                    candidate = `${GOV_API_BASE}/requests/${encodeURIComponent(String(requestId))}/download`;
+                }
+                if (!candidate) return '';
+
+                try {
+                    const parsed = new URL(candidate, window.location.origin);
+                    const normalizedPath = parsed.pathname.replace(/\/+$/, '');
+                    const reqSuffix = requestId ? `/requests/${String(requestId)}` : '';
+                    const needsDownloadSuffix =
+                        normalizedPath.endsWith(reqSuffix) ||
+                        /\/api\/veris\/requests\/[^/]+$/i.test(normalizedPath);
+                    if (needsDownloadSuffix && !/\/download$/i.test(normalizedPath)) {
+                        parsed.pathname = `${normalizedPath}/download`;
+                    }
+                    return parsed.toString();
+                } catch (_) {
+                    return candidate;
+                }
+            }
+
+            function startDirectBinaryDownload(downloadUrl, requestUrl, requestId) {
+                const finalUrl = resolveLauncherDownloadUrl(downloadUrl, requestUrl, requestId);
+                if (!finalUrl) {
+                    throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
+                }
+                const frame = ensureLauncherDownloadFrame();
+                frame.removeAttribute('src');
+                window.setTimeout(() => {
+                    frame.src = finalUrl;
+                }, 0);
+                return finalUrl;
+            }
+
+            function summarizeResultPayload(payload) {
+                const p = payload && typeof payload === 'object' ? payload : {};
+                const s = (p.summary && typeof p.summary === 'object') ? p.summary : {};
+                const esc = (p.escalation_decision && typeof p.escalation_decision === 'object')
+                    ? p.escalation_decision
+                    : {};
+                const recs = Array.isArray(p.recommendations) ? p.recommendations : [];
+                let recommended_next_step = '';
+                if (recs.length && recs[0] && typeof recs[0].detail !== 'undefined') {
+                    recommended_next_step = String(recs[0].detail);
+                } else if (recs.length && typeof recs[0] === 'string') {
+                    recommended_next_step = recs[0];
+                }
+                const nextProf = typeof esc.recommended_next_profile !== 'undefined'
+                    ? esc.recommended_next_profile
+                    : s.recommended_next_profile;
+                const disp = typeof s.host_disposition !== 'undefined' && s.host_disposition
+                    ? s.host_disposition
+                    : (typeof p.disposition === 'string' ? p.disposition : '');
+                return Object.assign({}, s, {
+                    job_id: typeof p.job_id === 'string' ? p.job_id : '',
+                    log_trust_score: s.log_trust_score,
+                    gap_count: s.gap_count,
+                    recommended_next_step: recommended_next_step,
+                    trust_reasons: s.trust_reasons,
+                    primary_process_name: s.primary_process_name,
+                    primary_process_display: s.primary_process_display ?? s.primary_process_name ?? '',
+                    executive_verdict: s.executive_verdict && typeof s.executive_verdict === 'object' ? s.executive_verdict : {},
+                    executive_verdict_sentence: s.executive_verdict_sentence ?? '',
+                    analysis_highlights: Array.isArray(s.analysis_highlights) ? s.analysis_highlights : [],
+                    top_processes: Array.isArray(s.top_processes) ? s.top_processes : [],
+                    primary_remote_addresses: Array.isArray(s.primary_remote_addresses) ? s.primary_remote_addresses : [],
+                    dominant_signals: Array.isArray(s.dominant_signals) ? s.dominant_signals : [],
+                    collection_profile: s.collection_profile ?? p.collection_profile ?? '',
+                    suspicion_score: s.suspicion_score,
+                    collection_sufficiency_score: s.collection_sufficiency_score,
+                    host_disposition: disp,
+                    correlation_count: s.correlation_count ?? '',
+                    root_cause_type: s.root_cause_type ?? '',
+                    root_cause_confidence: s.root_cause_confidence ?? '',
+                    recollection_recommended: esc.recollection_recommended === true,
+                    deep_forensics_recommended: esc.deep_forensics_recommended === true,
+                    recommended_next_profile: nextProf ?? '',
+                    escalation_rerun_reason: esc.why_rerun_needed ?? '',
+                    escalation_insufficient_reason: esc.why_evidence_insufficient ?? '',
+                    requested_collection_profile: p.requested_collection_profile ?? s.requested_collection_profile ?? '',
+                    effective_collection_profile: p.effective_collection_profile ?? s.effective_collection_profile ?? '',
+                    requested_observation_window_sec: p.requested_observation_window_sec ?? s.requested_observation_window_sec ?? '',
+                    effective_observation_window_sec: p.effective_observation_window_sec ?? s.effective_observation_window_sec ?? '',
+                    entitlement_mode: p.entitlement_mode ?? s.entitlement_mode ?? '',
+                    allowed_next_profile: esc.allowed_next_profile ?? '',
+                    entitlement_blocked: esc.entitlement_blocked === true,
+                    service_follow_up_required: esc.service_follow_up_required === true
+                });
+            }
+
+            function formatExecutiveVerdict(summary) {
+                const verdict = summary && summary.executive_verdict && typeof summary.executive_verdict === 'object'
+                    ? summary.executive_verdict
+                    : {};
+                const code = String(verdict.code || '').trim();
+                const labels = {
+                    risk_present: v('veris_page.exec_verdict_risk_present', 'Risk present'),
+                    needs_attention: v('veris_page.exec_verdict_needs_attention', 'Needs attention'),
+                    no_clear_risk: v('veris_page.exec_verdict_no_clear_risk', 'No clear risk')
+                };
+                const reasons = {
+                    multi_domain_chain_activity: v('veris_page.exec_reason_multi_domain_chain_activity', 'several processes show linked suspicious activity'),
+                    collection_gaps_limit_confidence: v('veris_page.exec_reason_collection_gaps_limit_confidence', 'the scan could not see enough of this host to rule risk out'),
+                    common_app_memory_gap_pressure: v('veris_page.exec_reason_common_app_memory_gap_pressure', 'unusual memory activity in common applications, with some startup entries not yet traced'),
+                    bounded_anomaly_without_strong_chain: v('veris_page.exec_reason_bounded_anomaly_without_strong_chain', 'some unusual activity was found, but nothing links it to an attack'),
+                    low_signal_with_acceptable_coverage: v('veris_page.exec_reason_low_signal_with_acceptable_coverage', 'nothing suspicious stood out in what we checked'),
+                    dual_axis_compromise_elevated: v('veris_page.exec_reason_dual_axis_compromise_elevated', 'activity on this host is consistent with a possible compromise'),
+                    known_malware_hash_match: v('veris_page.exec_reason_known_malware_hash_match', 'executables on this host match known malware'),
+                    known_c2_connection: v('veris_page.exec_reason_known_c2_connection', 'this host is talking to known command-and-control (C2) servers')
+                };
+                const actions = {
+                    maintain_baseline_and_compare_future_runs: v('veris_page.exec_action_maintain_baseline_and_compare_future_runs', 'scan again in about 30 days and compare'),
+                    recollect_with_follow_up_profile: v('veris_page.exec_action_recollect_with_follow_up_profile', 're-run the scanner as Administrator for a complete picture'),
+                    rerun_observe_and_review_startup: v('veris_page.exec_action_rerun_observe_and_review_startup', 're-run the scanner and review the startup entries listed in the report'),
+                    review_primary_pivot_and_persistence: v('veris_page.exec_action_review_primary_pivot_and_persistence', 'review the processes and startup entries listed in the report now'),
+                    monitor_follow_up_timeline: v('veris_page.exec_action_monitor_follow_up_timeline', 'scan again later and compare before taking further action'),
+                    isolate_and_review_matched_binaries: v('veris_page.exec_action_isolate_and_review_matched_binaries', 'isolate the host and review the matched binaries listed in the report'),
+                    isolate_and_block_c2: v('veris_page.exec_action_isolate_and_block_c2', 'isolate the host, block the listed C2 addresses and investigate the connecting processes')
+                };
+                if (code) {
+                    const label = labels[code] || String(verdict.label || '').trim() || v('veris_page.exec_verdict_needs_attention', 'Needs attention');
+                    const reasonCode = String(verdict.reason_code || '').trim();
+                    const actionCode = String(verdict.action_code || '').trim();
+                    const reason = reasons[reasonCode] || String(verdict.reason_text || '').trim();
+                    const action = actions[actionCode] || String(verdict.action_text || '').trim();
+                    const cjk = currentLang() !== 'en';
+                    const [colon, semi, stop] = cjk ? ['：', '；', '。'] : [': ', '; ', '.'];
+                    if (reason && action) return `${label}${colon}${reason}${semi}${action}${stop}`;
+                    if (reason) return `${label}${colon}${reason}${stop}`;
+                    return label;
+                }
+                const sentence = String(summary && (summary.executive_verdict_sentence || verdict.sentence) || '').trim();
+                return sentence;
+            }
+
+            function buildSummary(summary) {
+                const rows = [
+                    [v('veris_page.sum_profile', 'Profile'), summary.collection_profile || '-'],
+                    [v('veris_page.sum_requested_profile', 'Requested profile'), summary.requested_collection_profile || '-'],
+                    [v('veris_page.sum_effective_profile', 'Effective profile'), summary.effective_collection_profile || '-'],
+                    [v('veris_page.sum_requested_window', 'Requested window'), summary.requested_observation_window_sec || '-'],
+                    [v('veris_page.sum_effective_window', 'Effective window'), summary.effective_observation_window_sec || '-'],
+                    [v('veris_page.sum_host', 'Host'), summary.host ?? '-'],
+                    [v('veris_page.sum_evidence', 'Evidence Count'), summary.evidence_count ?? '-'],
+                    [v('veris_page.sum_rules', 'Matched Rules'), summary.matched_rules_count ?? '-'],
+                    [v('veris_page.sum_trust', 'Trust Grade'), summary.evidence_trust_grade ?? '-'],
+                    [v('veris_page.metric_suspicion', 'Suspicion'), summary.suspicion_score ?? '-'],
+                    [v('veris_page.metric_sufficiency', 'Sufficiency'), summary.collection_sufficiency_score ?? '-'],
+                    [v('veris_page.sum_disposition', 'Disposition'), summary.host_disposition ?? '-'],
+                    [v('veris_page.log_trust_short', 'Log trust'), summary.log_trust_score ?? '-'],
+                    [v('veris_page.metric_chains_short', 'Attack chains'), summary.attack_chain_candidates_count ?? '-'],
+                    [v('veris_page.metric_correlations_short', 'Correlations'), summary.correlation_count || '-'],
+                    [v('veris_page.root_cause_short', 'Root cause'), summary.root_cause_type || '-'],
+                    [v('veris_page.root_confidence_short', 'Root confidence'), summary.root_cause_confidence || '-'],
+                    [v('veris_page.metric_gap_short', 'Gaps'), summary.gap_count ?? '-'],
+                    [v('veris_page.sum_delta', 'Score Delta'), summary.total_score_delta ?? '-']
+                ];
+                const lines = rows.map(([label, val]) => (
+                    `<div class="veris-summary-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(String(val))}</span></div>`
+                )).join('');
+                const pivotLabel = summary.primary_process_display || summary.primary_process_name || '';
+                const piv = pivotLabel
+                    ? `<div class="veris-summary-row"><span>${v('veris_page.primary_pivot', 'Primary process')}</span><span>${escapeHtml(String(pivotLabel))}</span></div>`
+                    : '';
+                const executiveVerdict = formatExecutiveVerdict(summary);
+                const topRec = summary.recommended_next_step || (
+                    summary.trust_reasons && summary.trust_reasons[0] ? String(summary.trust_reasons[0]) : ''
+                );
+                const highlights = Array.isArray(summary.analysis_highlights)
+                    ? summary.analysis_highlights.map((row) => String(row || '').trim()).filter(Boolean).slice(0, 6)
+                    : [];
+                const topProcesses = Array.isArray(summary.top_processes)
+                    ? summary.top_processes.filter((row) => row && typeof row === 'object').slice(0, 4)
+                    : [];
+                const dominantSignals = Array.isArray(summary.dominant_signals)
+                    ? summary.dominant_signals.filter((row) => row && typeof row === 'object').slice(0, 5)
+                    : [];
+                const remoteRows = Array.isArray(summary.primary_remote_addresses)
+                    ? summary.primary_remote_addresses.filter((row) => row && typeof row === 'object')
+                    : [];
+                const externalRemotes = remoteRows.filter((row) => String(row.class || '') === 'external');
+                const remoteFocus = (externalRemotes.length ? externalRemotes : remoteRows).slice(0, 5);
+                const recProf = summary.recommended_next_profile
+                    ? `<p><strong>${v('veris_page.next_scan_profile', 'Next scan profile')}:</strong> ${escapeHtml(String(summary.recommended_next_profile))}</p>`
+                    : '';
+                const allowedProf = summary.allowed_next_profile
+                    ? `<p><strong>${v('veris_page.allowed_next_profile', 'Allowed next profile')}:</strong> ${escapeHtml(String(summary.allowed_next_profile))}</p>`
+                    : '';
+                const recColl = summary.recollection_recommended === true
+                    ? `<p><strong>${v('veris_page.recollect_needed', 'Re-collection')}:</strong> ${v('veris_page.recollect_yes', 'recommended')}</p>`
+                    : '';
+                const serviceGate = summary.entitlement_blocked || summary.service_follow_up_required
+                    ? `<p><strong>${v('veris_page.service_gate', 'Service-gated escalation')}:</strong> ${v('veris_page.service_gate_msg', 'Escalated follow-up requires service entitlement. Public preset ceiling remains Observe (180s).')}</p>`
+                    : '';
+                const recLine = topRec ? `<p class="veris-next"><strong>${v('veris_page.next_step', 'Next step')}:</strong> ${escapeHtml(String(topRec))}</p>` : '';
+                const escWhy = summary.escalation_rerun_reason
+                    ? `<p class="veris-why"><small>${escapeHtml(String(summary.escalation_rerun_reason))}</small></p>`
+                    : '';
+                const verdictBlock = executiveVerdict
+                    ? `<div class="veris-summary-block veris-summary-verdict"><h4>${v('veris_page.sum_exec_verdict', 'Executive verdict')}</h4><p>${escapeHtml(executiveVerdict)}</p></div>`
+                    : '';
+                const review = summary.report_review && typeof summary.report_review === 'object' ? summary.report_review : null;
+                const reviewHref = review && /^mailto:[^\s"'<>]+$/.test(String(review.mailto || '')) ? String(review.mailto) : '';
+                const reviewBlock = reviewHref
+                    ? `<div class="veris-summary-block veris-summary-review"><h4>${v('veris_page.review_title', 'Free 30-minute report review')}</h4><p>${v('veris_page.review_body', 'Want an expert to walk you through this result? Email us to book a free 30-minute review with a Nine-Security analyst.')}</p><p><a class="veris-note-link" href="${escapeHtml(reviewHref)}">${v('veris_page.review_button', 'Book by email')}</a> <small>${escapeHtml(String(review.email || ''))}</small></p></div>`
+                    : '';
+                const fbJob = /^[A-Za-z0-9_-]{1,64}$/.test(String(summary.job_id || '')) ? String(summary.job_id) : '';
+                const feedbackBlock = fbJob
+                    ? `<div class="veris-summary-block veris-summary-feedback" data-job="${escapeHtml(fbJob)}"><h4>${v('veris_page.fb_title', 'Was this result useful?')}</h4>`
+                      + `<p class="veris-fb-buttons"><button type="button" class="lang-btn" data-fb-rating="up">${v('veris_page.fb_up', '👍 Useful')}</button> `
+                      + `<button type="button" class="lang-btn" data-fb-rating="down">${v('veris_page.fb_down', '👎 Not useful')}</button></p>`
+                      + `<div class="veris-fb-more" hidden><textarea maxlength="500" rows="3" placeholder="${v('veris_page.fb_comment_ph', 'What could be better? (optional)')}"></textarea>`
+                      + `<p><button type="button" class="lang-btn" data-fb-send>${v('veris_page.fb_send', 'Send')}</button></p></div>`
+                      + `<p class="veris-fb-status" role="status"></p></div>`
+                    : '';
+                const highlightBlock = highlights.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_findings', 'Key findings')}</h4><ul class="veris-summary-list">${highlights.map((row) => `<li>${escapeHtml(row)}</li>`).join('')}</ul></div>`
+                    : '';
+                const pivotBlock = topProcesses.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_top_pivots', 'Top pivots')}</h4><ul class="veris-summary-list">${topProcesses.map((row) => {
+                        const name = String(row.name || 'unknown');
+                        const pid = typeof row.pid !== 'undefined' ? `pid ${escapeHtml(String(row.pid))}` : '';
+                        const score = typeof row.risk_score !== 'undefined' ? `score ${escapeHtml(String(row.risk_score))}` : '';
+                        const central = row.central_score && typeof row.central_score === 'object'
+                            ? row.central_score
+                            : {};
+                        const centralText = typeof central.final_score !== 'undefined'
+                            ? `central ${escapeHtml(String(central.final_severity || 'unknown'))} ${escapeHtml(String(central.final_score))}`
+                            : '';
+                        const domains = typeof row.domain_count !== 'undefined' ? `${v('veris_page.metric_domains_short', 'domains')} ${escapeHtml(String(row.domain_count))}` : '';
+                        const topSignals = Array.isArray(row.top_signals)
+                            ? row.top_signals
+                                .map((sig) => sig && sig.signal ? `${String(sig.signal)}(${String(sig.count ?? '-')})` : '')
+                                .filter(Boolean)
+                                .slice(0, 4)
+                                .join(', ')
+                            : '';
+                        return `<li><strong>${escapeHtml(name)}${pid ? ` (${pid})` : ''}</strong><span>${[score, centralText, domains].filter(Boolean).join(' • ')}</span>${topSignals ? `<small>${escapeHtml(topSignals)}</small>` : ''}</li>`;
+                    }).join('')}</ul></div>`
+                    : '';
+                const remoteBlock = remoteFocus.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_remote_focus', 'Remote focus')}</h4><div class="veris-summary-chip-list">${remoteFocus.map((row) => {
+                        const label = String(row.address || '').trim();
+                        const count = typeof row.count !== 'undefined' ? String(row.count) : '';
+                        const kind = String(row.class || '').trim();
+                        const suffix = [kind, count].filter(Boolean).join(' • ');
+                        return `<span class="veris-summary-chip">${escapeHtml(label)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
+                    }).join('')}</div></div>`
+                    : '';
+                const signalBlock = dominantSignals.length
+                    ? `<div class="veris-summary-block"><h4>${v('veris_page.sum_signal_hotspots', 'Signal hotspots')}</h4><div class="veris-summary-chip-list">${dominantSignals.map((row) => {
+                        const signal = String(row.signal || '').trim();
+                        const count = typeof row.count !== 'undefined' ? String(row.count) : '';
+                        const category = String(row.category || '').trim();
+                        const suffix = [category, count].filter(Boolean).join(' • ');
+                        return `<span class="veris-summary-chip">${escapeHtml(signal)}${suffix ? ` <small>${escapeHtml(suffix)}</small>` : ''}</span>`;
+                    }).join('')}</div></div>`
+                    : '';
+                return `<div class="veris-summary">${verdictBlock}${reviewBlock}${feedbackBlock}<details class="veris-summary-details"><summary>${v('veris_page.sum_details_toggle', 'Show technical details')}</summary><div class="veris-summary">${recLine}${lines}${piv}${highlightBlock}${pivotBlock}${remoteBlock}${signalBlock}${recProf}${allowedProf}${recColl}${serviceGate}${escWhy}</div></details></div>`;
+            }
+
+            function generateCaseId() {
+                const randomToken = Math.random().toString(36).slice(2, 8).toUpperCase();
+                return `case-${new Date().getFullYear()}-${randomToken}`;
+            }
+
+            function showWaitOverlay({ caseId, requestId, email }) {
+                waitClosedManually = false;
+                waitTerminalState = false;
+                overlayContext = 'scanner';
+                restoreWaitChromeDefaults();
+                waitCaseId.textContent = caseId;
+                waitRequestId.textContent = requestId || '-';
+                waitEmail.textContent = email || '-';
+                setFeedback(waitResultStatus, 'pending',
+                    `<strong>${v('veris_page.state_overlay_wait', 'Awaiting scanner result')}</strong><p>${v('veris_page.overlay_wait_p', 'When the launcher finishes, Central will ingest via status.json — no HTML scraping.')}</p>`
+                );
+                scannerWaitOverlay.hidden = false;
+            }
+
+            function restoreWaitChromeDefaults() {
+                if (!waitModalTitle || !waitModalIntro) return;
+                scannerWaitOverlay.classList.remove('minimized');
+                clearReportDownloadUrl();
+                waitTerminalState = false;
+                overlayTerminalTitleI18nKey = null;
+                waitModalIntro.hidden = false;
+                if (waitKvSection) {
+                    waitKvSection.hidden = false;
+                    waitKvSection.style.removeProperty('display');
+                }
+                if (closeScannerWaitBtn) {
+                    closeScannerWaitBtn.hidden = false;
+                    closeScannerWaitBtn.textContent = '[-]';
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', 'Minimize wait window (polling continues in background)');
+                }
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', 'Close and stop waiting');
+                }
+                refreshWaitOverlayI18n();
+            }
+
+            function lockUploadForm() {
+                if (uploadPackageInput) uploadPackageInput.disabled = true;
+                if (uploadButton) uploadButton.disabled = true;
+            }
+
+            function unlockUploadForm() {
+                if (uploadPackageInput) {
+                    uploadPackageInput.disabled = false;
+                    uploadPackageInput.value = '';
+                }
+                if (uploadButton) uploadButton.disabled = false;
+            }
+
+            function prepareManualUploadOverlay(fileLabel) {
+                waitClosedManually = false;
+                waitTerminalState = false;
+                overlayContext = 'manual';
+                clearReportDownloadUrl();
+                if (uploadStatus) uploadStatus.hidden = true;
+                if (waitModalTitle) {
+                    waitModalTitle.textContent = v('veris_page.upload_wait_title', '證據封裝分析');
+                }
+                if (waitModalIntro) {
+                    waitModalIntro.hidden = false;
+                    const nameEsc = escapeHtml(fileLabel || '—');
+                    waitModalIntro.innerHTML =
+                        `<span>${v('veris_page.upload_wait_intro', '已收到封裝，Central 正在驗證與分析。')}</span> <code>${nameEsc}</code>`;
+                }
+                if (waitKvSection) {
+                    waitKvSection.hidden = true;
+                    waitKvSection.style.display = 'none';
+                }
+                if (closeScannerWaitBtn) {
+                    closeScannerWaitBtn.hidden = false;
+                    closeScannerWaitBtn.textContent = '[-]';
+                    closeScannerWaitBtn.title = v('veris_page.wait_minimize_title', 'Minimize wait window (polling continues in background)');
+                }
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.wait_stop_title', 'Close and stop waiting');
+                }
+                setFeedback(waitResultStatus, 'pending',
+                    `<strong>${v('veris_page.state_analyzing', 'Central is analyzing evidence...')}</strong>` +
+                    `<p>${v('veris_page.manual_upload_overlay_p', '請勿關閉此頁；完成後將顯示與自動回傳相同的報告視窗。')}</p>`
+                );
+                scannerWaitOverlay.hidden = false;
+            }
+
+            /** Evidence rejected at /upload (HTTP 4xx etc.): same modal; hide scanner KV (case / countdown). */
+            function showManualUploadApiErrorOverlay(detailHtmlEscaped, fileHintRaw) {
+                overlayContext = 'manual';
+                waitClosedManually = false;
+                waitTerminalState = true;
+                clearReportDownloadUrl();
+                if (waitKvSection) {
+                    waitKvSection.hidden = true;
+                    waitKvSection.style.display = 'none';
+                }
+                if (waitModalIntro) {
+                    const hint = String(fileHintRaw || '').trim();
+                    if (hint) {
+                        waitModalIntro.hidden = false;
+                        waitModalIntro.innerHTML =
+                            `<span>${v('veris_page.upload_failed_file_intro', '已選取的檔案：')}</span> <code>${escapeHtml(hint)}</code>`;
+                    } else {
+                        waitModalIntro.hidden = true;
+                    }
+                }
+                if (waitModalTitle) {
+                    waitModalTitle.textContent = v('veris_page.upload_failed_title', '證據上傳失敗');
+                }
+                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.close_title', 'Close');
+                }
+                setFeedback(waitResultStatus, 'error',
+                    `<strong>${v('veris_page.err_upload', 'Upload failed.')}</strong><p>${detailHtmlEscaped}</p>` +
+                    `<p><small>${v('veris_page.upload_error_dismiss_hint', '請關閉視窗［×］後可重新選擇檔案並再試。')}</small></p>`
+                );
+                scannerWaitOverlay.hidden = false;
+            }
+
+            /**
+             * @param {'success' | 'fail'} mode
+             * @param {string} [optionalTitleKey] Full i18n key under veris_page (e.g. veris_page.wait_timeout_overlay_title).
+             */
+            function showTerminalWaitChrome(mode, optionalTitleKey) {
+                if (!waitModalTitle || !waitModalIntro) return;
+                waitTerminalState = true;
+                waitModalIntro.hidden = true;
+                if (mode === 'fail') {
+                    clearReportDownloadUrl();
+                }
+                const key = optionalTitleKey || (mode === 'fail' ? 'veris_page.wait_title_fail' : 'veris_page.wait_title_report');
+                overlayTerminalTitleI18nKey = key;
+                waitModalTitle.textContent = v(key, TERMINAL_TITLE_FALLBACK[key] || '');
+                if (closeScannerWaitBtn) closeScannerWaitBtn.hidden = true;
+                if (closeScannerResultX) {
+                    closeScannerResultX.hidden = false;
+                    closeScannerResultX.textContent = '[x]';
+                    closeScannerResultX.title = v('veris_page.close_title', 'Close');
+                }
+                scannerWaitOverlay.classList.remove('minimized'); // results: always expand
+                scannerWaitOverlay.hidden = false;
+            }
+
+            function closeWaitOverlay() {
+                const wasManual = overlayContext === 'manual';
+                scannerWaitOverlay.hidden = true;
+                restoreWaitChromeDefaults();
+                overlayContext = 'idle';
+                if (wasManual) unlockUploadForm();
+            }
+
+            /**
+             * Poll job status until completed/failed; fetch result.json with retries.
+             * @returns {{ kind: 'ok', payload: object, jobBase: string } | { kind: 'fail' } | { kind: 'stopped' }}
+             */
+            async function pollJobFromQueued(jobBaseUrl, deadline, abortFn) {
+                const jb = String(jobBaseUrl || '').replace(/\/+$/, '');
+                while (Date.now() < deadline && !abortFn()) {
+                    let jst = null;
+                    try {
+                        jst = await fetchJsonStrict(`${jb}/status.json`, 'job status');
+                    } catch (_) {
+                        jst = null;
+                    }
+
+                    if (jst) {
+                        const st = String(jst.status ?? '');
+                        if (st === 'failed') {
+                            const errHtml = jst.error ? escapeHtml(String(jst.error)) : escapeHtml(String(jst.diagnostic_code ?? 'failed'));
+                            showTerminalWaitChrome('fail');
+                            setFeedback(waitResultStatus, 'error',
+                                `<strong>${v('veris_page.analysis_failed_title', 'Analysis failed.')}</strong>` +
+                                `<p>${errHtml}</p>` +
+                                `<p><a href="${jb}/result.json">${jb}/result.json</a></p>`
+                            );
+                            return { kind: 'fail' };
+                        }
+
+                        if (st === 'completed')
+                            break;
+
+                        setFeedback(waitResultStatus, 'pending',
+                            `<strong>${v('veris_page.state_analyzing', 'Central is analyzing evidence...')}</strong>` +
+                            `<p>${v('veris_page.state_analyzing_p', 'This window refreshes automatically while rules and correlation finish.')}</p>`
+                        );
+                    }
+
+                    await new Promise((resolve) => setTimeout(resolve, 900));
+                }
+
+                if (abortFn())
+                    return { kind: 'stopped' };
+                if (Date.now() >= deadline)
+                    return { kind: 'stopped' };
+
+                let payload = null;
+                for (let attempt = 0; attempt < 12 && Date.now() < deadline && !abortFn(); attempt++) {
+                    try {
+                        payload = await fetchJsonStrict(`${jb}/result.json`, 'analysis result');
+                        break;
+                    } catch (_) {
+                        await new Promise((r) => setTimeout(r, 600));
+                    }
+                }
+
+                if (!payload || abortFn())
+                    return { kind: 'stopped' };
+                return { kind: 'ok', payload, jobBase: jb };
+            }
+
+            /** Dedicated-scanner flow: keep #scannerRequestStatus as launcher-ready info only; full report stays in the overlay. */
+            /* Result-panel feedback + review-click tracking (POST /jobs/<id>/feedback, form-encoded). */
+            function postJobFeedback(jobId, fields) {
+                return fetch(`${GOV_API_BASE}/jobs/${encodeURIComponent(jobId)}/feedback`, {
+                    method: 'POST', keepalive: true,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+                    body: new URLSearchParams(fields).toString(),
+                }).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r; });
+            }
+            document.addEventListener('click', (e) => {
+                const t = e.target instanceof Element ? e.target : null;
+                if (!t) return;
+                const review = t.closest('.veris-summary-review a');
+                const fbBox = t.closest('.veris-summary-feedback');
+                if (review) {
+                    const jobEl = document.querySelector('.veris-summary-feedback[data-job]');
+                    if (jobEl) postJobFeedback(jobEl.dataset.job, { event: 'review_click' }).catch(() => {});
+                    return;
+                }
+                if (!fbBox) return;
+                const jobId = fbBox.dataset.job || '';
+                const status = fbBox.querySelector('.veris-fb-status');
+                const more = fbBox.querySelector('.veris-fb-more');
+                const thanks = () => { status.textContent = v('veris_page.fb_thanks', 'Thank you for the feedback!'); };
+                const failed = () => { status.textContent = v('veris_page.fb_error', 'Could not send feedback. Please try again later.'); };
+                const btn = t.closest('[data-fb-rating]');
+                if (btn) {
+                    const rating = btn.getAttribute('data-fb-rating');
+                    fbBox.dataset.rating = rating;
+                    fbBox.querySelectorAll('[data-fb-rating]').forEach((b) => { b.disabled = true; });
+                    postJobFeedback(jobId, { rating }).then(() => {
+                        thanks();
+                        if (rating === 'down' && more) more.hidden = false;
+                    }).catch(failed);
+                    return;
+                }
+                if (t.closest('[data-fb-send]')) {
+                    const comment = (fbBox.querySelector('textarea') || {}).value || '';
+                    if (!comment.trim()) return;
+                    postJobFeedback(jobId, { rating: fbBox.dataset.rating || 'down', comment: comment.slice(0, 500) })
+                        .then(() => { if (more) more.hidden = true; thanks(); }).catch(failed);
+                }
+            });
+
+            function finalizeOverlayAnalysisSuccess(payload, jobBase) {
+                const summed = summarizeResultPayload(payload);
+
+                showTerminalWaitChrome('success');
+                setReportDownloadUrl(jobBase);
+                refreshWaitOverlayI18n();
+                setFeedback(waitResultStatus, 'success',
+                    `<strong>${v('veris_page.msg_analysis_done', 'Analysis completed.')}</strong>` +
+                    buildSummary(summed));
+
+                try {
+                    sessionStorage.removeItem(STORAGE_KEY_REQ);
+                    sessionStorage.removeItem(STORAGE_KEY_JOB);
+                } catch (_) { /* ignore */ }
+            }
+
+            async function pollScannerResult(requestNormalizedUrl, requestId, startedAt) {
+                const deadline = startedAt + WAIT_TIMEOUT_MS;
+                const pollBase = String(requestNormalizedUrl || '').replace(/\/+$/, '');
+                const reqStatusUrl = `${pollBase}/status.json`;
+                stashRequest(requestId);
+
+                let jid = '';
+                while (Date.now() < deadline && !waitClosedManually) {
+                    try {
+                        const st = await fetchJsonStrict(reqStatusUrl, 'request status');
+                        stashJob(st.latest_job_id || '');
+                        const cand = st.latest_job_id ? String(st.latest_job_id).trim() : '';
+                        if (cand) {
+                            jid = cand;
+                            break;
+                        }
+                        setFeedback(waitResultStatus, 'pending',
+                            `<strong>${v('veris_page.state_waiting_exec', 'Waiting for scanner upload or correlation.')}</strong>`
+                        );
+                    } catch (_) {
+                        /* transient */
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 2200));
+                }
+
+                if (!jid || waitClosedManually)
+                    return null;
+
+                stashJob(jid);
+                const jobBase = `${GOV_API_BASE}/jobs/${encodeURIComponent(jid)}`;
+                const outcome = await pollJobFromQueued(jobBase, deadline, () => waitClosedManually);
+
+                if (outcome.kind === 'fail')
+                    return OVERLAY_JOB_FAILED;
+                if (outcome.kind === 'stopped')
+                    return null;
+
+                finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
+                return outcome.payload;
+            }
+
+            const LAUNCHER_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
+
+            /* Central's JSON error codes -> [i18n key, English fallback]. */
+            const VERIS_ERROR_MESSAGES = {
+                consent_required: ['veris_page.err_consent', 'Please agree to the privacy notice to continue.'],
+                invalid_email: ['veris_page.err_invalid_email', 'Please enter a valid email address.'],
+                rate_limited: ['veris_page.err_rate_limited', 'Too many requests. Please try again in about an hour.'],
+                verification_email_failed: ['veris_page.err_verify_email_failed', 'We could not send the verification email. Please try again later.'],
+                verification_link_expired: ['veris_page.err_verify_expired', 'This verification link has expired. Please request a new scanner.'],
+                verification_link_invalid: ['veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'],
+                request_not_found: ['veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'],
+            };
+
+            /* Throw a localized message for a known Central error code, else the generic HTTP error. */
+            async function throwForResponse(response, fallbackMessage) {
+                const ct = String(response.headers.get('content-type') || '').toLowerCase();
+                if (response.status === 429 && !ct.includes('application/json')) {
+                    /* Cloudflare edge rate limit (plain "error code: 1015"); it lifts within seconds. */
+                    throw new Error(v('veris_page.err_rate_limited_edge', 'Too many requests in a short time. Please wait a few seconds and try again.'));
+                }
+                if (ct.includes('application/json')) {
+                    let code = '';
+                    try {
+                        code = String((await response.clone().json()).error || '');
+                    } catch (_) {
+                        code = '';
+                    }
+                    const known = VERIS_ERROR_MESSAGES[code];
+                    if (known) throw new Error(v(known[0], known[1]));
+                }
+                await fetchTextOrThrow(response, fallbackMessage);
+            }
+
+            function currentLang() {
+                try {
+                    const lang = localStorage.getItem('9sec_lang') || 'en';
+                    return ['en', 'tw', 'jp'].includes(lang) ? lang : 'en';
+                } catch (_) {
+                    return 'en';
+                }
+            }
+
+            /* Poll a request's status.json until the background launcher build finishes.
+               Resolves with the final status payload; throws if the build failed, the request
+               is no longer usable, or the build timed out. */
+            async function waitForLauncherReady(statusUrl) {
+                const deadline = Date.now() + LAUNCHER_BUILD_TIMEOUT_MS;
+                while (Date.now() < deadline) {
+                    let st;
+                    try {
+                        st = await fetchJsonStrict(statusUrl, 'request status');
+                    } catch (_) {
+                        st = null; /* transient */
+                    }
+                    const status = st ? String(st.status || '') : '';
+                    if (status === 'ready') return st;
+                    if (status === 'failed') {
+                        throw new Error(`${v('veris_page.err_req_create', 'Request creation failed')}: ${String(st.error || status)}`);
+                    }
+                    if (status && status !== 'generating') {
+                        throw new Error(v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 2500));
+                }
+                throw new Error(v('veris_page.err_build_timeout', 'Launcher build is taking longer than expected. Please try again in a few minutes.'));
+            }
+
+            /* Not normalizeVerisResourceUrl(): it collapses /requests/<id>/status.json to the HTML page. */
+            function requestStatusUrl(requestId) {
+                return `${GOV_API_BASE}/requests/${encodeURIComponent(String(requestId || ''))}/status.json`;
+            }
+
+            function buildingFeedback() {
+                setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_building_launcher', 'Building and signing your dedicated launcher...')}</strong><p>${v('veris_page.msg_building_launcher_p', 'This usually takes under a minute. The download starts automatically.')}</p>`);
+            }
+
+            /* Start the launcher download, show the summary, then wait for the scanner's upload
+               and analysis in the overlay. Shared by the form submit and the email-verify link. */
+            async function deliverLauncherAndWait(d) {
+                if (!d.requestId || !d.downloadUrl) {
+                    throw new Error(v('veris_page.err_resolve_req', 'Unable to resolve request identifier from response.'));
+                }
+                stashRequest(d.requestId);
+                startDirectBinaryDownload(d.downloadUrl, d.requestNorm, d.requestId);
+                setFeedback(scannerStatus, 'success',
+                    `<strong>${v('veris_page.msg_scanner_ok', 'Dedicated scanner is ready.')}</strong>` +
+                    `<p>${v('veris_page.msg_scanner_ok_p', 'Request {id} was created and the launcher download has started.').replace('{id}', `<code>${escapeHtml(d.requestId)}</code>`)}</p>` +
+                    `<p>${v('veris_page.sum_profile', 'Profile')}: <code>${escapeHtml(String(d.profile || 'fast'))}</code></p>` +
+                    `<p>Target Platform: <code>${escapeHtml(d.platform)}</code>${d.platform !== 'windows' ? ' <em>(beta)</em>' : ''}</p>` +
+                    `<p>${v('veris_page.lab_window', 'Observation Window')}: <code>${escapeHtml(String(d.observationWindowSec || 60))}s</code></p>` +
+                    (d.launcherSigned === null ? '' : `<p>${v('veris_page.launcher_signature_state', 'Launcher signing')}: <code>${escapeHtml(d.launcherSigned ? 'signed' : (d.signingStatus || 'unsigned'))}</code></p>`) +
+                    (d.launcherSizeBytes > 0 ? `<p>Launcher Size: <code>${escapeHtml(String(d.launcherSizeBytes))}</code></p>` : '') +
+                    (d.launcherSha256 ? `<p>Launcher SHA-256: <code>${escapeHtml(d.launcherSha256)}</code></p>` : '') +
+                    `<p>${v('veris_page.lab_case', 'Case ID')}: <code>${escapeHtml(d.caseId)}</code></p>`
+                );
+
+                showWaitOverlay({ caseId: d.caseId, requestId: d.requestId, email: d.email });
+                const result = await pollScannerResult(d.requestNorm, d.requestId, Date.now());
+
+                if (waitClosedManually) {
+                    /* Overlay already dismissed by 「關閉」.*/
+                    setFeedback(scannerStatus, 'pending',
+                        `<strong>${v('veris_page.wait_closed', 'Wait dialog closed.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
+                    );
+                    return;
+                }
+                if (!result) {
+                    closeWaitOverlay();
+                    setFeedback(scannerStatus, 'pending',
+                        `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong><p>${v('veris_page.wait_timeout_p', 'No automated result yet. If the launcher runs later, upload the package below.')}</p>`
+                    );
+                }
+                /* OVERLAY_JOB_FAILED is already shown in the overlay; on success the overlay stays on the report until [×]. */
+            }
+
+            function launcherDetailsFrom(jr, fallbackRequestUrl) {
+                const requestId = String(jr.request_id || jr.id || '');
+                const requestNorm = normalizeVerisResourceUrl(jr.request_url || fallbackRequestUrl || `${GOV_API_BASE}/requests/${requestId}`);
+                return {
+                    requestId,
+                    requestNorm,
+                    downloadUrl: normalizeVerisResourceUrl(jr.download_url || `${requestNorm}/download`),
+                    launcherSigned: (typeof jr.launcher_signed === 'boolean') ? jr.launcher_signed : null,
+                    signingStatus: String(jr.signing_status || ''),
+                    launcherSizeBytes: Number(jr.launcher_size_bytes || 0),
+                    launcherSha256: String(jr.launcher_sha256 || ''),
+                };
+            }
+
+            scannerForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                scannerButton.disabled = true;
+                setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_creating_scanner', 'Creating dedicated scanner request...')}</strong><p>${v('veris_page.msg_creating_scanner_p', 'Packaging launcher and preparing a signed 72-hour token.')}</p>`);
+
+                try {
+                    const formData = new FormData(scannerForm);
+                    const email = String(formData.get('email') || '').trim();
+                    if (!email) {
+                        throw new Error('Email is required.');
+                    }
+                    const randomCaseId = generateCaseId();
+                    const params = new URLSearchParams();
+                    params.set('case_id', randomCaseId);
+                    params.set('contact', email);
+                    params.set('requester_name', email);
+                    const selectedPresetId = String(formData.get('collection_preset') || 'fast_60');
+                    const selectedPreset = verisPresets.find((p) => p.id === selectedPresetId) || verisPresets[0];
+                    params.set('observation_window_sec', String(selectedPreset?.observation_window_sec ?? 60));
+                    params.set('collection_profile', String(selectedPreset?.profile || 'fast'));
+                    const selectedPlatform = String(formData.get('target_platform') || 'windows');
+                    params.set('target_platform', selectedPlatform);
+                    params.set('company', String(formData.get('company') || '').trim());
+                    params.set('endpoint_count', String(formData.get('endpoint_count') || ''));
+                    params.set('reason', String(formData.get('reason') || ''));
+                    params.set('consent', formData.get('consent') ? '1' : '');
+                    params.set('lang', currentLang());
+                    /* Central builds the launcher in the background and answers 202; we poll
+                       status.json below instead of holding the request open past the proxy timeout. */
+                    params.set('async_build', '1');
+                    const response = await fetch(`${GOV_API_BASE}/requests`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: params.toString(),
+                        redirect: 'follow'
+                    });
+                    if (!response.ok) {
+                        await throwForResponse(response, v('veris_page.err_req_create', 'Request creation failed'));
+                    }
+
+                    let details;
+                    const rqCt = String(response.headers.get('content-type') || '').toLowerCase();
+                    if (rqCt.includes('application/json')) {
+                        let jr = await response.json();
+                        if (String(jr.status || '') === 'pending_verification') {
+                            /* Central emailed a confirmation link; the download continues from that link. */
+                            setFeedback(scannerStatus, 'success',
+                                `<strong>${v('veris_page.msg_check_email', 'Check your inbox to continue.')}</strong>` +
+                                `<p>${v('veris_page.msg_check_email_p', 'We sent a confirmation link to {email}. Open it within 24 hours to build and download your scanner. Check your spam folder if it does not arrive in a few minutes.').replace('{email}', `<code>${escapeHtml(String(jr.email_sent_to || email))}</code>`)}</p>`
+                            );
+                            scannerForm.reset();
+                            return;
+                        }
+                        if (String(jr.status || '') === 'generating') {
+                            buildingFeedback();
+                            const built = await waitForLauncherReady(
+                                requestStatusUrl(jr.request_id)
+                            );
+                            jr = { ...jr, ...built, request_id: jr.request_id };
+                        }
+                        details = launcherDetailsFrom(jr);
+                    } else {
+                        /* Older Central: HTML redirect to the request page. */
+                        await fetchTextOrThrow(response, v('veris_page.err_req_create', 'Request creation failed'));
+                        const requestNorm = normalizeVerisResourceUrl(response.url || '');
+                        details = launcherDetailsFrom({ request_id: parseRequestId(requestNorm) }, requestNorm);
+                    }
+                    await deliverLauncherAndWait({
+                        ...details,
+                        profile: String(selectedPreset?.profile || 'fast'),
+                        platform: selectedPlatform,
+                        observationWindowSec: selectedPreset?.observation_window_sec || 60,
+                        caseId: randomCaseId,
+                        email,
+                    });
+                } catch (error) {
+                    setFeedback(scannerStatus, 'error',
+                        `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
+                    );
+                } finally {
+                    scannerButton.disabled = false;
+                }
+            });
+
+            /* Email-verification landing: veris.html?verify=<requestId>.<token> */
+            async function handleVerificationLink() {
+                let raw = '';
+                try {
+                    raw = new URLSearchParams(window.location.search).get('verify') || '';
+                } catch (_) {
+                    raw = '';
+                }
+                if (!raw) return;
+                try {
+                    const clean = new URL(window.location.href);
+                    clean.searchParams.delete('verify');
+                    window.history.replaceState(null, '', clean.toString());
+                } catch (_) {
+                    /* leaving the token in the address bar is harmless: it is single-request and expires */
+                }
+                const dot = raw.indexOf('.');
+                const requestId = dot > 0 ? raw.slice(0, dot) : '';
+                const token = dot > 0 ? raw.slice(dot + 1) : '';
+                scannerStatus?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                scannerButton.disabled = true;
+                setFeedback(scannerStatus, 'pending', `<strong>${v('veris_page.msg_verifying', 'Confirming your email...')}</strong>`);
+                try {
+                    if (!/^[0-9a-f]{12,64}$/i.test(requestId) || !token) {
+                        throw new Error(v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    const response = await fetch(`${GOV_API_BASE}/requests/${encodeURIComponent(requestId)}/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: new URLSearchParams({ token }).toString()
+                    });
+                    if (!response.ok) {
+                        await throwForResponse(response, v('veris_page.err_verify_invalid', 'This verification link is invalid or was already used. Please request a new scanner.'));
+                    }
+                    const jr = await response.json();
+                    buildingFeedback();
+                    const st = await waitForLauncherReady(
+                        requestStatusUrl(requestId)
+                    );
+                    await deliverLauncherAndWait({
+                        ...launcherDetailsFrom({ ...jr, ...st, request_id: requestId }),
+                        profile: String(st.collection_profile || 'fast'),
+                        platform: String(st.target_platform || jr.target_platform || 'windows'),
+                        observationWindowSec: st.observation_window_sec || 60,
+                        caseId: String(st.case_id || jr.case_id || '-'),
+                        email: '',
+                    });
+                } catch (error) {
+                    setFeedback(scannerStatus, 'error',
+                        `<strong>${v('veris_page.err_scanner_req', 'Unable to create scanner request.')}</strong><p>${escapeHtml(error.message || 'Unknown error')}</p>`
+                    );
+                } finally {
+                    scannerButton.disabled = false;
+                }
+            }
+
+            closeScannerWaitBtn?.addEventListener('click', (ev) => {
+                // Shrink to a non-blocking corner pill instead of hiding entirely, so the
+                // user keeps a visible progress indicator. Background polling continues and
+                // the window auto-expands when results arrive (showTerminalWaitChrome).
+                ev.stopPropagation();
+                scannerWaitOverlay.classList.add('minimized');
+            });
+
+            // Tapping the minimized corner pill restores the full wait window.
+            scannerWaitOverlay?.addEventListener('click', () => {
+                if (scannerWaitOverlay.classList.contains('minimized'))
+                    scannerWaitOverlay.classList.remove('minimized');
+            });
+
+            downloadReportBtn?.addEventListener('click', async (ev) => {
+                ev.preventDefault();
+                if (!lastReportMdUrl) return;
+                try {
+                    const r = await fetch(lastReportMdUrl, {
+                        headers: { Accept: 'text/markdown', 'Cache-Control': 'no-cache' },
+                    });
+                    if (!r.ok) return;
+                    const blob = await r.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = objectUrl;
+                    a.download = 'veris-final-report.md';
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(objectUrl);
+                } catch (_) { /* ignore */ }
+            });
+
+            closeScannerResultX?.addEventListener('click', () => {
+                if (!waitTerminalState && (overlayContext === 'scanner' || overlayContext === 'manual')) {
+                    waitClosedManually = true;
+                    const ctx = overlayContext;
+                    closeWaitOverlay();
+                    if (ctx === 'scanner') {
+                        setFeedback(scannerStatus, 'pending',
+                            `<strong>${v('veris_page.wait_closed_manual', 'You closed the wait dialog.')}</strong><p>${v('veris_page.wait_closed_p', 'If the launcher runs later, use Analyze Existing Package to upload.')}</p>`
+                        );
+                    } else if (ctx === 'manual') {
+                        if (uploadStatus) uploadStatus.hidden = false;
+                        setFeedback(uploadStatus, 'pending',
+                            `<strong>${v('veris_page.upload_wait_cancelled', '已停止等待分析。')}</strong><p>${v('veris_page.upload_wait_cancelled_p', '若要分析證據封裝請重新選擇檔案並上傳。')}</p>`
+                        );
+                    }
+                    return;
+                }
+                closeWaitOverlay();
+            });
+
+            uploadForm?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (overlayContext === 'scanner') {
+                    if (uploadStatus) uploadStatus.hidden = false;
+                    setFeedback(uploadStatus, 'error',
+                        `<strong>${v('veris_page.upload_blocked_scanner_title', '請先關閉掃描等待視窗')}</strong>` +
+                        `<p>${v('veris_page.upload_blocked_scanner_p', 'Dedicated Launcher 流程進行中時，請勿同時手動上傳另一份封裝。先關閉或完成上方視窗後再試。')}</p>`
+                    );
+                    return;
+                }
+
+                const selectedFile = uploadPackageInput?.files?.[0] || null;
+                if (!selectedFile) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v('veris_page.err_choose_file', 'Please choose an evidence package before upload.')),
+                        '',
+                    );
+                    return;
+                }
+                if (!isAllowedManualEvidenceFilename(selectedFile.name)) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v(
+                            'veris_page.err_upload_file_type',
+                            'Only .zip / .tar.gz (evidence package) or .json (evidence.json export) files are allowed.'
+                        )),
+                        escapeHtml(String(selectedFile.name || '')),
+                    );
+                    return;
+                }
+                if (selectedFile.size > MANUAL_UPLOAD_MAX_BYTES) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(v(
+                            'veris_page.err_upload_file_too_large',
+                            'Evidence package must be 60 MB or smaller.'
+                        )),
+                        escapeHtml(String(selectedFile.name || '')),
+                    );
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('package', selectedFile, selectedFile.name || 'evidence.zip');
+
+                if (uploadStatus) uploadStatus.hidden = false;
+                lockUploadForm();
+                setFeedback(uploadStatus, 'pending', `<strong>${v('veris_page.msg_uploading', 'Uploading evidence package...')}</strong><p>${v('veris_page.msg_uploading_p', 'Central validation and analysis will start automatically.')}</p>`);
+
+                let fileLabel = String(selectedFile.name || '');
+                try {
+                    const response = await fetch(`${GOV_API_BASE}/upload`, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        body: formData,
+                        redirect: 'follow'
+                    });
+
+                    const upCt = String(response.headers.get('content-type') || '').toLowerCase();
+                    let jobUrl = '';
+                    let jobId = '';
+                    if (upCt.includes('application/json')) {
+                        const ju = await response.json();
+                        if (!response.ok) {
+                            throw new Error(ju.error || ju.detail || v('veris_page.err_evidence_up', 'Evidence upload failed') + ` (HTTP ${response.status})`);
+                        }
+                        jobId = String(ju.job_id || '');
+                        jobUrl = normalizeVerisResourceUrl(ju.job_url || '');
+                    } else {
+                        await fetchTextOrThrow(response, v('veris_page.err_evidence_up', 'Evidence upload failed'));
+                        jobUrl = normalizeVerisResourceUrl(response.url || '');
+                        jobId = parseJobId(jobUrl);
+                    }
+                    if (!jobUrl || !jobId) {
+                        throw new Error(v('veris_page.err_resolve_job', 'Unable to resolve job identifier from response.'));
+                    }
+
+                    stashJob(jobId);
+                    const startedAt = Date.now();
+                    const deadline = startedAt + WAIT_TIMEOUT_MS;
+
+                    prepareManualUploadOverlay(fileLabel);
+
+                    const outcome = await pollJobFromQueued(jobUrl, deadline, () => waitClosedManually);
+
+                    if (waitClosedManually) {
+                        return;
+                    }
+
+                    if (outcome.kind === 'stopped') {
+                        if (uploadStatus) uploadStatus.hidden = true;
+                        showTerminalWaitChrome('fail', 'veris_page.wait_timeout_overlay_title');
+                        setFeedback(waitResultStatus, 'error',
+                            `<strong>${v('veris_page.wait_timeout_title', 'Wait timed out (10 minutes).')}</strong>` +
+                            `<p>${v('veris_page.upload_timeout_p', '分析尚未取得結果，請稍後再試或使用 Job URL 追查。')}</p>`
+                        );
+                        return;
+                    }
+
+                    if (outcome.kind === 'fail') {
+                        if (uploadStatus) uploadStatus.hidden = true;
+                        return;
+                    }
+
+                    finalizeOverlayAnalysisSuccess(outcome.payload, outcome.jobBase);
+                    if (uploadStatus) uploadStatus.hidden = true;
+                } catch (error) {
+                    if (uploadStatus) uploadStatus.hidden = true;
+                    showManualUploadApiErrorOverlay(
+                        escapeHtml(error.message || 'Unknown error'),
+                        fileLabel,
+                    );
+                }
+            });
+            loadCapabilities();
+            handleVerificationLink();
+        })();
+    </script>
+    <script type="module">
+        const verisLocalCopy = {
+            en: {
+                source_h: "SCANNER SOURCE",
+                source_p: "Review the public 9STriage scanner source to verify what endpoint evidence is collected before using the service.",
+                source_link: "VIEW_SOURCE_ON_GITHUB",
+                scope_link: "COLLECTION_SCOPE",
+                privacy_link: "PRIVACY_NOTES",
+                sample_link: "SAMPLE_REPORT",
+                build_link: "BUILD_NOTES",
+                consult_h: "CUSTOM ENDPOINT TRIAGE",
+                consult_p: "Need custom workflows or large-scale endpoint triage across many systems? Contact Nine-Security for a scoped service engagement.",
+            },
+            tw: {
+                source_h: "SCANNER 原始碼",
+                source_p: "使用服務前，可檢視公開的 9STriage scanner 原始碼，確認端點證據蒐集範圍。",
+                source_link: "在 GitHub 檢視原始碼",
+                scope_link: "蒐集範圍",
+                privacy_link: "隱私說明",
+                sample_link: "範例報告",
+                build_link: "編譯說明",
+                consult_h: "客製化大量端點檢測",
+                consult_p: "如果需要客製化流程，或要對大範圍、大量端點進行檢測服務，請聯繫 Nine-Security 進行需求評估。",
+            },
+            jp: {
+                source_h: "SCANNER ソース",
+                source_p: "サービス利用前に、公開されている 9STriage scanner のソースを確認し、端末証拠の収集範囲を検証できます。",
+                source_link: "GitHub でソースを見る",
+                scope_link: "収集範囲",
+                privacy_link: "プライバシー注意事項",
+                sample_link: "サンプルレポート",
+                build_link: "ビルド手順",
+                consult_h: "大規模カスタム端末トリアージ",
+                consult_p: "カスタムワークフローや多数の端末を対象とした大規模トリアージが必要な場合は、Nine-Security にご相談ください。",
+            },
+        };
+        const applyVerisLocalCopy = (lang) => {
+            const dict = verisLocalCopy[lang] || verisLocalCopy.en;
+            document.querySelectorAll("[data-veris-local-i18n]").forEach((el) => {
+                const key = el.getAttribute("data-veris-local-i18n");
+                if (key && dict[key]) el.textContent = dict[key];
+            });
+        };
+        const reapply = () => {
+            const lang = localStorage.getItem("9sec_lang") || "en";
+            window.__NINESEC_APPLY_LANG?.(lang);
+            applyVerisLocalCopy(lang);
+            const g = window.__NINESEC_I18N;
+            if (typeof g === "function") {
+                document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+                    const key = el.getAttribute("data-i18n-placeholder");
+                    if (!key) return;
+                    const fb = el.getAttribute("placeholder") || "";
+                    el.setAttribute("placeholder", g(key, fb));
+                });
+                document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+                    const key = el.getAttribute("data-i18n-aria");
+                    if (!key) return;
+                    const fb = el.getAttribute("aria-label") || "";
+                    el.setAttribute("aria-label", g(key, fb));
+                });
+            }
+            window.__VERIS_REFRESH_OVERLAY_I18N?.();
+        };
+        await import("/assets/main-C6k6dQLZ-Dfs4FkN3-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g-ZuL6FTWX-biPipN6g.js");
+        reapply();
+        window.addEventListener("9sec:langChange", reapply);
+    </script>
+</body>
+
+</html>
